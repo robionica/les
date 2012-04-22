@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2012 Alexander Sviridenko
+ */
+
+#include <iostream>
+
+#include <les/quasiblock_milp_problem.hpp>
+#include <les/finkelstein.hpp>
+
+#include <les/demos/demo_qbmilpp.hpp>
+
+int
+main()
+{
+  /* Create quasiblock MILP problem and print it */
+  QBMILPP* problem = gen_demo_qbmilpp();
+  problem->print();
+
+  /* Do finkelstein quasi-block decomposition and obtain decomposition
+     information */
+  vector<set<int>*> U, S, M;
+  FinkelsteinQBDecomposition decomposer;
+  decomposer.decompose(problem, NULL, &U, &S, &M);
+
+  printf("Finkelstein decomposition information:\n");
+  for (size_t i = 0; i < U.size(); i++)
+    {
+      set<int>* rows = U[i];
+      std::cout << " U" << i << "  : {";
+      for (set<int>::iterator it = rows->begin(); it != rows->end(); it++)
+          printf("%d, ", *it);
+      printf("}\n");
+    }
+#if 0
+  for (size_t i = 0; i < S->size(); i++)
+    {
+      cols = S->at(i);
+      printf(" S%d  : {", i);
+      for (set<int>::iterator it = cols->begin(); it != cols->end(); it++)
+        {
+          printf("%d, ", *it);
+        }
+      printf("}\n");
+    }
+
+  for (size_t i = 0; i < M->size(); i++)
+    {
+      cols = M->at(i);
+      printf(" M%d  : {", i);
+      for (set<int>::iterator it = cols->begin(); it != cols->end(); it++)
+        {
+          printf("%d, ", *it);
+        }
+      printf("}\n");
+    }
+#endif
+  return 0;
+}

@@ -1,0 +1,19 @@
+#
+# Copyright (c) 2012 Alexander Sviridenko
+#
+
+ROOT = ..
+TEST = demo_finkelstein_decomposition
+SRC = $(ROOT)/src
+INCLUDES = -I$(ROOT)/include -I/opt/SYMPHONY-5.4.0/include
+LES_LIBRARY_DIR = ../lib/
+
+LIB = -L$(LES_LIBRARY_DIR) -lles -Wl,--rpath -Wl,$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,/opt/SYMPHONY-5.4.0/lib
+
+all:
+	cd $(SRC); make
+	g++ $(INCLUDES) $(LIB) problems/demo_qbmilpp.cpp demo_finkelstein_decomposition.cpp -o $(TEST)
+
+clean:
+	rm demo_finkelstein_decomposition
+	cd $(SRC); make clean
