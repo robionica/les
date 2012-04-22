@@ -1,0 +1,53 @@
+// Copyright (c) 2012-2013 Oleksandr Sviridenko
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package les;
+
+message OptimizationParameters {
+  enum Relaxation {
+    CLP = 0;  // https://projects.coin-or.org/Clp/
+    DUMMY_SOLVER = 1;
+    FRAKTIONAL_KNAPSACK_SOLVER = 2;
+  };
+  enum BackendSolver {
+    GLPK = 0;  // http://www.gnu.org/software/glpk/
+    LP_SOLVE = 1;  // http://lpsolve.sourceforge.net/
+    SCIP = 2;  // http://scip.zib.de/
+    SYMPHONY = 3;  // https://projects.coin-or.org/SYMPHONY/
+  };
+  // NOTE: this enumeration has to be synced with les.solver.executors package.
+  enum Executor {
+    DUMMY_EXECUTOR = 0;
+    THREAD_EXECUTOR = 1;
+  };
+  enum Decomposer {
+    QUASIBLOCK_FINKELSTEIN_DECOMPOSER = 1;
+  };
+  enum SolutionTable {
+    SQLITE_SOLUTION_TABLE = 1;
+  };
+  // A backend solver that will be used to solve relaxed problem or entire
+  // problem in the worst case.
+  optional BackendSolver backend_solver = 1;
+  // A list of relaxations that will be applied one by one.
+  repeated Relaxation relaxations = 2;
+  // Max number of shared variables betweet two subproblems. In the worst case
+  // les will have to solve 2**max_num_shared_variables problems.
+  optional int64 max_num_shared_variables = 3 [default = 10];
+  optional Executor executor = 4 [default = DUMMY_EXECUTOR];
+  optional Decomposer decomposer = 5 [default = QUASIBLOCK_FINKELSTEIN_DECOMPOSER];
+  optional SolutionTable solution_table = 6 [default = SQLITE_SOLUTION_TABLE];
+}

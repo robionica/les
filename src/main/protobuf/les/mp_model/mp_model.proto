@@ -1,0 +1,46 @@
+// Copyright (c) 2012-2013 Oleksandr Sviridenko
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package les.mp_model;
+
+message MPTerm {
+  required string name = 1;
+  required double coefficient = 2;
+}
+
+message MPVariable {
+  required string name = 1;
+  required double lower_bound = 2 [default = 0.0];
+  required double upper_bound = 3 [default = 1.0];
+}
+
+message MPConstraint {
+  required string name = 1;
+  required double lower_bound = 2;
+  required double upper_bound = 3;
+  repeated MPTerm terms = 4;
+}
+
+message MPObjective {
+  required bool maximization = 1 [default = true];
+  repeated MPTerm terms = 2;
+}
+
+message MPModel {
+  required string name = 1;
+  required MPObjective objective = 2;
+  required MPConstraint constraints = 3;
+}
