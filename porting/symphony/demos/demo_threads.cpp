@@ -7,6 +7,7 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/foreach.hpp>
+#include <boost/timer.hpp>
 
 class BlockSolver
 {
@@ -19,7 +20,14 @@ public:
   void operator()() const
   {
     OsiLeSolverInterface solver;
+    //boost::timer::auto_cpu_timer t;
+    boost::timer t;
     solver.solve_block(_block);
+    cout << boost::this_thread::get_id()
+         << " worked "
+         << t.elapsed()
+         << "s" << endl;
+    // Report will be printed automatically
   }
 
 private:

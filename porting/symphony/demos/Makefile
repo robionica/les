@@ -8,7 +8,7 @@ LES_LIBRARY_DIR = $(ROOT)/lib/
 LIB = -L$(LES_LIBRARY_DIR) -lz -lbz2 -lles -losilesolver -Wl,--rpath -Wl,$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,/opt/SYMPHONY-5.4.0/lib
 
 demo_threads:
-	g++ $(INCLUDES) $(LIB) -lboost_thread $@.cpp -o $@
+	g++ $@.cpp -o $@ $(INCLUDES) $(LIB) -lboost_thread -lboost_system
 
 demo_symphony_with_lea:
 	g++ $(INCLUDES) $(LIB) $@.cpp -o $@
