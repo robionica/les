@@ -1,8 +1,6 @@
 
-The Bondy-Murty graph G3 with n = 14 vertices. See file g3.txt
+* File g3.txt: the Bondy-Murty graph G3 with n = 14 vertices. 
 
-http://www.dharwadker.org/vertex_cover/fig12a.gif
-
-
+![Two Face Singing Example](http://www.dharwadker.org/vertex_cover/fig12a.gif)
 
 
