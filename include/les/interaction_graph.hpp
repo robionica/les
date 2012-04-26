@@ -17,24 +17,9 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/biconnected_components.hpp>
 
-
 #include <les/milp_problem.hpp>
 
-namespace boost
-{
-  struct edge_component_t
-  {
-    enum { num = 555 };
-    typedef edge_property_tag kind;
-  };
-
-  typedef adjacency_list< vecS, vecS, undirectedS, no_property,
-                          property< edge_component_t, std::size_t > >graph_t;
-  typedef graph_traits< graph_t >::vertex_descriptor vertex_t;
-}
-
-//typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> graph_t;
-//typedef boost::graph_traits<graph_t>::vertex_descriptor vertex_t;
+#include <les/graph.hpp>
 
 class InteractionGraph : public boost::graph_t
 {

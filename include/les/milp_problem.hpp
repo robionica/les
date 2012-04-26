@@ -16,6 +16,7 @@
 
 #include <les/problem.hpp>
 #include <les/packed_matrix.hpp>
+#include <les/graph.hpp>
 
 using namespace std;
 
@@ -82,6 +83,8 @@ public:
   {
     return &cons_matrix_;
   }
+
+  void set_cons_matrix(const PackedMatrix* matrix);
 
   inline const set<int>* get_rows_related_to_col(int i)
   {

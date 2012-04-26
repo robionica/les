@@ -110,15 +110,19 @@ FinkelsteinQBDecomposition::decompose(MILPP* problem,
   cols = new set<int>(initial_cols->begin(), initial_cols->end());
 
   cols_diff = new set<int>();
+
   while (1)
     {
       prev_cols = cols;
 
       rows = problem->get_rows_related_to_cols(cols);
+      assert(rows != NULL);
+
       cols = problem->get_cols_related_to_rows(rows);
 
       /* Stop creterion. Define whether we have to stop. */
       cols_diff->clear();
+
       set_difference(cols->begin(), cols->end(),
                      prev_cols->begin(), prev_cols->end(),
                      inserter(*cols_diff, cols_diff->begin()));

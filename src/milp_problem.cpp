@@ -100,6 +100,22 @@ MILPP::initialize(int nr_cols, int nr_rows)
 }
 
 void
+MILPP::set_cons_matrix(const PackedMatrix* matrix)
+{
+  cons_matrix_ = *matrix;
+
+  for (int i = 0; i < get_num_rows(); i++)
+    {
+      PackedVector* row = get_row(i);
+      for (int j = 0; j < row->get_num_elements(); j++)
+        {
+          col_to_row_mapping_[ row->get_index_by_pos(j) ]->insert(i);
+          row_to_col_mapping_[i]->insert( row->get_index_by_pos(j) );
+        }
+    }
+}
+
+void
 MILPP::print()
 {
   int i;

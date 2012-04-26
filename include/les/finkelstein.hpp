@@ -11,6 +11,8 @@
 #define __LES_FINKELSTEIN_DECOMPOSITION_HPP
 
 #include <les/milp_problem.hpp>
+#include <les/decomposition.hpp>
+#include <les/interaction_graph.hpp>
 
 class FinkelsteinQBDecomposition {
 public:
