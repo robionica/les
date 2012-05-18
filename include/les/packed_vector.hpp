@@ -11,6 +11,8 @@
 #define __LES_PACKED_VECTOR_HPP
 
 #include <map>
+#include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -25,7 +27,7 @@ public:
   /** Default constructor */
   PackedVector();
 
-  void init(size_t size, const int* indices, double* elements);
+  void init(size_t size, const int* indices, const double* elements);
   void init(vector<int>& indices);
   void init(vector<int>& indices, vector<double>& elements);
 
@@ -91,12 +93,22 @@ public:
   /**
    * Get vector of indices of elements.
    */
-  inline int get_index_by_pos(int pos) { return indices_[pos]; }
+  inline int get_index_by_pos(int pos)
+  {
+    assert(pos < get_num_elements());
+    return indices_[pos];
+  }
 
   /**
    * Insert an element into the vector.
    */
   void insert(int index, double element);
+
+  void dump()
+  {
+    for (int i = 0; i < get_num_elements(); i++)
+      cout << "\t" << get_index(i) << "\t\t" << get_element(i) << endl;
+  }
 
 private:
   void reserve(int n);

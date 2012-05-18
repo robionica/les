@@ -98,6 +98,8 @@ FinkelsteinQBDecomposition::decompose(MILPP* problem,
   set<int>* prev_cols = NULL;
   set<int>* rows = NULL;
 
+  bool merge_empty_blocks = true;
+
   /* If initial columns was not provided use default columns. */
   if (initial_cols == NULL)
     {

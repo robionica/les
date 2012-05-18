@@ -9,8 +9,6 @@ LES_LIBRARY_DIR = ../lib/
 SYMPHONY_LIBS = -lz -lbz2  -Wl,--rpath -Wl,/opt/SYMPHONY-5.4.0/lib
 LIB = -L$(LES_LIBRARY_DIR) $(SYMPHONY_LIBS) -lles -Wl,--rpath -Wl,$(LES_LIBRARY_DIR)
 
-demo_finkelstein_decomposition:
-	g++ src/demo_qbmilpp.cpp src/$@.cpp -o $@ $(INCLUDES) $(LIB)
+finkelstein_decomposition:
+	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
 
-bondy_murty_graph:
-	g++ src/$@.cpp -o $@ $(INCLUDES) $(LIB)

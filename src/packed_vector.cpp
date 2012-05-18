@@ -35,11 +35,11 @@ PackedVector::zero()
 {
   for (int i = 0; i < get_num_elements(); i++)
     elements_[i] = 0.0;
-  //CoinIotaN(elements_, nr_elements_, 0.0);
 }
 
 void
-PackedVector::init(size_t size, const int* indices, double* elements)
+PackedVector::init(size_t size, const int* indices,
+                   const double* elements)
 {
   clear();
   if (size > 0)
@@ -97,9 +97,9 @@ PackedVector::reserve(int n)
   double* temp_elements = elements_;
 
   /* allocate new space */
-  indices_ = new int [capacity_];
-  orig_indices_ = new int [capacity_];
-  elements_ = new double [capacity_];
+  indices_ = (int*) calloc(capacity_, sizeof(int));
+  orig_indices_ = (int*) calloc(capacity_, sizeof(int));
+  elements_ = (double*) calloc(capacity_, sizeof(double));
 
   /* copy data to new space */
   if (get_num_elements() > 0)

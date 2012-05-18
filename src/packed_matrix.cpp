@@ -4,15 +4,14 @@
 
 #include <les/packed_matrix.hpp>
 
-/* Translate CoinPackedVector for coin-or library to PackedVector. */
+/* Convert CoinPackedVector for coin-or library to PackedVector. */
 static void
 convert_CoinPackedVector_to_PackedVector(CoinShallowPackedVector* src,
                                          PackedVector* dst)
 {
-  for (int i = 0; i < src->getNumElements(); i++)
-    {
-      dst->insert(src->getIndices()[i], src->getElements()[i]);
-    }
+  dst->init(src->getNumElements(), src->getIndices(), src->getElements());
+  //for (int i = 0; i < src->getNumElements(); i++)
+  //  dst->insert(src->getIndices()[i], src->getElements()[i]);
 }
 
 /* FIXME: some sheet happens here. */

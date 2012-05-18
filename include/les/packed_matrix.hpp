@@ -46,8 +46,16 @@ public:
     slave_matrix_.reverseOrdering();
   }
 
-  inline int get_num_elements() const { return slave_matrix_.getNumElements(); }
-  inline const double* get_elements() const { return slave_matrix_.getElements(); }
+  inline int get_num_elements() const
+  {
+    return slave_matrix_.getNumElements();
+  }
+
+  inline const double* get_elements() const
+  {
+    return slave_matrix_.getElements();
+  }
+
   /**
    * Return vector of indices. Use get_num_elements() to get length
    * of this vector.
