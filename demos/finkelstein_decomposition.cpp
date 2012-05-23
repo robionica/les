@@ -24,16 +24,16 @@ main()
  *                                       3x7 + 4x8 +  x9 <= 5
  */
   /* Vector of objective function coefficients */
-  double c[] = {8.0, 2.0, 5.0, 5.0, 8.0, 3.0, 9.0, 7.0, 6.0};
+  double c[] = {8.0, 2.0, 5.0, 5.0, 9.0, 7.0, 6.0};
 
   /* Matrix of constraints */
-  double A[6][9] = {
-    {2., 3., 4., 1., 0., 0., 0., 0., 0.},
-    {1., 2., 3., 2., 0., 0., 0., 0., 0.},
-    {0., 0., 1., 4., 3., 4., 2., 0., 0.},
-    {0., 0., 2., 1., 1., 2., 5., 0., 0.},
-    {0., 0., 0., 0., 0., 0., 2., 1., 2.},
-    {0., 0., 0., 0., 0., 0., 3., 4., 1.},
+  double A[6][7] = {
+    {2., 3., 4., 1., 0., 0., 0.},
+    {1., 2., 3., 2., 0., 0., 0.},
+    {0., 0., 1., 4., 2., 0., 0.},
+    {0., 0., 2., 1., 5., 0., 0.},
+    {0., 0., 0., 0., 2., 1., 2.},
+    {0., 0., 0., 0., 3., 4., 1.},
   };
 
   /* Vector of rows sense */
@@ -57,11 +57,12 @@ main()
   };
 
   /* Create quasi-block MILP problem by using predefined description.*/
-  QBMILPP* p = new QBMILPP(c, 9, &A[0][0], 6, s, b);
+  QBMILPP* p = new QBMILPP(c, 7, &A[0][0], 6, s, b);
 
   /* Do finkelstein quasi-block decomposition and obtain decomposition
      information */
-  vector<set<int>*> U, S, M;
+  vector< set<int> > U, S, M;
+
   FinkelsteinQBDecomposition decomposer;
   decomposer.decompose(p, NULL, &U, &S, &M);
 
@@ -73,7 +74,7 @@ main()
       std::cout << " U"
                 << i
                 << " : {";
-      BOOST_FOREACH(int row, *U[i])
+      BOOST_FOREACH(int row, U[i])
         {
           std::cout << row
                     << ", ";
@@ -86,7 +87,7 @@ main()
       std::cout << " S"
                 << i
                 << " : {";
-      BOOST_FOREACH(int col, *S[i])
+      BOOST_FOREACH(int col, S[i])
         {
           std::cout << col
                     << ", ";
@@ -99,7 +100,7 @@ main()
       std::cout << " M"
                 << i
                 << " : {";
-      BOOST_FOREACH(int col, *M[i])
+      BOOST_FOREACH(int col, M[i])
         {
           std::cout << col
                     << ", ";

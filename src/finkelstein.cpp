@@ -10,7 +10,7 @@
 vector<DecompositionBlock*>*
 FinkelsteinQBDecomposition::decompose_by_blocks(MILPP* problem)
 {
-  vector<set<int>*> U, S, M;
+  vector< set<int> > U, S, M;
   PackedMatrix* left_part;
   PackedMatrix* middle_part;
   PackedMatrix* right_part;
@@ -32,15 +32,15 @@ FinkelsteinQBDecomposition::decompose_by_blocks(MILPP* problem)
       right_part = next_block->get_right_part();
 
       /* for each constraint */
-      for (set<int>::iterator u = U[i]->begin(); u != U[i]->end(); u++)
+      for (set<int>::iterator u = U[i].begin(); u != U[i].end(); u++)
         {
           //printf("U%d\n", *u);
           PackedVector* row = problem->get_row(*u);
 
           if (i > 0)
             {
-              for (set<int>::iterator s = S[i - 1]->begin();
-                   s != S[i - 1]->end(); s++)
+              for (set<int>::iterator s = S[i - 1].begin();
+                   s != S[i - 1].end(); s++)
                 {
                   if (row->get_element_by_index(*s) != 0.0)
                     left_part->set_coefficient(*u, *s,
@@ -48,21 +48,19 @@ FinkelsteinQBDecomposition::decompose_by_blocks(MILPP* problem)
                 }
             }
 
-          for (set<int>::iterator m = M[i]->begin(); m != M[i]->end(); m++)
+          for (set<int>::iterator m = M[i].begin(); m != M[i].end(); m++)
             {
               if (row->get_element_by_index(*m) != 0.0)
                 middle_part->set_coefficient(*u, *m,
                                              row->get_element_by_index(*m));
             }
-          //part->dump();
           if ((U.size() - i) > 1)
             {
-              for (set<int>::iterator s = S[i]->begin();
-                   s != S[i]->end(); s++)
+              for (set<int>::iterator s = S[i].begin();
+                   s != S[i].end(); s++)
                 if (row->get_element_by_index(*s) != 0.0)
                   right_part->set_coefficient(*u, *s, row->get_element_by_index(*s));
             }
-          //printf("\n");
         }
 
       if (prev_block)
@@ -86,19 +84,18 @@ FinkelsteinQBDecomposition::decompose_by_blocks(MILPP* problem)
 void
 FinkelsteinQBDecomposition::decompose(MILPP* problem,
                                       vector<int>* initial_cols,
-                                      vector<set<int>*>* U,
-                                      vector<set<int>*>* S,
-                                      vector<set<int>*>* M)
+                                      vector< set<int> >* U,
+                                      vector< set<int> >* S,
+                                      vector< set<int> >* M,
+                                      int max_separator_size,
+                                      bool merge_empty_blocks)
 {
-  vector<set<int>*> S_; /* S' */
-  vector<set<int>*> U_; /* U' */
+  vector< set<int> > S_; /* S' */
+  vector< set<int> > U_; /* U' */
 
-  set<int>* cols_diff = NULL; /* cols delta */
-  set<int>* cols = NULL;
-  set<int>* prev_cols = NULL;
-  set<int>* rows = NULL;
-
-  bool merge_empty_blocks = true;
+  set<int> cols_diff = set<int>();
+  set<int> prev_cols = set<int>();
+  set<int> rows = set<int>();
 
   /* If initial columns was not provided use default columns. */
   if (initial_cols == NULL)
@@ -109,63 +106,66 @@ FinkelsteinQBDecomposition::decompose(MILPP* problem,
 
   /* The first iteration will be implemented out of loop to avoid
      unnecessary if-statements. */
-  cols = new set<int>(initial_cols->begin(), initial_cols->end());
-
-  cols_diff = new set<int>();
+  set<int> cols = set<int>(initial_cols->begin(), initial_cols->end());
 
   while (1)
     {
+      cols_diff.clear();
+      rows = *problem->get_rows_related_to_cols(&cols);
+      assert(!rows.empty());
+
       prev_cols = cols;
+      cols = *problem->get_cols_related_to_rows(&rows);
 
-      rows = problem->get_rows_related_to_cols(cols);
-      assert(rows != NULL);
+      set_difference(cols.begin(), cols.end(),
+                     prev_cols.begin(), prev_cols.end(),
+                     inserter(cols_diff, cols_diff.begin()));
 
-      cols = problem->get_cols_related_to_rows(rows);
+      /* Store the new set of columns and rows. We also need to store
+         the last set even it will be empty. In some cases there might
+         be exception such as blocks of right-separators. */
+      S_.push_back(cols);
+      U_.push_back(rows);
 
-      /* Stop creterion. Define whether we have to stop. */
-      cols_diff->clear();
-
-      set_difference(cols->begin(), cols->end(),
-                     prev_cols->begin(), prev_cols->end(),
-                     inserter(*cols_diff, cols_diff->begin()));
-      if (cols_diff->empty())
+      if (cols_diff.empty())
         {
           break;
         }
-
-      /* Store the new set of columns and variables */
-      S_.push_back(cols);
-      U_.push_back(rows);
     }
-  free(cols_diff);
 
-  if (U != NULL)
+  rows = U_.at(0);
+  U->push_back(rows);
+
+  for (vector< set<int> >::iterator it = U_.begin() + 1; it != U_.end(); it++)
     {
-      rows = U_.at(0);
-      U->push_back(rows);
-
-      for (vector<set<int>*>::iterator it = U_.begin() + 1; it != U_.end(); it++)
-        {
-          set<int>* u_diff = new set<int>();
-          set_difference((*it)->begin(), (*it)->end(), rows->begin(), rows->end(),
-                         inserter(*u_diff, u_diff->begin()));
-          U->push_back(u_diff);
-          rows = *it;
-        }
+      set<int> u_diff = set<int>();
+      set_difference((*it).begin(), (*it).end(), rows.begin(), rows.end(),
+                     inserter(u_diff, u_diff.begin()));
+      U->push_back(u_diff);
+      rows = *it;
     }
 
   /* Find all separators, where the separator is left/right
      part of a block. */
   if (S != NULL)
     {
-      for (vector<set<int>*>::iterator it = U->begin(); it != U->end() - 1; it++)
+      for (vector< set<int> >::iterator it = U->begin(); it != U->end() - 1; it++)
         {
-          set<int>* s = new set<int>(); /* separator */
-          cols = problem->get_cols_related_to_rows(*(it + 1));
-          prev_cols = problem->get_cols_related_to_rows(*it);
-          set_intersection(cols->begin(), cols->end(),
-                           prev_cols->begin(), prev_cols->end(),
-                           inserter(*s, s->begin()));
+          set<int> s = set<int>(); /* separator */
+          set<int>& rows = *(it + 1);
+          cols = *problem->get_cols_related_to_rows(&rows);
+          set<int>& prev_rows = *it;
+          prev_cols = *problem->get_cols_related_to_rows(&prev_rows);
+          set_intersection(cols.begin(), cols.end(),
+                           prev_cols.begin(), prev_cols.end(),
+                           inserter(s, s.begin()));
+          if (max_separator_size && s.size() > max_separator_size)
+            {
+              prev_rows.insert(rows.begin(), rows.end());
+              U->erase(it + 1);
+              it--;
+              continue;
+            }
           S->push_back(s);
         }
     }
@@ -173,87 +173,85 @@ FinkelsteinQBDecomposition::decompose(MILPP* problem,
   /* Find middle part for each block if required */
   if (M != NULL)
     {
-      cols = problem->get_cols_related_to_rows(U->at(0));
-      cols_diff = new set<int>();
-      set_difference(cols->begin(), cols->end(),
-                     S->at(0)->begin(), S->at(0)->end(),
-                     inserter(*cols_diff, cols_diff->begin()));
+      cols = *problem->get_cols_related_to_rows(&U->at(0));
+      cols_diff.clear();
+
+      set_difference(cols.begin(), cols.end(),
+                     S->at(0).begin(), S->at(0).end(),
+                     inserter(cols_diff, cols_diff.begin()));
       M->push_back(cols_diff);
+
+      vector<int> e = vector<int>();
 
       for (size_t i = 1; i < (U->size() - 1); i++)
         {
           set<int> sep_union;
-          set_union(S->at(i - 1)->begin(), S->at(i - 1)->end(),
-                    S->at(i)->begin(), S->at(i)->end(),
+
+          cols_diff.clear();
+
+          set_union(S->at(i - 1).begin(), S->at(i - 1).end(),
+                    S->at(i).begin(), S->at(i).end(),
                     inserter(sep_union, sep_union.begin()));
-          cols_diff = new set<int>();
-          cols = problem->get_cols_related_to_rows(U->at(i));
-          set_difference(cols->begin(), cols->end(),
+
+          cols = *problem->get_cols_related_to_rows(&U->at(i));
+          set_difference(cols.begin(), cols.end(),
                          sep_union.begin(), sep_union.end(),
-                         inserter(*cols_diff, cols_diff->begin()));
+                         inserter(cols_diff, cols_diff.begin()));
+#if 0
+          if (merge_empty_blocks && cols_diff.empty())
+            {
+              U->at(M->size() - 1).insert( U->at(i).begin(), U->at(i).end() );
+              M->at(M->size() - 1).insert( S->at(i - 1).begin(), S->at(i - 1).end() );
+
+              U->erase(U->begin() + i);
+              S->erase(S->begin() + i - 1);
+              i--;
+              continue;
+            }
+#endif
           M->push_back(cols_diff);
         }
 
-      cols = problem->get_cols_related_to_rows(*(U->end() - 1));
-      cols_diff = new set<int>();
-      set_difference(cols->begin(), cols->end(),
-                     (*(S->end() - 1))->begin(), (*(S->end() - 1))->end(),
-                     inserter(*cols_diff, cols_diff->begin()));
+      cols = *problem->get_cols_related_to_rows(&(*(U->end() - 1)));
+      cols_diff.clear();
+      set_difference(cols.begin(), cols.end(),
+                     (*(S->end() - 1)).begin(), (*(S->end() - 1)).end(),
+                     inserter(cols_diff, cols_diff.begin()));
       M->push_back(cols_diff);
+
+      if (merge_empty_blocks) {
+        for (size_t i = 1; i < U->size(); i++)
+          {
+            if (!M->at(i).empty())
+              continue;
+            U->at(i - 1).insert( U->at(i).begin(), U->at(i).end() );
+            M->at(i - 1).insert( S->at(i - 1).begin(), S->at(i - 1).end() );
+
+            U->erase(U->begin() + i);
+            M->erase(M->begin() + i);
+            S->erase(S->begin() + i - 1);
+
+            i--;
+          }
+      }
     }
 
-#ifdef LES_DEBUG /* debug */
-  printf("Finkelstein debug information:\n");
-  for (size_t i = 0; i < S_.size(); i++)
-    {
-      cols = S_.at(i);
-      printf(" S'%d : {", i);
-      for (set<int>::iterator it = cols->begin(); it != cols->end(); it++)
-        {
-          printf("%d, ", *it);
-        }
-      printf("}\n");
-
-      rows = U_.at(i);
-      printf(" U'%d : {", i);
-      for (set<int>::iterator it = rows->begin(); it != rows->end(); it++)
-        {
-          printf("%d, ", *it);
-        }
-      printf("}\n");
-    }
-
-  for (size_t i = 0; i < U->size(); i++)
-    {
-      rows = U->at(i);
-      printf(" U%d  : {", i);
-      for (set<int>::iterator it = rows->begin(); it != rows->end(); it++)
-        {
-          printf("%d, ", *it);
-        }
-      printf("}\n");
-    }
-
-  for (size_t i = 0; i < S->size(); i++)
-    {
-      cols = S->at(i);
-      printf(" S%d  : {", i);
-      for (set<int>::iterator it = cols->begin(); it != cols->end(); it++)
-        {
-          printf("%d, ", *it);
-        }
-      printf("}\n");
-    }
-
-  for (size_t i = 0; i < M->size(); i++)
-    {
-      cols = M->at(i);
-      printf(" M%d  : {", i);
-      for (set<int>::iterator it = cols->begin(); it != cols->end(); it++)
-        {
-          printf("%d, ", *it);
-        }
-      printf("}\n");
-    }
-#endif /* LED_DEBUG */
+  // DEBUG
+  /* Verification */
+  assert(U->size() == M->size());
+  assert(U->size() == (S->size() + 1));
+#if 1
+  do {
+  int num_rows = 0;
+  for (vector< set<int> >::iterator it = U->begin(); it != U->end(); it++)
+    num_rows += (*it).size();
+  int num_cols = 0;
+  for (vector< set<int> >::iterator it = S->begin(); it != S->end(); it++)
+    num_cols += (*it).size();
+  for (vector< set<int> >::iterator it = M->begin(); it != M->end(); it++)
+    num_cols += (*it).size();
+  assert(problem->get_num_rows() == num_rows);
+  assert(problem->get_num_cols() == num_cols);
+  } while (0);
+#endif
 }

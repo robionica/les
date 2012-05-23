@@ -23,12 +23,12 @@ InteractionGraph::get_connected_components()
   vector<int> components(get_num_vertices());
   int num = boost::connected_components(*this, &components[0]);
 
-#if defined(LES_DEBUG)
+#if 0
   printf("Total number of components: %d\n", num);
   for (vector<int>::size_type i = 0; i != components.size(); ++i)
     printf("Vertex %d is in component %d\n", i, components[i]);
   printf("\n");
-#endif /* LES_DEBUG */
+#endif
 
   return components;
 }
