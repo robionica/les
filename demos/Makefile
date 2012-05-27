@@ -12,3 +12,5 @@ LIB = -L$(LES_LIBRARY_DIR) $(SYMPHONY_LIBS) -lles -Wl,--rpath -Wl,$(LES_LIBRARY_
 finkelstein_decomposition:
 	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
 
+demo_celar_reader:
+	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
