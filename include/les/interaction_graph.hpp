@@ -30,7 +30,7 @@ public:
   /* Return number of vertices in the graph. */
   inline size_t get_num_vertices() { return num_vertices(*this); }
 
-  vector<int> get_connected_components();
+  map< int, vector<int> > get_connected_components();
   /** Return vector of vertex neighbors. */
   inline vector<int> get_vertex_neighbours(int v)
   {

@@ -17,11 +17,17 @@ using namespace boost;
  * Learn more:
  * http://www.boost.org/doc/libs/1_49_0/libs/graph/doc/connected_components.html
  */
-vector<int>
+map< int, vector<int> >
 InteractionGraph::get_connected_components()
 {
-  vector<int> components(get_num_vertices());
-  int num = boost::connected_components(*this, &components[0]);
+  vector<int> vertices_to_components(get_num_vertices());
+  int num = boost::connected_components(*this, &vertices_to_components[0]);
+
+  map< int, vector<int> > components;
+  for (size_t i = 0; i < vertices_to_components.size(); i++)
+    {
+      components[ vertices_to_components[i] ].push_back(i);
+    }
 
 #if 0
   printf("Total number of components: %d\n", num);
