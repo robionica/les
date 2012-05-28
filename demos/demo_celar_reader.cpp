@@ -81,17 +81,17 @@ main(int argc, char* argv[])
 
   /* Build interaction graph to check number of connected components. */
   InteractionGraph g = InteractionGraph(&problem);
-  //std::ofstream dotfile ("graph.png");
-  //write_graphviz(dotfile, g);
-
   map< int, vector<int> > components = g.get_connected_components();
 
   for (map< int, vector<int> >::iterator it = components.begin();
        it != components.end(); it++)
     {
       cout << "Decompose connected component #"
-           << (*it).first
+           << (*it).first << " (" << (*it).second.size() << " cols)"
            << endl;
+
+      if ((*it).second.size() < 2)
+        continue;
 
       /* Do finkelstein quasi-block decomposition and obtain
          decomposition information */
