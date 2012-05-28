@@ -6,8 +6,6 @@
 #include <les/quasiblock_milp_problem.hpp>
 #include <les/finkelstein.hpp>
 
-#include <boost/foreach.hpp>
-
 int
 main()
 {
@@ -67,47 +65,7 @@ main()
   decomposer.decompose(p, NULL, &U, &S, &M);
 
   printf("Finkelstein decomposition information:\n");
+  decomposer.dump();
 
-#if 1
-  for (size_t i = 0; i < U.size(); i++)
-    {
-      std::cout << " U"
-                << i
-                << " : {";
-      BOOST_FOREACH(int row, U[i])
-        {
-          std::cout << row
-                    << ", ";
-        }
-      std::cout << "}" << std::endl;
-    }
-
-  for (size_t i = 0; i < S.size(); i++)
-    {
-      std::cout << " S"
-                << i
-                << " : {";
-      BOOST_FOREACH(int col, S[i])
-        {
-          std::cout << col
-                    << ", ";
-        }
-      std::cout << "}" << std::endl;
-    }
-
-  for (size_t i = 0; i < M.size(); i++)
-    {
-      std::cout << " M"
-                << i
-                << " : {";
-      BOOST_FOREACH(int col, M[i])
-        {
-          std::cout << col
-                    << ", ";
-        }
-      std::cout << "}" 
-                << std::endl;
-    }
-#endif
   return 0;
 }

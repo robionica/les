@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2012 Alexander Sviridenko
+ */
 
 #include <les/finkelstein.hpp>
 #include <les/reader/celar.hpp>
@@ -5,51 +8,6 @@
 
 #include <boost/foreach.hpp>
 #include <boost/graph/graphviz.hpp>
-
-void
-dump(const vector< set<int> >& U, const vector< set<int> >& S,
-     const vector< set<int> >& M)
-{
-  for (size_t i = 0; i < U.size(); i++)
-    {
-      cout << " U"
-           << i
-           << " : {";
-      BOOST_FOREACH(int row, U[i])
-        {
-          cout << row
-               << ", ";
-        }
-      cout << "}" << std::endl;
-    }
-
-  for (size_t i = 0; i < S.size(); i++)
-    {
-      std::cout << " S"
-                << i
-                << " : {";
-      BOOST_FOREACH(int col, S[i])
-        {
-          std::cout << col
-                    << ", ";
-        }
-      std::cout << "}" << std::endl;
-    }
-
-  for (size_t i = 0; i < M.size(); i++)
-    {
-      std::cout << " M"
-                << i
-                << " : {";
-      BOOST_FOREACH(int col, M[i])
-        {
-          std::cout << col
-                    << ", ";
-        }
-      std::cout << "}" 
-                << std::endl;
-    }
-}
 
 int
 main(int argc, char* argv[])
@@ -99,7 +57,7 @@ main(int argc, char* argv[])
       FinkelsteinQBDecomposition decomposer;
       vector<int> initial_cols(1, (*it).second[0]);
       decomposer.decompose(&problem, &initial_cols, &U, &S, &M, 10, true);
-      dump(U, S, M);
+      decomposer.dump();
     }
 
   return 0;
