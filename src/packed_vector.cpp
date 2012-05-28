@@ -52,6 +52,11 @@ PackedVector::init(size_t size, const int* indices,
       else
         zero();
       CoinIotaN(orig_indices_, size, 0);
+      index_to_pos_mapping_.clear();
+      for (size_t i = 0; i < size; i++)
+        {
+          index_to_pos_mapping_[indices[i]] = i;
+        }
     }
 }
 
