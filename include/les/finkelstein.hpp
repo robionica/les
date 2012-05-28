@@ -34,11 +34,13 @@ public:
    */
   vector<DecompositionBlock*>* decompose_by_blocks(MILPP* problem);
 
+  void dump();
+
 private:
   MILPP* _problem;
-  vector<set<int>*>* _U;
-  vector<set<int>*>* _S;
-  vector<set<int>*>* _M;
+  vector< set<int> > _U;
+  vector< set<int> > _S;
+  vector< set<int> > _M;
 };
 
 #endif /* __LES_FINKELSTEIN_DECOMPOSITION_HPP */
