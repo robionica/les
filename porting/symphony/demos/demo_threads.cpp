@@ -78,6 +78,15 @@ main()
   FinkelsteinQBDecomposition decomposer;
   vector<DecompositionBlock*>* blocks = decomposer.decompose_by_blocks(&problem);
 
+  for (vector<DecompositionBlock*>::iterator it = blocks->begin();
+       it < blocks->end(); it++)
+    {
+      DecompositionBlock* block = *it;
+      printf("<%p>\n", block);
+    }
+
+  return 0;
+
   OsiLeSolverInterface solver;
 
   boost::thread_group threads;
@@ -87,7 +96,7 @@ main()
       threads.add_thread(t);
     }
   threads.join_all();
-
+  return 0;
   solver.solve(blocks);
 
   std::cout << "Objective value = "

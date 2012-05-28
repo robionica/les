@@ -49,7 +49,7 @@ OsiLeSolverInterface::solve(vector<DecompositionBlock*>* blocks)
   vector<int>* left_cols;
   int right_mask;
   size_t i;
-  
+
   /* NOTE: maybe we also need to check all the blocks, so they all
      have to be from the same problem?*/
   MILPP* p = (MILPP*)blocks->back()->get_problem();
@@ -139,10 +139,9 @@ OsiLeSolverInterface::solve_block(DecompositionBlock* block)
 
   PackedVector left; /* vector of left assignments */
 
-  /* Setup solver */
-  OsiSymSolverInterface si; /* solver for intermediate calculations */
+  /* Setup solver for intermediate calculations */
+  OsiSymSolverInterface si;
   si.setSymParam("generate_cgl_cuts", FALSE);
-  /* Copy solver's parameters as parameters for intermediate solver */
   si.setSymParam(OsiSymVerbosity, -2);
 
   right_matrix = block->get_right_part();
@@ -168,9 +167,12 @@ OsiLeSolverInterface::solve_block(DecompositionBlock* block)
       si.setObjCoeff(i, c);
     }
 
+  assert(si.getNumCols() > 0);
+
   /* Set column type. At some point we can not set column type when there
      is only one column in the problem. Otherwise SYMPHONY crashes
      with segmentation fault.*/
+
   if (si.getNumCols() > 1)
     {
       for (i = 0; i < middle_cols->size(); i++)

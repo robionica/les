@@ -46,6 +46,8 @@ test1()
      information in form of chain of blocks. */
   FinkelsteinQBDecomposition decomposer;
   vector<DecompositionBlock*>* blocks = decomposer.decompose_by_blocks(&problem);
+  cout << "Finkelstein decomposition:" << endl;
+  decomposer.dump();
 
   OsiLeSolverInterface solver;
 
@@ -138,6 +140,6 @@ int
 main()
 {
   test1();
-  test2();
+  //test2();
   return 0;
 }

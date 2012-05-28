@@ -18,7 +18,11 @@ public:
   void solve(vector<DecompositionBlock*>* blocks);
   void solve_block(DecompositionBlock* block);
 
-  inline double get_col_value(int i) { return solution_[i]; }
+  inline double get_col_value(int i)
+  {
+    assert(i < solution_.size());
+    return solution_[i];
+  }
   const vector<double>* get_solution() { return &solution_; }
 
   /** Return objective function value. */
