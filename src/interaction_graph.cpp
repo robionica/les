@@ -20,15 +20,16 @@ using namespace boost;
 map< int, vector<int> >
 InteractionGraph::get_connected_components()
 {
+  map< int, vector<int> > components;
+#if 0
   vector<int> vertices_to_components(get_num_vertices());
   int num = boost::connected_components(*this, &vertices_to_components[0]);
 
-  map< int, vector<int> > components;
   for (size_t i = 0; i < vertices_to_components.size(); i++)
     {
       components[ vertices_to_components[i] ].push_back(i);
     }
-
+#endif
 #if 0
   printf("Total number of components: %d\n", num);
   for (vector<int>::size_type i = 0; i != components.size(); ++i)
@@ -40,7 +41,7 @@ InteractionGraph::get_connected_components()
 }
 
 InteractionGraph::InteractionGraph(MILPP* problem)
-  : graph_t(problem->get_num_cols())
+  : Graph(problem->get_num_cols())
 {
   int ri; /* row index */
   int ci; /* col index */
@@ -57,13 +58,12 @@ InteractionGraph::InteractionGraph(MILPP* problem)
         for (ni = 0; ni < row->get_num_elements(); ni++)
           {
             if ((ci == ni) || /* Skip variables with the same index */
-                edge(row->get_index_by_pos(ci),
-                     row->get_index_by_pos(ni), *this).second)
+                edge(vertex(row->get_index_by_pos(ci)),
+                     vertex(row->get_index_by_pos(ni)), *this).second)
               continue;
             /* Add variable with index n as a neighbor for a
                variable with index c*/
-            add_edge(row->get_index_by_pos(ci),
-                     row->get_index_by_pos(ni), *this);
+            add_edge(row->get_index_by_pos(ci), row->get_index_by_pos(ni));
           }
     }
 }

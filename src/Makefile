@@ -5,7 +5,7 @@ LES_LIBRARY_DIR = ../lib
 LES_LIBRARY_NAME = libles.so
 LES_LIBRARY_PATH = $(LES_LIBRARY_DIR)/$(LES_LIBRARY_NAME)
 
-OBJECTS = decomposition.o finkelstein.o interaction_graph.o milp_problem.o \
+OBJECTS = decomposition.o tree_decomposition.o finkelstein.o graph.o interaction_graph.o milp_problem.o \
 	quasiblock_milp_problem.o packed_vector.o packed_matrix.o utils/math.o
 
 COINOR_DIR = /opt/SYMPHONY-5.4.0

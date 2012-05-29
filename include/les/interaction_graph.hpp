@@ -7,8 +7,8 @@
  * @brief Interaction graph
  */
 
-#ifndef __INTERACTION_GRAPH_HXX
-#define __INTERACTION_GRAPH_HXX
+#ifndef __INTERACTION_GRAPH_HPP
+#define __INTERACTION_GRAPH_HPP
 
 /* Include required BOOST API */
 #include <boost/config.hpp>
@@ -18,31 +18,15 @@
 #include <boost/graph/biconnected_components.hpp>
 
 #include <les/milp_problem.hpp>
-
 #include <les/graph.hpp>
 
-class InteractionGraph : public boost::graph_t
+class InteractionGraph : public Graph
 {
 public:
   /* Constructor */
   InteractionGraph(MILPP* problem);
 
-  /* Return number of vertices in the graph. */
-  inline size_t get_num_vertices() { return num_vertices(*this); }
-
   map< int, vector<int> > get_connected_components();
-  /** Return vector of vertex neighbors. */
-  inline vector<int> get_vertex_neighbours(int v)
-  {
-    vector<int> nb;
-    InteractionGraph::adjacency_iterator i, end;
-    boost::tie(i, end) = adjacent_vertices(v, *this);
-    for (; i != end; i++)
-      {
-        nb.push_back(*i);
-      }
-    return nb;
-  }
 
   inline MILPP* get_problem()
   {
@@ -53,4 +37,4 @@ private:
   MILPP* problem_;
 };
 
-#endif /* __INTERACTION_GRAPH_HXX */
+#endif /* __INTERACTION_GRAPH_HPP */
