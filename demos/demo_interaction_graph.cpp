@@ -45,10 +45,13 @@ main()
 
   /* Create quasi-block MILP problem by using predefined description.*/
   QBMILPP problem(c, 7, &A[0][0], 4, s, b);
+  problem.print();
 
   /* Build interaction graph to check number of connected components. */
-  InteractionGraph g = InteractionGraph(&problem);
-
+  InteractionGraph g(&problem);
+  cout << "Interaction graph for a given problem:" << endl;
+  g.dump();
+  cout << "Interaction graph once vertex 2 was eliminated:" << endl;
   g.eliminate_vertex(2);
   g.dump();
 

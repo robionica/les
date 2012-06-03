@@ -9,10 +9,13 @@ LES_LIBRARY_DIR = ../lib/
 SYMPHONY_LIBS = -lz -lbz2  -Wl,--rpath -Wl,/opt/SYMPHONY-5.4.0/lib
 LIB = -L$(LES_LIBRARY_DIR) $(SYMPHONY_LIBS) -lles -Wl,--rpath -Wl,$(LES_LIBRARY_DIR)
 
-finkelstein_decomposition:
+DEMOS = demo_finkelstein_decomposition demo_interaction_graph	\
+	demo_tree_decomposition demo_celar_reader
+
+demo_finkelstein_decomposition:
 	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
 
-interaction_graph:
+demo_interaction_graph:
 	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
 
 demo_tree_decomposition:
@@ -20,3 +23,6 @@ demo_tree_decomposition:
 
 demo_celar_reader:
 	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+
+clean:
+	rm -f $(DEMOS)

@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include <les/quasiblock_milp_problem.hpp>
-#include <les/finkelstein.hpp>
+#include <les/decomposition.hpp>
 
 int
 main()

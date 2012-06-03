@@ -2,7 +2,7 @@
  * Copyright (c) 2012 Alexander Sviridenko
  */
 
-#include <les/tree_decomposition.hpp>
+#include <les/decomposition.hpp>
 
 int
 main()
