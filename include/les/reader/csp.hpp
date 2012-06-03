@@ -2,6 +2,10 @@
  * Copyright (c) 2012 Alexander Sviridenko
  */
 
+/**
+ * @file csp.hpp
+ */
+
 #ifndef __LES_READER_CSP_HPP
 #define __LES_READER_CSP_HPP
 
