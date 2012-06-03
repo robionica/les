@@ -151,4 +151,10 @@ block_decomposition_by_articulation_points(InteractionGraph* g);
 
 void blocktree_decomposition(MILPP* problem);
 
+class Decomposer {
+public:
+  Decomposer() {
+  }
+};
+
 #endif /* __DECOMPOSITION_HPP */
