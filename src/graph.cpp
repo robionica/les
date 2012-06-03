@@ -73,7 +73,6 @@ Graph::eliminate_vertices(vector<int>& vertices)
        it < vertices.end(); it++)
     {
       vector<int> neighbours = get_vertex_neighbours(*it);
-      cout << endl;
       for (vector<int>::iterator first_nb = neighbours.begin();
            first_nb < neighbours.end(); first_nb++)
         {

@@ -1,6 +1,19 @@
 /*
  * Copyright (c) 2012 Alexander Sviridenko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
+
 #include <les/interaction_graph.hpp>
 #include <les/packed_vector.hpp>
 
@@ -58,12 +71,12 @@ InteractionGraph::InteractionGraph(MILPP* problem)
         for (ni = 0; ni < row->get_num_elements(); ni++)
           {
             if ((ci == ni) || /* Skip variables with the same index */
-                edge(vertex(row->get_index_by_pos(ci)),
-                     vertex(row->get_index_by_pos(ni)), *this).second)
+                has_edge(row->get_index_by_pos(ci), row->get_index_by_pos(ni)))
               continue;
             /* Add variable with index n as a neighbor for a
                variable with index c*/
-            add_edge(row->get_index_by_pos(ci), row->get_index_by_pos(ni));
+            add_edge(row->get_index_by_pos(ci),
+                     row->get_index_by_pos(ni));
           }
     }
 }

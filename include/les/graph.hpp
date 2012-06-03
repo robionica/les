@@ -66,8 +66,11 @@ public:
 
   /* Consructors */
   Graph() { }
-  Graph(size_t num_cols) : boost::graph_t(num_cols)
+
+  Graph(size_t num_vertices)
   {
+    for (size_t vi = 0; vi < num_vertices; vi++)
+      add_vertex(vi);
   }
 
   /** Return number of vertices in the graph. */
@@ -106,10 +109,10 @@ public:
   /** Remove vertex. */
   void remove_vertex(int vi);
 
-  inline bool has_edge(int v1, int v2)
+  inline bool has_edge(int vi1, int vi2)
   {
-    return (boost::edge(vertex(v1), vertex(v2), *this).second ||
-            boost::edge(vertex(v2), vertex(v1), *this).second);
+    return (boost::edge(vertex(vi1), vertex(vi2), *this).second ||
+            boost::edge(vertex(vi2), vertex(vi1), *this).second);
   }
 
   /**

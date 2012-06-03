@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-#include <les/tree_decomposition.hpp>
+#include <les/decomposition.hpp>
 
 #include <boost/graph/copy.hpp>
 #include <boost/property_map/property_map.hpp>
