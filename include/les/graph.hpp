@@ -1,6 +1,23 @@
 /*
  * Copyright (c) 2012 Alexander Sviridenko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
+
+/**
+ * @file graph.hpp
+ */
+
 #ifndef __LES_GRAPH_HPP
 #define __LES_GRAPH_HPP
 
@@ -22,18 +39,30 @@ namespace boost
     typedef edge_property_tag kind;
   };
 
+  /**
+   * See 
+   * <http://www.boost.org/doc/libs/1_49_0/libs/graph/doc/graph_concepts.html>
+   * and <http://www.boost.org/doc/libs/1_35_0/libs/graph/doc/adjacency_list.html>
+   */
   typedef adjacency_list< vecS, /* edge container */
                           listS, /* vertex container */
                           undirectedS, /* indirected graph */
-                          property<vertex_index_t, int>, /* no_property */ /* vertex properties */
+                          property<vertex_index_t, int>, /* vertex properties */
                           property< edge_component_t, std::size_t > /* edge properties  */
                           >graph_t;
   typedef graph_traits< graph_t >::vertex_descriptor vertex_t;
 }
 
+class Graph;
+
 class Graph : public boost::graph_t
 {
 public:
+
+  typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+  typedef boost::graph_traits<Graph>::edge_descriptor Edge;
+  typedef typename boost::graph_traits<Graph>::adjacency_iterator
+  adjacency_iterator;
 
   /* Consructors */
   Graph() { }
@@ -42,46 +71,74 @@ public:
   }
 
   /** Return number of vertices in the graph. */
-  inline size_t get_num_vertices() { return num_vertices(*this); }
-
-  inline boost::vertex_t vertex(int v) { return boost::vertex(v, *this); }
-
-  /** Remove vertex. */
-  void remove_vertex(int v);
-
-  std::pair<boost::graph_traits<Graph>::edge_descriptor, bool>
-  add_edge(int v1, int v2)
+  inline size_t get_num_vertices()
   {
-    if (!boost::edge(vertex(v1), vertex(v2), *this).second)
+    return boost::num_vertices(*this);
+  }
+
+  /**
+   * Return vertex with index vi.
+   *
+   * TODO: improve this.
+   */
+  inline Graph::Vertex vertex(int vi)
+  {
+    //return boost::vertex(vi, *this); /* get vertex by position */
+    boost::graph_traits<Graph>::vertex_iterator vit, vit_end, next;
+    boost::tie(vit, vit_end) = boost::vertices(*this);
+    for (next = vit; vit != vit_end; vit = next)
       {
-        boost::add_edge(vertex(v1), vertex(v2), *this);
-        boost::put(boost::vertex_index, *this, vertex(v1), v1);
-        boost::put(boost::vertex_index, *this, vertex(v2), v2);
+        ++next;
+        if (boost::get(boost::vertex_index, *this, *vit) == vi)
+          return *vit;
       }
   }
 
-  /** Eliminate a vertex. Once vertex has been eliminated all the
-     vertices connected to it are joined together (making the
-     neighborhood of this variable into a clique in the remaining
-     graph, before deleting), modifying the structure of the graph. */
+  std::pair<vertex_iterator, vertex_iterator>
+  get_vertices()
+  {
+    return boost::vertices(*this);
+  }
+
+  /** Add vertex. */
+  void add_vertex(int vi);
+
+  /** Remove vertex. */
+  void remove_vertex(int vi);
+
+  inline bool has_edge(int v1, int v2)
+  {
+    return (boost::edge(vertex(v1), vertex(v2), *this).second ||
+            boost::edge(vertex(v2), vertex(v1), *this).second);
+  }
+
+  /**
+   * Add and return edge between vertices v1 and v2.
+   */
+  std::pair<Graph::Edge, bool>
+  add_edge(int v1, int v2)
+  {
+    if (has_edge(v1, v2))
+      return boost::edge(vertex(v1), vertex(v2), *this);
+    return boost::add_edge(vertex(v1), vertex(v2), *this);
+    //boost::put(boost::vertex_index, *this, vertex(v1), v1);
+    //boost::put(boost::vertex_index, *this, vertex(v2), v2);
+  }
+
+  /**
+   * Eliminating v is the operation, that adds an edge between
+   * each pair of non-adjacent neighbours of v, and then removes v.
+   */
   void eliminate_vertex(int v);
   void eliminate_vertices(vector<int>& vertices);
 
   /** Return vector of vertex neighbors. */
-  inline vector<int> get_vertex_neighbours(int v)
-  {
-    vector<int> nb;
-    typename boost::graph_traits< Graph >::adjacency_iterator vi, vi_end;
-    //boost::graph_traits<Graph>::adjacency_iterator i, end;
-    //boost::tie(i, end) = adjacent_vertices(v, *this);
-    //for (; i != end; i++)
-    for (boost::tie(vi, vi_end) = boost::adjacent_vertices(vertex(v), *this); vi != vi_end; ++vi)
-      {
-        nb.push_back(boost::get(boost::vertex_index, *this, *vi));
-        //cout << boost::get(boost::vertex_index, *this, *vi) << endl;
-      }
-    return nb;
-  }
+  vector<int> get_vertex_neighbours(int v);
+
+  /**
+   * Clone graph.
+   */
+  void clone(Graph& g);
 
   void dump();
 };
