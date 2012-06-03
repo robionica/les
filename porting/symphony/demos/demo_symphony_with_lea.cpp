@@ -6,7 +6,7 @@
 #include <sys/time.h>
 
 #include <les/quasiblock_milp_problem.hpp>
-#include <les/finkelstein.hpp>
+#include <les/decomposition.hpp>
 #include <OsiLeSolverInterface.hpp>
 
 void
