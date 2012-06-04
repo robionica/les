@@ -1,7 +1,9 @@
 
 # LES (Local Elimination Solver)
 
-## INSTALLING ON UBUNTU
+Copyright (c) 2012 Alexander Sviridenko
+
+## Installing on Ubuntu
 
 First, of all, you need to install prerequisites:
 
@@ -13,7 +15,7 @@ Next, get the sources and build it:
       cd les
       make
 
-## GETTING STARTED
+## Getting Started
 
 Add path to LES library for your projects:
 
