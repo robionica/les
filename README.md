@@ -1,7 +1,13 @@
 
-# LES (Local Elimination Solver)
+# Local Elimination Solver (LES)
 
 Copyright (c) 2012 Alexander Sviridenko
+
+## What is LES?
+
+LES is a library for solving a class of mathematical problems called
+integer linear programming (ILP) problems and its variants with help
+of local elimination algorithms.
 
 ## Installing on Ubuntu
 
