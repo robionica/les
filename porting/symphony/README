@@ -1,4 +1,0 @@
-SYMPHONY solver support
-
-$ sudo apt-get install coinor-libsymphony-dev coinor-libcoinutils-dev
-  coinor-libosi-dev coinor-libcgl-dev coinor-libclp-dev
