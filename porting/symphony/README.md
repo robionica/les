@@ -1,4 +1,5 @@
-SYMPHONY solver support
+
+# SYMPHONY solver support
 
 ## Installing from binaries
 
@@ -12,7 +13,6 @@ for example [SYMPHONY-5.2.0-Linux-x86-Install](http://www.coin-or.org/download/b
 
 This section requires update.
 
-   sudo apt-get install coinor-libsymphony-dev coinor-libcoinutils-dev \
-   coinor-libosi-dev coinor-libcgl-dev coinor-libclp-dev
+     sudo apt-get install coinor-libsymphony-dev coinor-libcoinutils-dev coinor-libosi-dev coinor-libcgl-dev coinor-libclp-dev
 
 Read more about deb packages https://projects.coin-or.org/CoinBinary/wiki/CoinDeb.
