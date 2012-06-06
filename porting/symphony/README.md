@@ -42,7 +42,7 @@ Next, build it:
 ## Known issues
 
 *      CoinFinite.hpp: In function ‘bool CoinIsnan(double)’:
-           CoinFinite.hpp: 109 :26\: error\: ‘_isnan’ was not declared in this scope
+           CoinFinite.hpp: 109 :26: error: ‘_isnan’ was not declared in this scope
 
   Open file `config_coinutils.h` (in my case it can find found
   in `/home/d2rk/SYMPHONY/include`) and find the following lines:
