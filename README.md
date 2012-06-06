@@ -13,19 +13,24 @@ algorithms (LEA).
 
 ## What is it for, anyway?
 
-Many real DOPs from OR applications contain a huge number of variables and/or
-constraints that make the models intractable for currently available
-solvers. Usually, DOPs from applications have a special structure, and the
-matrices of constraints for large-scale problems have a lot of zero elements
-(sparse matrices), and the nonzero elements of the matrix often fall into a
-limited number of blocks. The block form of many DO problems is usually caused
-by the weak connectedness of subsystems of real-world systems.
+Many real DOPs from OR applications contain a huge number of variables
+and/or constraints that make the models intractable for currently
+available solvers. Usually, DOPs from applications have a special
+structure, and the matrices of constraints for large-scale problems
+have a lot of zero elements (sparse matrices), and the nonzero
+elements of the matrix often fall into a limited number of blocks. The
+block form of many DO problems is usually caused by the weak
+connectedness of subsystems of real-world systems.
 
-One of the promising ways to exploit sparsity in the constraint matrix of DO
-problems are LEAs, including local decomposition algorithms, nonserial dynamic
-programming (NSDP) algorithms.
+One of the promising ways to exploit sparsity in the constraint matrix
+of DO problems are LEAs, including local decomposition algorithms,
+nonserial dynamic programming (NSDP) algorithms.
 
 ## Installing on Ubuntu
+
+Tested on Ubuntu 11.10 x86. Please,
+[let me know](https://github.com/d2rk/les/issues), if it does not
+work for you.
 
 First, of all, you need to install prerequisites:
 
@@ -54,4 +59,3 @@ Supported solvers:
 Add path to LES library for your projects:
 
     LD_LIBRARY_PATH=/somewhere/les/lib/
-
