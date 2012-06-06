@@ -43,6 +43,12 @@ Next, get the sources and build it:
       cd les
       make
 
+## Porting
+
+Supported solvers:
+
+* [SYMPHONY](https://github.com/d2rk/les/tree/master/porting/symphony#symphony-solver-support)
+
 ## Getting Started
 
 Add path to LES library for your projects:
