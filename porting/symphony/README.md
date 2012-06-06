@@ -41,13 +41,13 @@ Next, build it:
 
 ## Known issues
 
-*      CoinFinite.hpp: In function ‘bool CoinIsnan(double)’:
-       CoinFinite.hpp:109:26: error: ‘_isnan’ was not declared in this scope
+*      CoinFinite.hpp\: In function ‘bool CoinIsnan(double)’:
+       CoinFinite.hpp\:109\:26\: error\: ‘_isnan’ was not declared in this scope
 
   Open file `config_coinutils.h` (in my case it can find found
   in `/home/d2rk/SYMPHONY/include`) and find the following lines:
 
-       /* Define to be the name of C-function for NaN check */
-       #define MY_C_ISNAN _isnan
+           /* Define to be the name of C-function for NaN check */
+           #define MY_C_ISNAN _isnan
 
-  Change `MY_C_ISNAN` to `isnan`.
+  Change `MY_C_ISNAN` value to `isnan`.
