@@ -7,12 +7,12 @@ LES_LIBRARY_PATH = $(LES_LIBRARY_DIR)/$(OSI_LESOLVER_LIBRARY_NAME)
 
 OBJECTS = src/OsiLeSolverInterface.o
 
-COINOR_DIR = /opt/SYMPHONY-5.4.0
-COINOR_LIB = /usr/lib/ # $(COINOR_DIR)/lib
-COINOR_INCLUDE = -I$(COINOR_DIR)/include
-INCLUDES = -DLES_DEBUG -I../../include $(COINOR_INCLUDE) -I./include
+COINOR_SYMPHONY_DIR = /home/d2rk/lib/SYMPHONY
+COINOR_SYMPHONY_LIB = $(COINOR_SYMPHONY_DIR)/lib
+COINOR_SYMPHONY_INCLUDE = -I$(COINOR_SYMPHONY_DIR)/include
+INCLUDES = -DLES_DEBUG -I../../include $(COINOR_SYMPHONY_INCLUDE) -I./include
 
-LIBS = -L$(COINOR_LIB) -L$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(COINOR_LIB) -lCoinUtils -lm -lOsi -lSym -lOsiClp \
+LIBS = -L$(COINOR_SYMPHONY_LIB) -L$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(COINOR_SYMPHONY_LIB) -lCoinUtils -lm -lOsi -lSym -lOsiClp \
 	-lCgl -lClp -lOsiClp -llapack -lblas -lles # -lOsiSym
 
 %.o: %.cpp
