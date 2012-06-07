@@ -61,3 +61,7 @@ Supported solvers:
 Add path to LES library for your projects:
 
     LD_LIBRARY_PATH=/somewhere/les/lib/
+
+## Maintainers
+
+Alexander Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova.
