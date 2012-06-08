@@ -15,15 +15,36 @@
  */
 
 /**
- * @file config.hpp
- * @brief Main library config
+ * @file minimum_degree_ordering
  */
 
-#ifndef __LES_CONFIG_HPP
-#define __LES_CONFIG_HPP
+#ifndef __LES_GRAPH_MD_ORDERING_HPP
+#define __LES_GRAPH_MD_ORDERING_HPP
 
-#define FALSE (0)
-#define TRUE (!FALSE)
+#include <les/graph.hpp>
 
-#endif /* __LES_CONFIG_HPP */
+class Ordering
+{
+public:
+  typedef vector<int> Permutation;
 
+  Permutation& get_permutation();
+
+};
+
+/**
+ * Uses http://www.boost.org/doc/libs/1_49_0/libs/graph/doc/minimum_degree_ordering.html
+ */
+class MinimumDegreeOrdering : public Ordering
+{
+public:
+  inline Permutation& get_permutation()
+  {
+    return perm;
+  }
+
+private:
+  Permutation perm;
+};
+
+#endif /* __LES_GRAPH_MD_ORDERING_HPP */
