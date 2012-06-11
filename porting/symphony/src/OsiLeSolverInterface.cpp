@@ -16,7 +16,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include <boost/dynamic_bitset.hpp>
+//#include <boost/dynamic_bitset.hpp>
 #include <boost/foreach.hpp>
 
 #include <les/config.hpp>
