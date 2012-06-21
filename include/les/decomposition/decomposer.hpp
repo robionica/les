@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-#ifndef __DECOMPOSER_HPP
-#define __DECOMPOSER_HPP
+#ifndef __LES_DECOMPOSITION_DECOMPOSER_HPP
+#define __LES_DECOMPOSITION_DECOMPOSER_HPP
 
 #include <vector>
 
@@ -164,4 +164,4 @@ public:
   }
 };
 
-#endif /* __DECOMPOSER_HPP */
+#endif /* __LES_DECOMPOSITION_DECOMPOSER_HPP */

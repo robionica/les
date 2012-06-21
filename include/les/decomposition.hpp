@@ -26,4 +26,4 @@
 #include <les/decomposition/finkelstein.hpp>
 #include <les/decomposition/tree_decomposition.hpp>
 
-#endif /* __DECOMPOSITION_HPP */
+#endif /* __LES_DECOMPOSITION_HPP */
