@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
 
 /**
  * @file solver.hpp
@@ -14,33 +12,28 @@
 
 class Solver {
 public:
-  void initial_solve();
+  void solve();
 
-  /* Slave solver */
-  void* get_slave_solver() { return slave_solver; }
-
-  /** @name Problem manipulations. */
-  /** @{ */
-
-  /** Load problem. */
+  // Load problem.
   void load_problem(Problem* problem);
+};
 
-  /** @} */
-
-  /** @name Objective function methods. */
-  /** @{ */
-
-  /** Get objective function value. */
-  double get_obj_value();
-
-  /* Columns */
-  const double* get_col_solution();
-
-  /** @} */
+class MasterSolver : Solver {
+public:
+  // Slave solver
+  void* get_slave_solver() { return slave_solver; }
 
 protected:
   void* slave_solver;
 };
 
-#endif /* __LES_SOLVER_HPP */
+class MILPPSolverInterface {
+public:
+  // Get objective function value.
+  double get_obj_value();
 
+  // Columns
+  const double* get_col_solution();
+};
+
+#endif /* __LES_SOLVER_HPP */

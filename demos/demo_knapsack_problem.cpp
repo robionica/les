@@ -1,27 +1,34 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-#include <stdio.h>
+#include <iostream>
 
-#include <les/knapsack_problem.h>
+#include <les/knapsack_problem.hpp>
 
 int
 main()
 {
-  int v[] = {5, 4, 6, 1};
-  int w[] = {3, 3, 3, 2};
-  int W = 5;
-  int* x;
-  int s;
-  int i;
-
-  fractional_knapsack(v, w, W, 4, &x, &s);
-  printf("Solution: %d\n", s);
-  printf("Vector: ");
-  for (i = 0; i < 4; i++)
+  int v[] = {50, 140, 60, 60};
+  int w[] = { 5, 20,  10, 12};
+  int n = 4;
+  int W = 30;
+  FractionalKnapsack* solver = new FractionalKnapsack(v, w, n, W);
+  solver->solve();
+  cout << "Bag weight: " << solver->get_bag_weight() << endl;
+  cout << "Bag value: " << solver->get_bag_value() << endl;
+  map<int, double>& items = solver->get_bag_items();
+  cout << "Items: " << endl;
+  for (map<int, double>::iterator it = items.begin(); it != items.end(); it++)
     {
-      printf("%d ", x[i]);
+      cout << (*it).first << " ==> " << (*it).second << endl;
     }
-  printf("\n");
+
+  MILPP* problem = solver->get_problem();
+  if (problem)
+    {
+      problem->dump();
+    }
+
+  delete solver;
 
   return 0;
 }

@@ -5,8 +5,10 @@ LES_LIBRARY_DIR = ../lib
 LES_LIBRARY_NAME = libles.so
 LES_LIBRARY_PATH = $(LES_LIBRARY_DIR)/$(LES_LIBRARY_NAME)
 
-OBJECTS = decomposition/decomposer.o decomposition/tree_decomposition.o decomposition/finkelstein.o graph.o interaction_graph.o milp_problem.o \
-	quasiblock_milp_problem.o packed_vector.o packed_matrix.o utils/math.o
+OBJECTS = decomposition/decomposer.o decomposition/tree_decomposition.o \
+	decomposition/finkelstein.o graph.o interaction_graph.o milp_problem.o \
+	quasiblock_milp_problem.o packed_vector.o packed_matrix.o utils/math.o \
+	knapsack_problem.o
 
 COINOR_DIR = /opt/SYMPHONY-5.4.0
 COINOR_LIB = $(COINOR_DIR)/lib
@@ -26,4 +28,3 @@ $(LES_LIBRARY_PATH): $(OBJECTS)
 
 clean:
 	rm $(OBJECTS) $(LES_LIBRARY_PATH)
-

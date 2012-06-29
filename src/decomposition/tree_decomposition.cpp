@@ -46,7 +46,8 @@ PermutationToTreeDecomposition::decompose(const vector<int>& permutation,
       vector<int> neighbours = _h.get_vertex_neighbours(v);
       /* compute the graph obtained from H by eliminating v */
       _h.eliminate_vertex(v);
-      //_h.dump();
+      cout << ">>>" << v << endl;
+      _h.dump();
       /* go into recursion */
       decompose(permutation, permutation_index + 1);
       /* create a bag and add it to the decomposition */
@@ -84,7 +85,7 @@ PermutationToTreeDecomposition::dump()
       for (vector<int>::iterator vit = (*bit).begin(); vit < (*bit).end();
            ++vit)
         {
-          cout << *vit << ", ";
+          cout << (*vit + 1) << ", ";
         }
       cout << endl;      
     }

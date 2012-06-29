@@ -13,6 +13,9 @@ demo_threads:
 demo_symphony_with_lea:
 	g++ $(INCLUDES) $(LIB) $@.cpp -o $@
 
+demo_relaxation:
+	g++ $(INCLUDES) $(LIB) $@.cpp -o $@
+
 simple_milp_problem:
 	g++ $(INCLUDES) $(LIB) $@.cpp -o $@
 

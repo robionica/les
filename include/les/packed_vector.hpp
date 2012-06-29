@@ -18,7 +18,7 @@ using namespace std;
 
 /*
  * Use i-th index or element by position use get_indices()[i] or
- * get_elements()[i]. 
+ * get_elements()[i].
  */
 
 class PackedVector

@@ -1,12 +1,10 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
 #ifndef __OSI_LESOLVER_INTERFACE_HPP
 #define __OSI_LESOLVER_INTERFACE_HPP
 
-/* Inlcude LES API */
+// Inlcude LES API
 #include <les/solver.hpp>
-/* Include native symphony API */
+// Include native symphony API
 #include <coin/OsiSymSolverInterface.hpp>
 
 using namespace std;
@@ -25,7 +23,7 @@ public:
   }
   const vector<double>* get_solution() { return &solution_; }
 
-  /** Return objective function value. */
+  // Return objective function value.
   double get_obj_value();
 
 private:
@@ -33,4 +31,4 @@ private:
   vector<double> solution_;
 };
 
-#endif /* __OSI_LESOLVER_INTERFACE_HPP */
+#endif // __OSI_LESOLVER_INTERFACE_HPP

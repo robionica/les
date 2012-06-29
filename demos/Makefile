@@ -15,6 +15,9 @@ DEMOS = demo_finkelstein_decomposition demo_interaction_graph	\
 demo_finkelstein_decomposition:
 	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
 
+demo_knapsack_problem:
+	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+
 demo_interaction_graph:
 	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
 
