@@ -1,18 +1,16 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (c) 2012 Alexander Sviridenko
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include <iostream>
 #include <cstdlib>
@@ -38,6 +36,94 @@ double
 OsiLeSolverInterface::get_obj_value()
 {
   return _obj_value;
+}
+
+void
+OsiLeSolverInterface::solve(vector<DecompositionBlock*>* blocks,
+                            bool use_relaxation)
+{
+  if (use_relaxation)
+    {
+      solve_with_relaxation(blocks);
+      return;
+    }
+  solve(blocks);
+}
+
+void
+OsiLeSolverInterface::solve_with_relaxation(vector<DecompositionBlock*>* blocks)
+{
+  vector<DecompositionBlock*>::iterator it;
+  block_solution_t* solution = NULL;
+  DecompositionBlock* block = NULL;
+  vector<int>* middle_cols;
+  vector<int>* left_cols;
+  int right_mask;
+  size_t i;
+
+  /* NOTE: maybe we also need to check all the blocks, so they all
+     have to be from the same problem?*/
+  MILPP* p = (MILPP*)blocks->back()->get_problem();
+
+  /* Solve the blocks one by one */
+  BOOST_FOREACH(block, *blocks)
+    {
+      if (!block->is_solved())
+        solve_block(block);
+    }
+
+  _obj_value = 0.0;
+
+  /* Initialize array of primal solution vector */
+  solution_.clear();
+  solution_.resize( p->get_num_cols() );
+
+  /* Initial right mask */
+  right_mask = 0;
+
+  for (it = blocks->end() - 1; it >= blocks->begin(); it--)
+    {
+      block = *it;
+
+      solution = block->find_solution_by_right_mask(right_mask);
+      assert(solution != NULL);
+
+      middle_cols = block->get_middle_part()->get_nonzero_cols();
+      left_cols = block->get_left_part()->get_nonzero_cols();
+
+      /* fix block's obj value */
+      if (it != blocks->begin())
+        {
+          DecompositionBlock* prev_block = *(it - 1);
+          int left_mask = convert_bin_to_dec(solution->left_values, left_cols->size());
+          block_solution_t* prev_solution = prev_block->find_solution_by_right_mask(left_mask);
+          assert(prev_solution != NULL);
+          solution->obj_value += prev_solution->obj_value;
+        }
+
+      for (i = 0; i < middle_cols->size(); i++)
+        {
+          assert(solution->middle_values != NULL);
+          solution_[ middle_cols->at(i) ] = solution->middle_values[i];
+          if (solution->middle_values[i])
+            {
+              _obj_value += p->get_obj_coef( middle_cols->at(i) );
+            }
+        }
+      for (i = 0; i < left_cols->size(); i++)
+        {
+          assert(solution->left_values != NULL);
+          solution_[ left_cols->at(i) ] = solution->left_values[i];
+          if (solution->left_values[i])
+            {
+              _obj_value += p->get_obj_coef( left_cols->at(i) );
+            }
+        }
+      if (left_cols->size())
+        {
+          right_mask = convert_bin_to_dec(solution->left_values, left_cols->size());
+        }
+    }
 }
 
 void
@@ -77,7 +163,7 @@ OsiLeSolverInterface::solve(vector<DecompositionBlock*>* blocks)
 
       solution = block->find_solution_by_right_mask(right_mask);
       assert(solution != NULL);
- 
+
       middle_cols = block->get_middle_part()->get_nonzero_cols();
       left_cols = block->get_left_part()->get_nonzero_cols();
 
@@ -180,7 +266,7 @@ OsiLeSolverInterface::solve_block(DecompositionBlock* block)
         si.setInteger(i);
     }
 
-  set<int>* cons = block->get_nonzero_rows();  
+  set<int>* cons = block->get_nonzero_rows();
   vector<int>* middle_cons = middle_matrix->get_nonzero_rows();
 
   /* Start to generate rows */
@@ -229,14 +315,12 @@ OsiLeSolverInterface::solve_block(DecompositionBlock* block)
             si.setRowUpper(i, rhs);
           }
 
-        /* The new objective function has the same sense that main
-           objective.
-           NOTE: can not set objective sense once at the bottom since,
-           solver modifies coefficients. */
+        // The new objective function has the same sense that main objective.
+        // NOTE: can not set objective sense once at the bottom since, solver
+        // modifies coefficients.
         si.setObjSense( p->get_obj_sense() );
 
-        /* HERE is a point where the problem will be solved by slave
-           solver. */
+        // HERE is a point where the problem will be solved by slave solver.
         si.branchAndBound();
 
         /* Obtain objective value and fix it.
@@ -250,8 +334,8 @@ OsiLeSolverInterface::solve_block(DecompositionBlock* block)
 
         solution = block->find_solution_by_right_mask(right_mask);
 
-        /* If solution already exists and its objective value greater
-           then the new once that it should be omitted. */
+        // If solution already exists and its objective value greater
+        // then the new once that it should be omitted.
         if (solution != NULL && solution->obj_value > obj_value)
           continue;
 

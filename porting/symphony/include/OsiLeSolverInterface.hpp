@@ -1,4 +1,5 @@
 // Copyright (c) 2012 Alexander Sviridenko
+
 #ifndef __OSI_LESOLVER_INTERFACE_HPP
 #define __OSI_LESOLVER_INTERFACE_HPP
 
@@ -9,11 +10,18 @@
 
 using namespace std;
 
-class OsiLeSolverInterface : public Solver {
+class OsiLeSolverInterface : public MILPSolver {
 public:
+  // Empty constructor
   OsiLeSolverInterface() : _obj_value(0.) {}
 
+  // Solve the problem decomposed by blocks. Optionally can be used relaxation.
+  void solve(vector<DecompositionBlock*>* blocks, bool use_relaxation);
   void solve(vector<DecompositionBlock*>* blocks);
+  void solve_with_relaxation(vector<DecompositionBlock*>* blocks);
+
+  // Solve a single block. Note the solving information will be written in
+  // block.
   void solve_block(DecompositionBlock* block);
 
   inline double get_col_value(int i)
@@ -21,6 +29,7 @@ public:
     assert(i < solution_.size());
     return solution_[i];
   }
+
   const vector<double>* get_solution() { return &solution_; }
 
   // Return objective function value.

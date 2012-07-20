@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
 
 /**
  * @file packed_vector.hpp
@@ -24,30 +22,47 @@ using namespace std;
 class PackedVector
 {
 public:
-  /** Default constructor */
+  // Default constructor.
   PackedVector();
 
+  // Initialization
   void init(size_t size, const int* indices, const double* elements);
   void init(vector<int>& indices);
   void init(vector<int>& indices, vector<double>& elements);
 
-  inline int size() const { return get_num_elements(); }
-  inline int get_num_elements() const { return nr_elements_; }
+  inline int size() const
+  {
+    return get_num_elements();
+  }
 
-  /**
-   * Reset the vector, as it was just created an empty vector.
-   */
+  inline int get_num_elements() const
+  {
+    return nr_elements_;
+  }
+
+  // Resizes the vector to contain n elements.
+  void resize(size_t n);
+
+  // Reset the vector, as it was just created an empty vector.
   void clear();
 
-  /** Return pointer to the array of elements. */
-  const double* get_elements() const { return elements_; }
+  // Return pointer to the array of elements.
+  inline const double* get_elements() const
+  {
+    return elements_;
+  }
 
-  double get_element(int pos) { return get_element_by_pos(pos); }
+  // Just an alias for get_element_by_pos().
+  inline double get_element(int pos)
+  {
+    return get_element_by_pos(pos);
+  }
 
-  /**
-   * Get element value by its position.
-   */
-  double get_element_by_pos(int pos) { return elements_[pos]; }
+  // Get element value by its position.
+  double get_element_by_pos(int pos)
+  {
+    return elements_[pos];
+  }
 
   bool has_element(int index)
   {
@@ -56,53 +71,49 @@ public:
     return (it != index_to_pos_mapping_.end());
   }
 
-  /**
-   * Get element by index. If element doesn't exist return WHAT?. On
-   * this moment we return 0.0.
-   */
-  double get_element_by_index(int i)
+  // Get element by index.
+  // XXX: if element doesn't exist return WHAT?. On this moment we return 0.0.
+  double get_element_by_index(int i);
+
+  int* get_indices() const
   {
-    map<int, int>::iterator it;
-    it = index_to_pos_mapping_.find(i);
-    if (it == index_to_pos_mapping_.end())
-      return 0.0;
-    return get_element_by_pos(it->second);
+    return indices_;
   }
 
-  int* get_indices() const { return indices_; }
-
-  /**
-   * Set an existing element in the packed vector.
-   * The first argument is the "index" into the elements() array.
-   * See set_element_by_pos() and get_element_by_pos().
-   */
-  void set_element(int index, double element)
+  void set_element(int pos, double element)
   {
-    set_element_by_pos(index, element);
+    set_element_by_pos(pos, element);
   }
 
-  void set_element_by_pos(int index, double element)
+  // Set an existing element in the packed vector.
+  // The first argument is the "pos" into the elements() array.
+  // See set_element_by_pos() and get_element_by_pos().
+  void set_element_by_pos(int pos, double element)
   {
-    elements_[index] = element;
+    elements_[pos] = element;
+  }
+
+  void set_element_by_index(int i, double element)
+  {
+    insert(i, element);
   }
 
   void zero();
 
-  inline int get_index(int pos) { return get_index_by_pos(pos); }
+  inline int get_index(int pos)
+  {
+    return get_index_by_pos(pos);
+  }
 
-  /**
-   * Get vector of indices of elements.
-   */
+  // Get vector of indices of elements.
   inline int get_index_by_pos(int pos)
   {
     assert(pos < get_num_elements());
     return indices_[pos];
   }
 
-  /**
-   * Insert an element into the vector.
-   */
-  void insert(int index, double element);
+  // Insert an element into the vector.
+  void insert(int i, double element);
 
   void dump()
   {
@@ -115,10 +126,10 @@ private:
   map<int, int> index_to_pos_mapping_;
   int* indices_; /* Pointer to vector of indices. */
   int* orig_indices_; /* original unsorted indices */
-  double* elements_; /* Pointer to vector of elements_. */
-  int nr_elements_; /* Size of indices_ and elements_ vectors. */
-  int capacity_; /* Amount of memory allocated for indices_,
-                    orig_indices_, and elements_. */
+  double* elements_; // Pointer to vector of elements_.
+  int nr_elements_; // Size of indices_ and elements_ vectors.
+  int capacity_; // Amount of memory allocated for indices_,
+                 // orig_indices_, and elements_.
 };
 
 #endif /* __LES_PACKED_VECTOR_HPP */

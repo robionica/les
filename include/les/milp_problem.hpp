@@ -18,8 +18,7 @@
 
 using namespace std;
 
-class MILPP;
-
+// MILPP stands fir Mixed-Integer Linear Programming Problem.
 class MILPP : public Problem
 {
 public:
@@ -32,20 +31,17 @@ public:
 
   static const char* OBJ_SENSE_TO_STRING[];
 
+  // Constructors.
   MILPP();
   MILPP(int nr_cols, int nr_rows);
   MILPP(double* c, int nr_cols, double* A, int nr_rows, char* s, double* b);
 
   void initialize(int nr_cols, int nr_rows);
 
-  /** Print the problem, so we humans can analyse it. */
+  // Print the problem, so we humans can analyse it.
   void dump();
 
-  // -----------------------------------------------------------------
-  /** @name Columns */
-  /** @{ */
-
-  /** Get number of columns */
+  // Get number of columns.
   inline int get_num_cols()
   {
     return cons_matrix_.get_num_cols();
@@ -63,7 +59,7 @@ public:
     // Do restructuring
     cons_matrix_.resize(get_num_rows(), n);
     // Compute problem parameters and set default values if required
-    obj_coefs_.resize(n);
+    _obj_coefs.resize(n);
     cols_lower_bounds_.resize(n);
     cols_upper_bounds_.resize(n);
 
@@ -107,12 +103,7 @@ public:
     return cols_upper_bounds_[i];
   }
 
-  /** @} */
-
-  /** @name Rows */
-  /** @{ */
-
-  inline const PackedMatrix* get_cons_matrix()
+  inline PackedMatrix* get_cons_matrix()
   {
     return &cons_matrix_;
   }
@@ -151,6 +142,8 @@ public:
 
   // Set constraint matrix where the matrix is represented by an arrays.
   void set_cons_matrix(double* A, int nr_rows, int nr_cols);
+
+  // Set constraint matrix.
   void set_cons_matrix(const PackedMatrix* matrix);
 
   inline const set<int>* get_rows_related_to_col(int i)
@@ -279,10 +272,15 @@ public:
     return obj_sense_;
   }
 
-  // Get pointer to array of objective function coefficients.
+  // Get pointer to array of objective function coefficients. Return 0.0 if
+  // coefficient with such index doesn't exist.
   inline double get_obj_coef(int i)
   {
-    return obj_coefs_[i];
+    if (i >= get_num_cols())
+      return 0.0;
+    // TODO: do we need to do assert if number of cols greater than number of
+    // obj coefs?
+    return _obj_coefs.get_element_by_index(i);
   }
 
   // Assign new coefficients for the objective function. Note, the
@@ -304,23 +302,18 @@ public:
   // Set coefficient for a single column.
   inline void set_obj_coef(int i, double v)
   {
-    assert(i < get_num_cols());
-    obj_coefs_[i] = v;
+    _obj_coefs.set_element_by_index(i, v);
   }
 
-  /** @} */
-
 private:
-  /**
-   * Set object state for default constructor.
-   *
-   * This routine establishes the initial values of data fields in the
-   * object when the object is created using the default constructor.
-   */
+  // Set object state for default constructor.
+  //
+  // This routine establishes the initial values of data fields in the
+  // object when the object is created using the default constructor.
   void set_initial_data();
 
-  /* Objective */
-  vector<double> obj_coefs_; /* Vector of objective coefficients. */
+  // Objective
+  PackedVector _obj_coefs; // Vector of objective coefficients.
   char obj_sense_;
 
   /* Columns */

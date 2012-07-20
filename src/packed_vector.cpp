@@ -1,6 +1,5 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
+
 #include <cstdlib>
 #include <assert.h>
 #include <string>
@@ -24,6 +23,18 @@ PackedVector::PackedVector()
   capacity_ = 0;
 }
 
+double
+PackedVector::get_element_by_index(int i)
+{
+  map<int, int>::iterator it;
+  it = index_to_pos_mapping_.find(i);
+  if (it == index_to_pos_mapping_.end())
+    {
+      return 0.0;
+    }
+  return get_element_by_pos(it->second);
+}
+
 void
 PackedVector::clear()
 {
@@ -35,6 +46,12 @@ PackedVector::zero()
 {
   for (int i = 0; i < get_num_elements(); i++)
     elements_[i] = 0.0;
+}
+
+void
+PackedVector::resize(size_t n)
+{
+  reserve(n);
 }
 
 void

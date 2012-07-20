@@ -1,10 +1,9 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
+
 #include <iostream>
 
 #include <les/quasiblock_milp_problem.hpp>
-#include <les/decomposition.hpp>
+#include <les/decomposition/finkelstein.hpp>
 
 int
 main()
@@ -55,17 +54,24 @@ main()
   };
 
   /* Create quasi-block MILP problem by using predefined description.*/
-  QBMILPP* p = new QBMILPP(c, 7, &A[0][0], 6, s, b);
+  QBMILPP* problem = new QBMILPP(c, 7, &A[0][0], 6, s, b);
 
   /* Do finkelstein quasi-block decomposition and obtain decomposition
      information */
   vector< set<int> > U, S, M;
 
   FinkelsteinQBDecomposition decomposer;
-  decomposer.decompose(p, NULL, &U, &S, &M);
-
-  printf("Finkelstein decomposition information:\n");
+  decomposer.decompose(problem, NULL, &U, &S, &M);
+  cout << "Finkelstein decomposition information:" << endl;
   decomposer.dump();
+
+  vector<QBMILPP*> subproblems = decomposer.get_subproblems();
+  for (vector<QBMILPP*>::iterator it = subproblems.begin();
+       it != subproblems.end(); it++)
+    {
+      QBMILPP* subproblem = *it;
+      subproblem->dump();
+    }
 
   return 0;
 }

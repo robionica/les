@@ -1,10 +1,8 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
 
 #include <les/packed_matrix.hpp>
 
-/* Convert CoinPackedVector for coin-or library to PackedVector. */
+// Convert CoinPackedVector for coin-or library to PackedVector.
 static void
 convert_CoinPackedVector_to_PackedVector(CoinShallowPackedVector* src,
                                          PackedVector* dst)
