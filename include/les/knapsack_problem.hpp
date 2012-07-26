@@ -13,10 +13,10 @@
 class FractionalKnapsack : Solver {
 public:
   /**
-   * @v array of values
-   * @w: array of weights
-   * @max_w: maximum weight that we can carry in the bag
+   * @values: array of values
+   * @weights: array of weights
    * @n: number of items in the bag.
+   * @max_weight: maximum weight that we can carry in the bag
    */
   FractionalKnapsack(int* values, int* weights, size_t n, int max_weight) {
     _problem = new MILPP();
