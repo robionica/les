@@ -34,9 +34,7 @@
 #include <les/packed_vector.hpp>
 #include <les/decomposition.hpp>
 
-/**
- * QBMILP stands for quasi-block MILP problem.
- */
+// QBMILP stands for Quasi-Block MILP problem.
 class QBMILPP : public MILPP
 {
 public:
@@ -60,17 +58,14 @@ typedef struct {
   bool fixed_bridge_size;
 } qbmilpp_generator_params_t;
 
-/**
- * Quasi-block MILP problem generator for automitic problem
- * generating.
- */
+// Quasi-block MILP problem generator for automitic problem generating.
 class QBMILPPGenerator
 {
 public:
   static const int DEFAULT_BLOCK_HEIGHT = 2;
   static const int DEFAULT_BRIDGE_SIZE = 1;
 
-  /* Default constructor. */
+  // Default constructor.
   QBMILPPGenerator(int num_cols, int num_rows,
                    int block_width, int block_height,
                    int bridge_size = 0,
@@ -80,8 +75,11 @@ public:
 
   QBMILPP* generate();
 
-  /** Return pointer to the result problem. */
-  QBMILPP* get_problem() { return &problem; }
+  // Return pointer to the result problem.
+  QBMILPP* get_problem()
+  {
+    return &problem;
+  }
 
 private:
   void setup(int block_width, int block_height, int bridge_size,
@@ -94,8 +92,8 @@ private:
 
   vector<Block*> blocks;
 
-  /** Target quasi-block MILP problem. */
+  // Target quasi-block MILP problem.
   QBMILPP problem;
 };
 
-#endif /* __LES_QBMILPP_HXX */
+#endif  // __LES_QBMILPP_HXX

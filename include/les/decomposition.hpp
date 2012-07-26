@@ -21,7 +21,7 @@
 #define __LES_DECOMPOSITION_HPP
 
 #include <les/decomposition/decomposer.hpp>
-#include <les/decomposition/finkelstein.hpp>
+//#include <les/decomposition/finkelstein.hpp>
 #include <les/decomposition/tree_decomposition.hpp>
 
 #endif /* __LES_DECOMPOSITION_HPP */

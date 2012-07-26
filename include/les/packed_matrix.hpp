@@ -1,18 +1,16 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// Copyright (c) 2012 Alexander Sviridenko
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+// implied.  See the License for the specific language governing
+// permissions and limitations under the License.
 
 /**
  * @file packed_matrix.hpp
@@ -28,28 +26,21 @@
 
 #include <les/packed_vector.hpp>
 
-/*
- * TODO: the current implementation is completely depends on COIN package. This
- * has to be fixed.
- */
+// TODO: the current implementation is completely depends on COIN package. This
+// has to be fixed.
 #define USE_PACKED_MATRIX_COINOR_WRAPPER
 
+// The following PackedMatrix implementation is a wrapper for CoinPackedMatrix
+// class and thus depends on from COIN-OR project. However it designed to
+// support the API for the future independent version.
 #ifdef USE_PACKED_MATRIX_COINOR_WRAPPER
-/**
- * The following PackedMatrix implementation is a wrapper for
- * CoinPackedMatrix class and thus depends on from COIN-OR
- * project. However it designed to support the API for the future
- * independent version.
- */
+
 #include <coin/CoinPackedMatrix.hpp>
 #include <coin/CoinShallowPackedVector.hpp>
 
-/*
- * TODO: CoinPackedMatrix doesn't provide *good* sparsity, thus do we
- * need to provide col delta and row delta in order to *compres* it?
- * We can use the following API fix_col_index() and fix_row_index() to
- * fix cols and rows.
- */
+// TODO: CoinPackedMatrix doesn't provide *good* sparsity, thus do we need to
+// provide col delta and row delta in order to *compres* it? We can use the
+// following API fix_col_index() and fix_row_index() to fix cols and rows.
 class PackedMatrix {
 public:
   /**

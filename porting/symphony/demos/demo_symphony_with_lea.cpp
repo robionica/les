@@ -1,6 +1,4 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
+// Copyright (c) 2012 Alexander Sviridenko
 
 #include <stdio.h>
 #include <sys/time.h>
@@ -12,51 +10,44 @@
 void
 test1()
 {
-  /* Vector of objective function coefficients */
+  // Vector of objective function coefficients
   double c[] = {2.0, 3.0, 1.0, 5.0, 4.0, 6.0, 1.0};
-  /* Matrix of constraints */
+  // Matrix of constraints
   double A[4][7] = {
     {3., 4., 1., 0., 0., 0., 0.},
     {0., 2., 3., 3., 0., 0., 0.},
     {0., 2., 0., 0., 3., 0., 0.},
     {0., 0., 2., 0., 0., 3., 2.},
   };
-  /* Vector of rows sense */
+  // Vector of rows sense
   char s[] = {
     MILPP::ROW_SENSE_LOWER,
     MILPP::ROW_SENSE_LOWER,
     MILPP::ROW_SENSE_LOWER,
     MILPP::ROW_SENSE_LOWER,
   };
-  /* Vector of right-hand side coefficients */
+  // Vector of right-hand side coefficients
   double b[] = {
     6.0,
     5.0,
     4.0,
     5.0
   };
-
-  /* Create quasiblock MILP problem by using predefined description.*/
+  // Create quasiblock MILP problem by using predefined description.
   QBMILPP problem(c, 7, &A[0][0], 4, s, b);
   problem.set_obj_sense(QBMILPP::OBJ_SENSE_MAXIMISATION);
-  /* Show the problem on display to verify the data */
-  problem.print();
-
-  /* Do finkelstein quasi-block decomposition and obtain decomposition
-     information in form of chain of blocks. */
+  // Show the problem on display to verify the data
+  problem.dump();
+  // Do finkelstein quasi-block decomposition and obtain decomposition
+  //   information in form of chain of blocks.
   FinkelsteinQBDecomposition decomposer;
   vector<DecompositionBlock*>* blocks = decomposer.decompose_by_blocks(&problem);
   cout << "Finkelstein decomposition:" << endl;
   decomposer.dump();
 
   OsiLeSolverInterface solver;
-
   solver.solve(blocks);
-
-  std::cout << "Objective value = "
-            << solver.get_obj_value()
-            << std::endl;
-
+  std::cout << "Objective value = " << solver.get_obj_value() << std::endl;
   std::cout << "Solution: ";
 
   for (int i = 0; i < problem.get_num_cols(); i++)
@@ -81,9 +72,9 @@ test1()
 void
 test2()
 {
-  /* Vector of objective function coefficients */
+  // Vector of objective function coefficients
   double c[] = {8.0, 2.0, 5.0, 5.0, 8.0, 3.0, 9.0, 7.0, 6.0};
-  /* Matrix of constraints */
+  // Matrix of constraints
   double A[6][9] = {
     {2., 3., 4., 1., 0., 0., 0., 0., 0.},
     {1., 2., 3., 2., 0., 0., 0., 0., 0.},
@@ -92,7 +83,7 @@ test2()
     {0., 0., 0., 0., 0., 0., 2., 1., 2.},
     {0., 0., 0., 0., 0., 0., 3., 4., 1.},
   };
-  /* Vector of rows sense */
+  // Vector of rows sense
   char s[] = {
     MILPP::ROW_SENSE_LOWER,
     MILPP::ROW_SENSE_LOWER,
@@ -101,7 +92,7 @@ test2()
     MILPP::ROW_SENSE_LOWER,
     MILPP::ROW_SENSE_LOWER
   };
-  /* Vector of right-hand side coefficients */
+  // Vector of right-hand side coefficients
   double b[] = {
     7.0,
     6.0,
@@ -111,28 +102,23 @@ test2()
     5.0
   };
 
-  /* Create quasiblock MILP problem by using predefined description.*/
+  // Create quasiblock MILP problem by using predefined description
   QBMILPP problem(c, 9, &A[0][0], 6, s, b);
   problem.set_obj_sense(QBMILPP::OBJ_SENSE_MAXIMISATION);
-  /* Display the problem to verify the data */
-  problem.print();
+  // Display the problem to verify the data
+  problem.dump();
 
-  /* Do finkelstein quasi-block decomposition and obtain decomposition
-     information in form of chain of blocks. */
+  // Do finkelstein quasi-block decomposition and obtain decomposition
+  // information in form of chain of blocks.
   FinkelsteinQBDecomposition decomposer;
   vector<DecompositionBlock*>* blocks = decomposer.decompose_by_blocks(&problem);
 
   OsiLeSolverInterface solver;
   solver.solve(blocks);
-
-  std::cout << "Objective value = "
-            << solver.get_obj_value()
-            << std::endl;
-
+  std::cout << "Objective value = " << solver.get_obj_value() << std::endl;
   std::cout << "Solution: ";
   for (int i = 0; i < problem.get_num_cols(); i++)
-    std::cout << solver.get_col_value(i)
-              << " ";
+    std::cout << solver.get_col_value(i) << " ";
   std::cout << std::endl;
 }
 
@@ -140,6 +126,6 @@ int
 main()
 {
   test1();
-  //test2();
+  test2();
   return 0;
 }

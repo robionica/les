@@ -5,8 +5,14 @@
 
 #include <OsiLeSolverInterface.hpp>
 
-// 8x1 + 2x2 + 5x3 + 5x4 + 8x5 + 3x6 + 9x7 + 7x8 + 6x9 => max
-
+// maximize 8x1 + 2x2 + 5x3 + 5x4 + 8x5 + 3x6 + 9x7 + 7x8 + 6x9
+// subject to
+//   2x1 + 3x2 + 4x3 +  x4                               <= 7
+//    x1 + 2x2 + 3x3 + 2x4                               <= 6
+//                x3 + 2x4 + 3x5 + 4x6 + 2x7             <= 9
+//               2x3 +  x4 +  x5 + 2x6 + 3x7             <= 7
+//                                       2x7 +  x8 + 2x9 <= 3
+//                                       1x7 + 4x8 + 2x9 <= 5
 int
 main()
 {
@@ -36,7 +42,7 @@ main()
   delete decomposer;
 
   OsiLeSolverInterface* solver = new OsiLeSolverInterface();
-  solver->solve(blocks);
+  solver->solve(blocks, true);
   std::cout << "Objective value = "
             << solver->get_obj_value()
             << std::endl;

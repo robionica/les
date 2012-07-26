@@ -19,12 +19,12 @@ LIBS = -L$(COINOR_LIB) -Wl,--rpath -Wl,$(COINOR_LIB) -lCoinUtils -lm -lOsi -lOsi
 	-lCgl -lClp -lOsiClp -llapack -lblas
 
 %.o: %.cpp
-	$(CXX) $(INCLUDES) -lboost_filesystem -lboost_program_options -lboost_graph -fPIC -g -c $< -o $@
+	$(CXX) -Wno-deprecated $(INCLUDES) -lboost_filesystem -lboost_program_options -lboost_graph -fPIC -g -c $< -o $@
 
 all: $(LES_LIBRARY_PATH)
 
 $(LES_LIBRARY_PATH): $(OBJECTS)
-	$(CXX) -shared $(INCLUDES) $(LDFLAGS) -o $(LES_LIBRARY_PATH) $(OBJECTS) $(LIBS)
+	$(CXX) -Wno-deprecated -shared $(INCLUDES) $(LDFLAGS) -o $(LES_LIBRARY_PATH) $(OBJECTS) $(LIBS)
 
 clean:
 	rm $(OBJECTS) $(LES_LIBRARY_PATH)

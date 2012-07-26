@@ -10,7 +10,7 @@
 // <v_i, w_i> worths v_i dollars, and weights w_i kgs, we would like to fill a
 // bag with max-capacity of W kgs with items from G, so that the total value of
 // items in the bag is maximized.
-class FractionalKnapsack : Solver {
+class FractionalKnapsack : MILPSolver {
 public:
   /**
    * @values: array of values
@@ -49,6 +49,11 @@ public:
   inline MILPP* get_problem()
   {
     return _problem;
+  }
+
+  inline double get_obj_value()
+  {
+    return _bag_value;
   }
 
   inline size_t get_num_items()

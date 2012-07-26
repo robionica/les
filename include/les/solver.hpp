@@ -27,7 +27,7 @@ protected:
   void* slave_solver;
 };
 
-class MILPPSolverInterface {
+class MILPSolver : Solver {
 public:
   // Get objective function value.
   double get_obj_value();
