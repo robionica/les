@@ -10,13 +10,12 @@ OBJECTS = decomposition/decomposer.o decomposition/tree_decomposition.o \
 	quasiblock_milp_problem.o packed_vector.o packed_matrix.o utils/math.o \
 	knapsack_problem.o
 
-COINOR_DIR = /opt/SYMPHONY-5.4.0
+COINOR_DIR = /home/d2rk/lib/SYMPHONY
 COINOR_LIB = $(COINOR_DIR)/lib
 COINOR_INCLUDE = -I$(COINOR_DIR)/include
-INCLUDES = -DLES_DEBUG -I../include $(COINOR_INCLUDE)
+INCLUDES = -DLES_DEBUG -I.. $(COINOR_INCLUDE)
 
-LIBS = -L$(COINOR_LIB) -Wl,--rpath -Wl,$(COINOR_LIB) -lCoinUtils -lm -lOsi -lOsiSym -lSym -lOsiClp \
-	-lCgl -lClp -lOsiClp -llapack -lblas
+LIBS = -L$(COINOR_LIB) -Wl,--rpath -Wl,$(COINOR_LIB)
 
 %.o: %.cpp
 	$(CXX) -Wno-deprecated $(INCLUDES) -lboost_filesystem -lboost_program_options -lboost_graph -fPIC -g -c $< -o $@
