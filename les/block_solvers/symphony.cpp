@@ -25,7 +25,7 @@
 #include <les/packed_vector.hpp>
 #include <les/utils/math.hpp>
 
-#include <OsiLeSolverInterface.hpp>
+#include <les/slavers/symphony.hpp>
 
 /* Include Coin-required API */
 #include <coin/CoinPackedVector.hpp>

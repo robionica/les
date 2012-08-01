@@ -16,7 +16,7 @@
 @SET_MAKE@
 
 # Copyright (c) 2012 Alexander Sviridenko
-
+SYMPHONY = @SYMPHONY_PATH@
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
