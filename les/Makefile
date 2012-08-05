@@ -1,6 +1,6 @@
 # Copyright (c) 2012 Alexander Sviridenko
 
-include ../tmp.mk
+include ../config.mk
 
 OBJECTS = decomposition/decomposer.o decomposition/tree_decomposition.o \
 	decomposition/finkelstein.o graph.o interaction_graph.o milp_problem.o \

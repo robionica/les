@@ -25,10 +25,10 @@
 #include <les/packed_vector.hpp>
 #include <les/utils/math.hpp>
 
-#include <les/block_solvers/symphony.hpp>
-
 /* Include Coin-required API */
 #include <coin/CoinPackedVector.hpp>
+
+#include <les/bsolvers/symphony.hpp>
 
 using namespace std;
 
