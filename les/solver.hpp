@@ -1,10 +1,5 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-/**
- * @file solver.hpp
- * @brief Generic solver interface.
- */
-
 #ifndef __LES_SOLVER_HPP
 #define __LES_SOLVER_HPP
 
@@ -18,15 +13,6 @@ public:
   void load_problem(Problem* problem);
 };
 
-class MasterSolver : Solver {
-public:
-  // Slave solver
-  void* get_slave_solver() { return slave_solver; }
-
-protected:
-  void* slave_solver;
-};
-
 class MILPSolver : Solver {
 public:
   // Get objective function value.
@@ -36,4 +22,4 @@ public:
   const double* get_col_solution();
 };
 
-#endif /* __LES_SOLVER_HPP */
+#endif // __LES_SOLVER_HPP

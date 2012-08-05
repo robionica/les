@@ -1,10 +1,10 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-#ifndef __OSI_LESOLVER_INTERFACE_HPP
-#define __OSI_LESOLVER_INTERFACE_HPP
+#ifndef __LES_BLOCK_SOLVERS_SYMPHONY_HPP
+#define __LES_BLOCK_SOLVERS_SYMPHONY_HPP
 
 // Inlcude LES API
-#include <les/solver.hpp>
+#include "les/solver.hpp"
 // Include native symphony API
 #include <coin/OsiSymSolverInterface.hpp>
 

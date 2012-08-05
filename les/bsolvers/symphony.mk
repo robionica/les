@@ -1,26 +1,20 @@
 # Copyright (c) 2012 Alexander Sviridenko
 
+include ../../tmp.mk
+
 # Target library directory and name
-LES_LIBRARY_DIR = ../../lib
-OSI_LESOLVER_LIBRARY_NAME = libosilesolver.so
-LES_LIBRARY_PATH = $(LES_LIBRARY_DIR)/$(OSI_LESOLVER_LIBRARY_NAME)
+BSOLVER_LIB_FILE_NAME = libbsolver_symphony.so
+BSOLVER_LIB_FILE_PATH = $(LES_LIB_DIR_PATH)/$(BSOLVER_LIB_FILE_NAME)
 
 OBJECTS = symphony.o
 
-COINOR_SYMPHONY_DIR = /home/d2rk/lib/SYMPHONY
-COINOR_SYMPHONY_LIB = $(COINOR_SYMPHONY_DIR)/lib
-COINOR_SYMPHONY_INCLUDE = -I$(COINOR_SYMPHONY_DIR)/include
-INCLUDES = -DLES_DEBUG -I../../ $(COINOR_SYMPHONY_INCLUDE)
-
-LIBS = -L$(COINOR_SYMPHONY_LIB) -L$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(COINOR_SYMPHONY_LIB) -lm -lles
-
 %.o: %.cpp
-	$(CXX) $(INCLUDES) -lboost_filesystem -lboost_program_options -lboost_graph -fPIC -g -c $< -o $@
+	$(CXX) $(LES_INCLUDE_FLAGS) -lboost_filesystem -lboost_program_options -lboost_graph -fPIC -g -c $< -o $@
 
-all: $(LES_LIBRARY_PATH)
+all: $(BSOLVER_LIB_FILE_PATH)
 
-$(LES_LIBRARY_PATH): $(OBJECTS)
-	$(CXX) -shared $(INCLUDES) $(LDFLAGS) -o $(LES_LIBRARY_PATH) $(OBJECTS) $(LIBS)
+$(BSOLVER_LIB_FILE_PATH): $(OBJECTS)
+	$(CXX) -shared $(LES_INCLUDE_FLAGS) $(LDFLAGS) -o $(LES_LIB_FILE_PATH) $(OBJECTS) $(LES_LIB_FLAGS)
 
 clean:
-	rm $(OBJECTS) $(LES_LIBRARY_PATH)
+	rm $(OBJECTS) $(BSOLVER_LIB_FILE_PATH)
