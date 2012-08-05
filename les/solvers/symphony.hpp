@@ -1,16 +1,15 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-#ifndef __LES_BLOCK_SOLVERS_SYMPHONY_HPP
-#define __LES_BLOCK_SOLVERS_SYMPHONY_HPP
+#ifndef __LES_BSOLVERS_SYMPHONY_HPP
+#define __LES_BSOLVERS_SYMPHONY_HPP
 
-// Inlcude LES API
-#include "les/solver.hpp"
+#include "les/bsolvers/bsolver.hpp"
 // Include native symphony API
 #include <coin/OsiSymSolverInterface.hpp>
 
 using namespace std;
 
-class OsiLeSolverInterface : public MILPSolver {
+class Symphony : public BSolver {
 public:
   // Empty constructor
   OsiLeSolverInterface() : _obj_value(0.) {}
@@ -40,4 +39,4 @@ private:
   vector<double> solution_;
 };
 
-#endif // __OSI_LESOLVER_INTERFACE_HPP
+#endif // __LES_BSOLVERS_SYMPHONY_HPP

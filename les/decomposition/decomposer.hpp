@@ -1,18 +1,16 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// Copyright (c) 2012 Alexander Sviridenko
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+// implied.  See the License for the specific language governing
+// permissions and limitations under the License.
 
 #ifndef __LES_DECOMPOSITION_DECOMPOSER_HPP
 #define __LES_DECOMPOSITION_DECOMPOSER_HPP
@@ -50,13 +48,10 @@ private:
 };
 
 
-/**
- * Decomposition block. Blocks can be combined in sequence, tree, etc.
- */
+// Decomposition block. Blocks can be combined in sequence, tree, etc.
 class DecompositionBlock {
 public:
-  DecompositionBlock(Problem* problem=NULL)
-  {
+  DecompositionBlock(Problem* problem=NULL) {
     problem_ = problem;
     left_part_ = new PackedMatrix();
     middle_part_ = new PackedMatrix();

@@ -2,7 +2,7 @@
 
 #include <les/quasiblock_milp_problem.hpp>
 #include <les/decomposition/finkelstein.hpp>
-
+#include <les/>
 #include <OsiLeSolverInterface.hpp>
 
 // maximize 8x1 + 2x2 + 5x3 + 5x4 + 8x5 + 3x6 + 9x7 + 7x8 + 6x9

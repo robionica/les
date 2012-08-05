@@ -16,10 +16,16 @@ public:
 class MILPSolver : Solver {
 public:
   // Get objective function value.
-  double get_obj_value();
+  inline double get_obj_value() {
+    return _obj_value;
+  }
 
   // Columns
   const double* get_col_solution();
+
+private:
+  double _obj_value;
+  vector<double> solution_;
 };
 
 #endif // __LES_SOLVER_HPP
