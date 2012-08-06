@@ -12,27 +12,20 @@
 // implied.  See the License for the specific language governing
 // permissions and limitations under the License.
 
-/**
- * @file quasiblock_milp_problem.hpp
- * @brief Quasi-block MILP problem
-
- The following code snippet shows how to use QBMILPPGenerator to
- generate quasi-block MILP problems.
-
- \code
- QBMILPPGenerator generator(9, 4, 3, 2);
- QBMILPP* problem = generator.generate();
- problem->print();
- \endcode
-
- */
+// Quasi-block MILP problem
+//
+// The following code snippet shows how to use QBMILPPGenerator to
+// generate quasi-block MILP problems.
+//
+//   QBMILPPGenerator generator(9, 4, 3, 2);
+//   QBMILPP* problem = generator.generate();
+//   problem->print();
 
 #ifndef __LES_QBMILPP_HPP
 #define __LES_QBMILPP_HPP
 
 #include <les/milp_problem.hpp>
 #include <les/packed_vector.hpp>
-#include <les/decomposition.hpp>
 
 // QBMILP stands for Quasi-Block MILP problem.
 class QBMILPP : public MILPP
@@ -45,6 +38,8 @@ public:
   QBMILPP(double* c, int nr_cols, double* A, int nr_rows, char* s, double* b) :
     MILPP(c, nr_cols, A, nr_rows, s, b) {}
 };
+
+#if 0
 
 typedef struct {
   int num_cols;
@@ -95,5 +90,6 @@ private:
   // Target quasi-block MILP problem.
   QBMILPP problem;
 };
+#endif
 
 #endif  // __LES_QBMILPP_HXX

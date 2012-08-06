@@ -12,11 +12,11 @@
 // implied.  See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include <les/decomposition.hpp>
-
 #include <boost/graph/copy.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <boost/graph/properties.hpp>
+
+#include "les/decomposers/tree_decomposition.hpp"
 
 /* See <http://www.treewidth.com/> */
 

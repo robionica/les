@@ -21,35 +21,27 @@
 // decomposer.decompose(problem);
 // vector<QBMILPP*> subproblems = decomposer.get_subproblems();
 
-/**
- * @file finkelstein.hpp
- * @brief Finkelstein algorithm.
- */
+#ifndef __LES_DECOMPOSERS_FINKELSTEIN_HPP
+#define __LES_DECOMPOSERS_FINKELSTEIN_HPP
 
-#ifndef __LES_DECOMPOSITION_FINKELSTEIN_HPP
-#define __LES_DECOMPOSITION_FINKELSTEIN_HPP
-
+#include <les/decomposers/decomposer.hpp>
 #include <les/quasiblock_milp_problem.hpp>
-#include <les/decomposition.hpp>
 #include <les/interaction_graph.hpp>
 
-class FinkelsteinQBDecomposition {
+class FinkelsteinQBDecomposition : public Decomposer {
 public:
   // Empty constructor
-  FinkelsteinQBDecomposition()
-  {
+  FinkelsteinQBDecomposition() {
   }
 
   vector<QBMILPP*> get_subproblems();
 
   void decompose(MILPP* problem = NULL,
                  vector<int>* initial_cols = NULL,
-                 vector<set<int> >* U = NULL, vector<set<int> >* S = NULL,
-                 vector< set<int> >* M = NULL,
                  int max_separator_size = 0,
                  bool merge_empty_blocks = true);
 
-  // Decompose a problem by using finkelstein algorithm on blocks and return a
+  // Decompose a problem on blocks by using Finkelstein algorithm and return a
   // chaine of DecompositionBlock. See also decompose().
   vector<DecompositionBlock*>* decompose_by_blocks(MILPP* problem);
 
@@ -58,8 +50,9 @@ public:
 private:
   MILPP* _problem;
   vector< set<int> > _U;
-  vector< set<int> > _S;
+  vector< set<int> >
+ _S;
   vector< set<int> > _M;
 };
 
-#endif  // __LES_DECOMPOSITION_FINKELSTEIN_HPP
+#endif  // __LES_DECOMPOSERS_FINKELSTEIN_HPP

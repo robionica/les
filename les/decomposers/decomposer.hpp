@@ -90,7 +90,7 @@ public:
   block_solution_t* find_solution_by_right_mask(int mask)
   {
     map<int, block_solution_t*>::iterator it;
-    it = right_mask_to_solution_mapping_.find(mask); 
+    it = right_mask_to_solution_mapping_.find(mask);
     if (it != right_mask_to_solution_mapping_.end())
       return it->second;
     return NULL;
@@ -148,15 +148,12 @@ private:
   map<int, block_solution_t> solutions;
 };
 
-vector<Block*>*
-block_decomposition_by_articulation_points(InteractionGraph* g);
-
-void blocktree_decomposition(MILPP* problem);
-
 class Decomposer {
 public:
   Decomposer() {
   }
+
+  void decompose(Problem& problem);
 };
 
-#endif /* __LES_DECOMPOSITION_DECOMPOSER_HPP */
+#endif // __LES_DECOMPOSITION_DECOMPOSER_HPP

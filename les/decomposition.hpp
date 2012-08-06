@@ -20,8 +20,8 @@
 #ifndef __LES_DECOMPOSITION_HPP
 #define __LES_DECOMPOSITION_HPP
 
-#include <les/decomposition/decomposer.hpp>
+#include <les/decomposers/decomposer.hpp>
 //#include <les/decomposition/finkelstein.hpp>
-#include <les/decomposition/tree_decomposition.hpp>
+#include <les/decomposers/tree_decomposition.hpp>
 
 #endif /* __LES_DECOMPOSITION_HPP */

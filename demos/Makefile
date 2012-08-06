@@ -1,33 +1,29 @@
-#
 # Copyright (c) 2012 Alexander Sviridenko
-#
 
-ROOT = ..
-INCLUDES = -I$(ROOT)/include -I/opt/SYMPHONY-5.4.0/include -I./include
-LES_LIBRARY_DIR = ../lib/
+include ../config.mk
 
-SYMPHONY_HOME_DIR = /home/d2rk/lib/SYMPHONY
-SIMPHONY_INC = -I$(ROOT)/include -I/opt/SYMPHONY-5.4.0/include -I../include
-SYMPHONY_LIB = -L$(LES_LIBRARY_DIR) -lz -lbz2 -losilesolver -Wl,--rpath -Wl,$(LES_LIBRARY_DIR) -Wl,--rpath -Wl,$(SYMPHONY_HOME_DIR)/lib
-LIB = -L$(LES_LIBRARY_DIR) $(SYMPHONY_LIB) -lles -Wl,--rpath -Wl,$(LES_LIBRARY_DIR)
+INCLUDE_FLAGS = -I. $(LES_INCLUDE_FLAGS)
+LIB_FLAGS = $(LES_LIB_FLAGS)
 
-DEMOS = demo_finkelstein_decomposition demo_interaction_graph	\
-	demo_tree_decomposition demo_celar_reader
+DEMOS = demo_finkelstein_decomposition \
+	demo_interaction_graph \
+	demo_tree_decomposition \
+	demo_celar_reader
 
 demo_finkelstein_decomposition:
-	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
 demo_knapsack_problem:
-	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
 demo_interaction_graph:
-	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
 demo_tree_decomposition:
-	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
 demo_celar_reader:
-	g++ $@.cpp -o $@ $(INCLUDES) $(LIB)
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
 # SYMPHONY
 

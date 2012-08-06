@@ -33,45 +33,11 @@ MILPP::MILPP(int nr_cols, int nr_rows)
   initialize(nr_cols, nr_rows);
 }
 
-void
-MILPP::set_cons_matrix(double* A, int nr_rows, int nr_cols)
-{
-  initialize(nr_cols, nr_rows);
-
-  /* Fill the constraint matrix */
-  for (size_t i = 0; i < get_num_rows(); i++)
-    for (size_t j = 0; j < get_num_cols(); j++)
-      {
-        double v = (A + i * get_num_cols())[j];
-        if (!v) continue;
-        cons_matrix_.set_coefficient(i, j, v);
-        col_to_row_mapping_[j]->insert(i);
-        row_to_col_mapping_[i]->insert(j);
-      }
-
-  set_rows_lower_bounds((double*)calloc(get_num_cols(), sizeof(double)));
-}
-
 MILPP::MILPP(double* c, int nr_cols, double* A, int nr_rows,
              char* s, double* b)
 {
   set_initial_data();
-  initialize(nr_cols, nr_rows);
-
-  // Set vector of coefficients for objective function
-  set_obj_coefs(c);
-  set_rows_lower_bounds((double*)calloc(get_num_cols(), sizeof(double)));
-  set_rows_upper_bounds(b);
-
-  set_rows_senses(s);
-
-  set_cons_matrix(A, nr_rows, nr_cols);
-}
-
-void
-MILPP::set_initial_data()
-{
-  obj_sense_ = 1;
+  initialize(c, nr_cols, A, nr_rows, s, b);
 }
 
 void
@@ -79,6 +45,44 @@ MILPP::initialize(int nr_cols, int nr_rows)
 {
   set_num_cols(nr_cols);
   set_num_rows(nr_rows);
+}
+
+void
+MILPP::initialize(double* c, int nr_cols, double* A, int nr_rows,
+                  char* s, double* b)
+{
+  initialize(nr_cols, nr_rows);
+  // Set vector of coefficients for objective function
+  set_obj_coefs(c);
+  set_rows_lower_bounds((double*)calloc(get_num_cols(), sizeof(double)));
+  set_rows_upper_bounds(b);
+  set_rows_senses(s);
+  // Set constraint matrix
+  set_cons_matrix(A, nr_rows, nr_cols);
+}
+
+void
+MILPP::set_cons_matrix(double* A, int nr_rows, int nr_cols)
+{
+  initialize(nr_cols, nr_rows);
+
+  /* Fill the constraint matrix */
+  for (size_t i = 0; i < get_num_rows(); i++) {
+    for (size_t j = 0; j < get_num_cols(); j++) {
+      double v = (A + i * get_num_cols())[j];
+      if (!v) continue;
+      cons_matrix_.set_coefficient(i, j, v);
+      col_to_row_mapping_[j]->insert(i);
+      row_to_col_mapping_[i]->insert(j);
+    }
+  }
+  set_rows_lower_bounds((double*)calloc(get_num_cols(), sizeof(double)));
+}
+
+void
+MILPP::set_initial_data()
+{
+  obj_sense_ = 1;
 }
 
 void

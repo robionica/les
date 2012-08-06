@@ -20,9 +20,8 @@
 
 using namespace std;
 
-/**
- * Setup generator. Compute required values.
- */
+#if 0
+// Setup generator. Compute required values.
 void
 QBMILPPGenerator::setup(int block_width, int block_height, int bridge_size,
                         bool fixed_block_width, bool fixed_block_height,
@@ -197,3 +196,4 @@ QBMILPPGenerator::generate_constraint(Block* block,
 
   //problem.assign_row(row_index, row);
 }
+#endif
