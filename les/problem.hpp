@@ -1,11 +1,16 @@
-/*
- * Copyright (c) 2012 Alexander Sviridenko
- */
-#ifndef __PROBLEM_HXX
-#define __PROBLEM_HXX
+// Copyright (c) 2012 Alexander Sviridenko
+//
+// The basic problem definition.
+
+#ifndef __LES_PROBLEM_HXX
+#define __LES_PROBLEM_HXX
+
+#include "les/config.hpp"
 
 class Problem {
-
+public:
+  Problem();
+  ~Problem();
 };
 
-#endif /* __PROBLEM_HXX */
+#endif // __LES_PROBLEM_HXX

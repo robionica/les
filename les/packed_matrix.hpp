@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 
+#include "les/config.hpp"
 #include "les/packed_vector.hpp"
 
 // TODO: the current implementation is completely depends on COIN package. This

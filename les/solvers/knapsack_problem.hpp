@@ -1,7 +1,9 @@
 // Copyright (c) 2012 Alexander Sviridenko
+//
+// Knapsack problem.
 
-#ifndef __LES_KNAPSACK_PROBLEM_HPP
-#define __LES_KNAPSACK_PROBLEM_HPP
+#ifndef __LES_SOLVERS_KNAPSACK_PROBLEM_HPP
+#define __LES_SOLVERS_KNAPSACK_PROBLEM_HPP
 
 #include <les/solver.hpp>
 #include <les/milp_problem.hpp>
@@ -12,29 +14,24 @@
 // items in the bag is maximized.
 class FractionalKnapsack : MILPSolver {
 public:
-  /**
-   * @values: array of values
-   * @weights: array of weights
-   * @n: number of items in the bag.
-   * @max_weight: maximum weight that we can carry in the bag
-   */
+  // Constructor, where values is array of values, weights is array of weights,
+  // n is number of items in the bag, max_weight is maximum weight that we can
+  // carry in the bag.
   FractionalKnapsack(int* values, int* weights, size_t n, int max_weight) {
     _problem = new MILPP();
     // Convert vector of ints to doubles
     double* tmp_values = (double*)malloc(n * sizeof(double));
-    for (int i = 0; i < n; i++)
-      {
-        tmp_values[i] = (double)values[i];
-      }
+    for (int i = 0; i < n; i++) {
+      tmp_values[i] = (double)values[i];
+    }
     _problem->set_obj_coefs(tmp_values, n);
     free(tmp_values);
     _problem->set_obj_sense(MILPP::OBJ_SENSE_MAXIMISATION);
     // Convert vector of ints to doubles
     double* tmp_weights = (double*)malloc(n * sizeof(double));
-    for (int i = 0; i < n; i++)
-      {
-        tmp_weights[i] = (double)weights[i];
-      }
+    for (int i = 0; i < n; i++) {
+      tmp_weights[i] = (double)weights[i];
+    }
     free(tmp_weights);
     _problem->set_cons_matrix(tmp_weights, 1, n);
     _problem->set_row_upper_bound(0, (double)max_weight);
@@ -46,33 +43,27 @@ public:
 
   void solve();
 
-  inline MILPP* get_problem()
-  {
+  inline MILPP* get_problem() {
     return _problem;
   }
 
-  inline double get_obj_value()
-  {
+  inline double get_obj_value() {
     return _bag_value;
   }
 
-  inline size_t get_num_items()
-  {
+  inline size_t get_num_items() {
     return _problem->get_num_cols();
   }
 
-  inline double get_bag_value()
-  {
+  inline double get_bag_value() {
     return _bag_value;
   }
 
-  inline double get_bag_weight()
-  {
+  inline double get_bag_weight() {
     return _bag_weight;
   }
 
-  inline map<int, double>& get_bag_items()
-  {
+  inline map<int, double>& get_bag_items() {
     return _bag_items;
   }
 
@@ -88,4 +79,4 @@ private:
 };
 
 
-#endif // __LES_KNAPSACK_PROBLEM_H
+#endif // __LES_SOLVERS_KNAPSACK_PROBLEM_HPP

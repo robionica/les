@@ -1,5 +1,17 @@
 // Copyright (c) 2012 Alexander Sviridenko
 //
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+// implied.  See the License for the specific language governing
+// permissions and limitations under the License.
+//
 // Mixed Integer Linear Programming (MILP) problem.
 
 #ifndef __LES_MILPP_H
@@ -15,7 +27,7 @@
 
 using namespace std;
 
-// MILPP stands fir Mixed-Integer Linear Programming Problem.
+// This class represents Mixed-Integer Linear Programming Problem (MILPP).
 class MILPP : public Problem
 {
 public:
@@ -92,6 +104,7 @@ public:
   }
 
   inline double get_col_upper_bound(int i) {
+    assert(i < get_num_cols());
     return cols_upper_bounds_[i];
   }
 
@@ -101,7 +114,6 @@ public:
 
   inline void set_num_rows(size_t n) {
     assert(n > 0);
-
     // Do not restructure problem if number of rows wasn't changed
     if (get_num_rows() == n) {
       return;
@@ -121,9 +133,9 @@ public:
 
     // Initialize rows related arrays
     for (int i = 0; i < n; i++) {
-      set_row_lower_bound(i, 0.);
+      set_row_lower_bound(i, 0.0);
       // The actual upper bound values will be assigned later.
-      set_row_upper_bound(i, 0.);
+      set_row_upper_bound(i, 0.0);
       // Set default row sense
       set_row_sense(i, ROW_SENSE_LOWER);
     }
@@ -140,7 +152,7 @@ public:
   }
 
   inline set<int>* get_rows_related_to_cols(set<int>* s) {
-    set<int>* u = new set<int>(); /* new set of rows */
+    set<int>* u = new set<int>(); // new set of rows
     for (set<int>::iterator it = s->begin(); it != s->end(); it++) {
       const set<int>* rows = get_rows_related_to_col(*it);
       u->insert(rows->begin(), rows->end());
@@ -226,8 +238,6 @@ public:
     return rows_upper_bounds_[i];
   }
 
-  // Objective function
-
   // Get the objective function sense (OBJ_SENSE_MINIMISATION for minimisation
   // (default), OBJ_SENSE_MAXIMISATION for maximisation).
   inline const char* obj_sense_to_string() {
@@ -279,15 +289,12 @@ private:
   // object when the object is created using the default constructor.
   void set_initial_data();
 
-  // Objective
-  PackedVector _obj_coefs; // Vector of objective coefficients.
+  PackedVector _obj_coefs; // vector of objective coefficients.
   char obj_sense_;
 
-  // Columns
   vector<double> cols_lower_bounds_;
   vector<double> cols_upper_bounds_;
 
-  // Rows
   vector<double> rows_lower_bounds_;
   vector<double> rows_upper_bounds_;
   // Vector where each element represents sense of corresponding row.

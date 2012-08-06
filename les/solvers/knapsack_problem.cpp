@@ -11,13 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 // implied.  See the License for the specific language governing
 // permissions and limitations under the License.
-
+//
 // Implements knapsak_problem.h interface.
 
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <les/knapsack_problem.hpp>
+#include "les/knapsack_problem.hpp"
 
 struct item {
   double m;
@@ -25,14 +25,12 @@ struct item {
 };
 
 // Compare two items a and b from the bag. The items are comparing by their
-static int
-compare_items(const void* a, const void* b)
+static int compare_items(const void* a, const void* b)
 {
   return (int)(((struct item*) a)->m - ((struct item*) b)->m);
 }
 
-void
-FractionalKnapsack::solve()
+void FractionalKnapsack::solve()
 {
   double value;
   int i;
@@ -48,31 +46,26 @@ FractionalKnapsack::solve()
 
   // Initialize the bag and items inside of it
   items = (struct item*)malloc(get_num_items() * sizeof(struct item));
-  for (i = 0; i < get_num_items(); i++)
-    {
-      items[i].i = i;
-      items[i].m = _problem->get_obj_coef(i) / weights->get_element(i);
-    }
+  for (i = 0; i < get_num_items(); i++) {
+    items[i].i = i;
+    items[i].m = _problem->get_obj_coef(i) / weights->get_element(i);
+  }
   // Sort the items by thier
   qsort(items, get_num_items(), sizeof(struct item), compare_items);
 
-  while ((_bag_weight < max_weight) && (j >= 0))
-    {
-      i = items[--j].i;
-      if ((_bag_weight + weights->get_element(i)) <= max_weight)
-        {
-          _bag_items[i] = 1.;
-          _bag_weight += weights->get_element(i);
-          _bag_value += (double)_problem->get_obj_coef(i);
-        }
-      else
-        {
-          _bag_items[i] = (double)(max_weight - _bag_weight)
-            / weights->get_element(i);
-          _bag_weight = (int)(weights->get_element(i) * _bag_items[i]);
-          _bag_value += (double)_problem->get_obj_coef(i) * _bag_items[i];
-          break;
-        }
+  while ((_bag_weight < max_weight) && (j >= 0)) {
+    i = items[--j].i;
+    if ((_bag_weight + weights->get_element(i)) <= max_weight) {
+      _bag_items[i] = 1.;
+      _bag_weight += weights->get_element(i);
+      _bag_value += (double)_problem->get_obj_coef(i);
     }
+    else {
+      _bag_items[i] = (double)(max_weight - _bag_weight) / weights->get_element(i);
+      _bag_weight = (int)(weights->get_element(i) * _bag_items[i]);
+      _bag_value += (double)_problem->get_obj_coef(i) * _bag_items[i];
+      break;
+    }
+  }
   free(items);
 }
