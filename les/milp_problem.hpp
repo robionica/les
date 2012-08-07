@@ -125,9 +125,9 @@ public:
     }
 
     // Allocate rows related variables
-    rows_lower_bounds_.resize(n);
-    rows_upper_bounds_.resize(n);
-    rows_senses_.resize(n);
+    _rows_lower_bounds.resize(n);
+    _rows_upper_bounds.resize(n);
+    _rows_senses.resize(n);
 
     cons_matrix_.resize(n, get_num_cols());
 
@@ -187,12 +187,12 @@ public:
 
   inline double get_row_lower_bound(int i) {
     assert(i < get_num_rows());
-    return rows_lower_bounds_[i];
+    return _rows_lower_bounds.get_element_by_index(i);
   }
 
   inline void set_row_lower_bound(int i, double v) {
     assert(i < get_num_rows());
-    rows_lower_bounds_[i] = v;
+    _rows_lower_bounds.set_element_by_index(i, v);
   }
 
   // Set lower bound for each row
@@ -204,12 +204,12 @@ public:
 
   inline double get_row_upper_bound(int i) {
     assert(i < get_num_rows());
-    return rows_upper_bounds_[i];
+    return _rows_upper_bounds.get_element_by_index(i);
   }
 
   inline void set_row_upper_bound(int i, double v) {
     assert(i < get_num_rows());
-    rows_upper_bounds_[i] = v;
+    _rows_upper_bounds.set_element_by_index(i, v);
   }
 
   inline void set_rows_upper_bounds(double* b) {
@@ -220,7 +220,7 @@ public:
 
   inline void set_row_sense(int i, char s) {
     assert(i < get_num_rows());
-    rows_senses_[i] = s;
+    _rows_senses.set_element_by_index(i, s);
   }
 
   inline void set_rows_senses(char* s) {
@@ -230,12 +230,12 @@ public:
   }
   inline char get_row_sense(int i) {
     assert(i < get_num_rows());
-    return rows_senses_[i];
+    return _rows_senses.get_element_by_index(i);
   }
 
   inline double get_row_rhs(int i) {
     assert(i < get_num_rows());
-    return rows_upper_bounds_[i];
+    return _rows_upper_bounds.get_element_by_index(i);
   }
 
   // Get the objective function sense (OBJ_SENSE_MINIMISATION for minimisation
@@ -295,10 +295,10 @@ private:
   vector<double> cols_lower_bounds_;
   vector<double> cols_upper_bounds_;
 
-  vector<double> rows_lower_bounds_;
-  vector<double> rows_upper_bounds_;
+  PackedVector _rows_lower_bounds;
+  PackedVector _rows_upper_bounds;
   // Vector where each element represents sense of corresponding row.
-  vector<char> rows_senses_;
+  PackedVector _rows_senses;
 
   vector<set<int>*> col_to_row_mapping_;
   vector<set<int>*> row_to_col_mapping_;

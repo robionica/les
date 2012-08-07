@@ -109,7 +109,7 @@ void MILPP::dump()
     printf("%.1fx%d", get_obj_coef(i), i);
     break;
   }
-  for (; i < get_num_cols(); i++) {
+  for (i = i + 1; i < get_num_cols(); i++) {
     if (get_obj_coef(i) == 0.0) {
       continue;
     }

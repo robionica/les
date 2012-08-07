@@ -9,8 +9,11 @@
 
 class Problem {
 public:
-  Problem();
-  ~Problem();
+  Problem() {
+  }
+
+  ~Problem() {
+  }
 };
 
 #endif // __LES_PROBLEM_HXX

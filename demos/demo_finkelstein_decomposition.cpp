@@ -10,7 +10,10 @@
 
 int main()
 {
+  // Problem
   DemoQBMILPProblem1 problem = DemoQBMILPProblem1();
+  cout << "Initial problem:" << endl;
+  problem.dump();
 
   // Do finkelstein quasi-block decomposition and obtain decomposition
   // information
@@ -21,6 +24,7 @@ int main()
 
   vector<QBMILPP*> subproblems = decomposer.get_subproblems();
   BOOST_FOREACH(QBMILPP* subproblem, subproblems) {
+    cout << "Subproblem:" << endl;
     subproblem->dump();
   }
 

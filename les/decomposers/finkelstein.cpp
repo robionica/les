@@ -26,11 +26,11 @@ void FinkelsteinQBDecomposition::dump() {
   }
 
   for (size_t i = 0; i < _S.size(); i++) {
-      std::cout << " S" << i << " : {";
-      BOOST_FOREACH(int col, _S[i]) {
-        std::cout << col << ", ";
-      }
-      std::cout << "}" << std::endl;
+    std::cout << " S" << i << " : {";
+    BOOST_FOREACH(int col, _S[i]) {
+      std::cout << col << ", ";
+    }
+    std::cout << "}" << std::endl;
   }
 
   for (size_t i = 0; i < _M.size(); i++) {
@@ -42,62 +42,53 @@ void FinkelsteinQBDecomposition::dump() {
   }
 }
 
-vector<QBMILPP*>
-FinkelsteinQBDecomposition::get_subproblems()
+vector<QBMILPP*> FinkelsteinQBDecomposition::get_subproblems()
 {
   vector<QBMILPP*> subproblems;
 
   // Decompose a problem by using finkelstein algorithm
   decompose(_problem);
 
-  for (size_t i = 0; i < _U.size(); i++)
-    {
-      int nr_cols = ((i > 0) ? _S[i - 1].size() : 0) + _M[i].size()
-        + (((_U.size() - i) > 1) ? _S[i].size() : 0);
-      int nr_rows = _U[i].size();
-      QBMILPP* subproblem = new QBMILPP(nr_cols , nr_rows);
-      PackedMatrix* cons = subproblem->get_cons_matrix();
+  for (size_t i = 0; i < _U.size(); i++) {
+    int nr_cols = ((i > 0) ? _S[i - 1].size() : 0) + _M[i].size()
+      + (((_U.size() - i) > 1) ? _S[i].size() : 0);
+    int nr_rows = _U[i].size();
+    QBMILPP* subproblem = new QBMILPP(nr_cols , nr_rows);
+    PackedMatrix* cons = subproblem->get_cons_matrix();
 
-      // Define objective function for the subproblem.
-      // XXX: Take the index of the first variable from M.
-      int first_v = (!i) ? *(_M[i].begin()) : *(_S[i-1].begin());
-      for (int j = first_v; j < (first_v + nr_cols); j++)
-        {
-          subproblem->set_obj_coef(j, _problem->get_obj_coef(j));
-        }
-
-      // For each constraint...
-      for (set<int>::iterator u = _U[i].begin(); u != _U[i].end(); u++)
-        {
-          PackedVector* row = _problem->get_row(*u);
-
-          if (i > 0)
-            {
-              for (set<int>::iterator s = _S[i - 1].begin();
-                   s != _S[i - 1].end(); s++)
-                {
-                  if (row->get_element_by_index(*s) != 0.0)
-                    cons->set_coefficient(*u, *s, row->get_element_by_index(*s));
-                }
-            }
-
-          for (set<int>::iterator m = _M[i].begin(); m != _M[i].end(); m++)
-            {
-              if (row->get_element_by_index(*m) != 0.0)
-                cons->set_coefficient(*u, *m, row->get_element_by_index(*m));
-            }
-          if ((_U.size() - i) > 1)
-            {
-              for (set<int>::iterator s = _S[i].begin();
-                   s != _S[i].end(); s++)
-                {
-                  if (row->get_element_by_index(*s) != 0.0)
-                    cons->set_coefficient(*u, *s, row->get_element_by_index(*s));
-                }
-            }
-        }
-      subproblems.push_back(subproblem);
+    // Define objective function for the subproblem.
+    // XXX: Take the index of the first variable from M.
+    int first_v = (!i) ? *(_M[i].begin()) : *(_S[i-1].begin());
+    for (int j = first_v; j < (first_v + nr_cols); j++) {
+      subproblem->set_obj_coef(j, _problem->get_obj_coef(j));
     }
+
+    // For each constraint...
+    BOOST_FOREACH(int u, _U[i]) {
+      PackedVector* row = _problem->get_row(u);
+      if (i > 0) {
+	BOOST_FOREACH(int s, _S[i - 1]) {
+	  if (row->get_element_by_index(s) != 0.0) {
+	    cons->set_coefficient(u, s, row->get_element_by_index(s));
+	  }
+	}
+      }
+      BOOST_FOREACH(int m, _M[i]) {
+	if (row->get_element_by_index(m) != 0.0) {
+	  cons->set_coefficient(u, m, row->get_element_by_index(m));
+	}
+      }
+      if ((_U.size() - i) > 1) {
+	BOOST_FOREACH(int s, _S[i]) {
+	  if (row->get_element_by_index(s) != 0.0) {
+	    cons->set_coefficient(u, s, row->get_element_by_index(s));
+	  }
+	}
+      }
+      subproblem->set_row_upper_bound(u, _problem->get_row_upper_bound(u));
+    }
+    subproblems.push_back(subproblem);
+  }
 
   return subproblems;
 }
