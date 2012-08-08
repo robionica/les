@@ -1,3 +1,5 @@
+// Copyright (c) 2012 Alexander Sviridenko
+
 #include <iostream>
 #include <coin/CoinPackedVector.hpp>
 #include <coin/CoinPackedMatrix.hpp>

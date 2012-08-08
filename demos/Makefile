@@ -27,6 +27,9 @@ demo_celar_reader:
 
 # SYMPHONY
 
+demo_symphony:
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS) -lsolver_symphony
+
 demo_threads:
 	g++ $@.cpp -o $@ $(SYMPHONY_INC) $(LIB) -lboost_thread -lboost_system
 
@@ -37,7 +40,7 @@ demo_relaxation:
 	g++ $(SYMPHONY_INC) $(LIB) $@.cpp -o $@
 
 simple_milp_problem:
-	g++ $(SYMPHONY_INC) $(LIB) $@.cpp -o $@
+	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS) -lsolver_symphony
 
 clean:
 	rm -f $(DEMOS)
