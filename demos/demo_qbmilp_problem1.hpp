@@ -49,6 +49,7 @@ public:
     };
     // Initialize problem
     initialize(c, 9, &A[0][0], 6, s, b);
+    set_obj_sense(QBMILPP::OBJ_SENSE_MAXIMISATION);
   }
 
   ~DemoQBMILPProblem1() {

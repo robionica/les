@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 
-/* Include required BOOST API */
+// Include required BOOST API
 #include <boost/config.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
@@ -47,7 +47,7 @@ class Graph : public boost::graph_t {
 public:
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   typedef boost::graph_traits<Graph>::edge_descriptor Edge;
-  typedef typename boost::graph_traits<Graph>::adjacency_iterator
+  typedef boost::graph_traits<Graph>::adjacency_iterator
   adjacency_iterator;
 
   // Consructors

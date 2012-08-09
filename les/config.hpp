@@ -17,7 +17,7 @@
 #ifndef __LES_CONFIG_HPP
 #define __LES_CONFIG_HPP
 
-#define FALSE (0)
-#define TRUE (!FALSE)
+#define LES_FALSE (0)
+#define LES_TRUE (!LES_FALSE)
 
 #endif // __LES_CONFIG_HPP

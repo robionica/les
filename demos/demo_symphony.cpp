@@ -13,8 +13,17 @@ int main()
   cout << "Initial problem:" << endl;
   problem.dump();
 
-  Symphony* symphony = new Symphony();
-  symphony->load_problem(&problem);
+  Symphony solver;
+  solver.load_problem(&problem);
+  solver.solve();
+
+  cout << "Objective value = " << solver.get_obj_value() << endl;
+  cout << "Solution: ";
+
+  for (int i = 0; i < problem.get_num_cols(); i++)
+    cout << solver.get_col_solution()[i]
+	 << " ";
+  cout << endl;
 
   return 0;
 }
