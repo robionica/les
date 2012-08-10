@@ -9,7 +9,7 @@ INCLUDE_FLAGS = $(LES_INCLUDE_FLAGS) $(COINOR_INCLUDE_FLAGS)
 LIB_FLAGS = $(COINOR_LIB_FLAGS) $(LES_LIB_FLAGS) \
 	-lboost_filesystem -lboost_program_options -lboost_graph
 
-OBJECTS = symphony.o
+OBJECTS = symphony_wrapper.o
 
 %.o: %.cpp
 	$(CXX) $(INCLUDE_FLAGS) $(LIB_FLAGS) -fPIC -g -c $< -o $@
