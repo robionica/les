@@ -119,9 +119,9 @@ void MILPP::dump()
   printf(" -> %s\n", obj_sense_to_string());
   // Print constraints represented by rows
   printf("subject to\n");
-  for (i = 0; i < cons_matrix_.get_num_rows(); i++) {
+  for (i = 0; i < get_num_rows(); i++) {
     int t = 0; // start from col zero
-    PackedVector* row = cons_matrix_.get_vector(i);
+    PackedVector* row = get_row(i);
     if (!row->size()) {
       continue;
     }

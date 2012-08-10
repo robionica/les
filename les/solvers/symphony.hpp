@@ -12,7 +12,7 @@ class Symphony : public MILPSolver
 {
 public:
   Symphony() {
-    //_si.setSymParam(OsiSymVerbosity, -2);
+    _si.setSymParam(OsiSymVerbosity, -2);
   }
   ~Symphony() {}
 

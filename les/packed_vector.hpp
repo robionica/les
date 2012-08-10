@@ -12,7 +12,7 @@
 // implied.  See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// Packed vector.
+// Packed vector interface.
 
 #ifndef __LES_PACKED_VECTOR_HPP
 #define __LES_PACKED_VECTOR_HPP

@@ -1,6 +1,6 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-#include "les/quasiblock_milp_problem.hpp"
+#include "les/milp_problem.hpp"
 
 // This class represents the following quasi-block mixed integer liner
 // programming demo problem #1:
@@ -13,10 +13,10 @@
 //               2x3 +  x4 +  x5 + 2x6 + 3x7             <= 7
 //                                       2x7 +  x8 + 2x9 <= 3
 //                                       1x7 + 4x8 + 2x9 <= 5
-class DemoQBMILPProblem1 : public QBMILPP
+class DemoMILPProblem1 : public MILPP
 {
 public:
-  DemoQBMILPProblem1() {
+  DemoMILPProblem1() {
     // Vector of objective function coefficients
     double c[] = {8.0, 2.0, 5.0, 5.0, 8.0, 3.0, 9.0, 7.0, 6.0};
     // Matrix of constraints
@@ -49,9 +49,9 @@ public:
     };
     // Initialize problem
     initialize(c, 9, &A[0][0], 6, s, b);
-    set_obj_sense(QBMILPP::OBJ_SENSE_MAXIMISATION);
+    set_obj_sense(MILPP::OBJ_SENSE_MAXIMISATION);
   }
 
-  ~DemoQBMILPProblem1() {
+  ~DemoMILPProblem1() {
   }
 };

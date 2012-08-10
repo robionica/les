@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-#include "demo_qbmilp_problem1.hpp"
+#include "demo_milp_problem1.hpp"
 
 #include "les/solvers/symphony.hpp"
 
 int main()
 {
   // Problem
-  DemoQBMILPProblem1 problem = DemoQBMILPProblem1();
+  DemoMILPProblem1 problem = DemoMILPProblem1();
   cout << "Initial problem:" << endl;
   problem.dump();
 
