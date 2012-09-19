@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-#ifndef __LES_BSOLVERS_SYMPHONY_HPP
-#define __LES_BSOLVERS_SYMPHONY_HPP
+#ifndef __LES_SOLVERS_SYMPHONY_LES_HPP
+#define __LES_SOLVERS_SYMPHONY_LES_HPP
 
 #include "les/bsolvers/bsolver.hpp"
 // Include native symphony API
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class Symphony : public BSolver {
+class LeSymphony : public Solver {
 public:
   // Empty constructor
   OsiLeSolverInterface() : _obj_value(0.) {}
@@ -39,4 +39,4 @@ private:
   vector<double> solution_;
 };
 
-#endif // __LES_BSOLVERS_SYMPHONY_HPP
+#endif // __LES_SOLVERS_SYMPHONY_LES_HPP

@@ -13,7 +13,7 @@ int main()
   cout << "Initial problem:" << endl;
   problem.dump();
 
-  Symphony solver;
+  SymphonyWrapper solver;
   solver.load_problem(&problem);
   solver.solve();
 

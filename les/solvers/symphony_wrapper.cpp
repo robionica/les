@@ -5,7 +5,7 @@
 
 #include "les/solvers/symphony.hpp"
 
-void Symphony::load_problem(MILPP* problem)
+void SymphonyWrapper::load_problem(MILPP* problem)
 {
   _problem = problem;
 
@@ -13,9 +13,9 @@ void Symphony::load_problem(MILPP* problem)
   for (int i = 0; i < _problem->get_num_cols(); i++) {
     // Add a new variable
     CoinPackedVector col;
-    _si.addCol(col, 0.0, 1.0, _problem->get_obj_coef(i));
+    addCol(col, 0.0, 1.0, _problem->get_obj_coef(i));
     // Set variable type
-    _si.setInteger(i);
+    setInteger(i);
   }
   // Add constraints
   for (int i = 0; i < _problem->get_num_rows(); i++) {
@@ -25,8 +25,8 @@ void Symphony::load_problem(MILPP* problem)
     CoinPackedVector target_row(source_row->get_num_elements(),
 				source_row->get_indices(),
 				source_row->get_elements());
-    _si.addRow(target_row, 'L', _problem->get_row_upper_bound(i), 1.0);
+    addRow(target_row, 'L', _problem->get_row_upper_bound(i), 1.0);
   }
   // Set problem sense
-  _si.setObjSense(_problem->get_obj_sense());
+  setObjSense(_problem->get_obj_sense());
 }

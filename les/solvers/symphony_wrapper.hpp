@@ -1,41 +1,36 @@
 // Copyright (c) 2012 Alexander Sviridenko
 
-#ifndef __LES_SOLVERS_SYMPHONY_HPP
-#define __LES_SOLVERS_SYMPHONY_HPP
+#ifndef __LES_SOLVERS_SYMPHONY_WRAPPER_HPP
+#define __LES_SOLVERS_SYMPHONY_WRAPPER_HPP
 
 // Include native symphony API
 #include <coin/OsiSymSolverInterface.hpp>
 
 #include <les/solvers/solver.hpp>
 
-class Symphony : public MILPSolver
+class SymphonyWrapper : public MILPSolver, public OsiSymSolverInterface
 {
 public:
-  Symphony() {
-    _si.setSymParam(OsiSymVerbosity, -2);
-  }
-  ~Symphony() {}
-
   void load_problem(MILPP* problem);
 
   inline void solve() {
-    // Branch and bound method
-    _si.branchAndBound();
+    // Temporary solution to make solver not so verbose.
+    setSymParam(OsiSymVerbosity, -2);
+    branchAndBound();
   }
 
   inline double get_obj_value() {
-    return _si.getObjValue();
+    return getObjValue();
   }
 
   inline const double* get_col_solution() {
-    return _si.getColSolution();
+    return getColSolution();
   }
 
+
 private:
-  // Symphony interface
-  OsiSymSolverInterface _si;
   // Problem
   MILPP* _problem;
 };
 
-#endif // __LES_SOLVERS_SYMPHONY_HPP
+#endif // __LES_SOLVERS_SYMPHONY_WRAPPER_HPP
