@@ -1,7 +1,9 @@
-// Copyright (c) 2012 Alexander Sviridenko
+/*
+ * Copyright (c) 2012 Oleksander Sviridenko
+ */
 
-#ifndef __LES_SOLVER_HPP
-#define __LES_SOLVER_HPP
+#ifndef __LES_SOLVERS_SOLVER_HPP
+#define __LES_SOLVERS_SOLVER_HPP
 
 #include <les/quasiblock_milp_problem.hpp>
 
@@ -9,23 +11,29 @@ class Solver {
 public:
   void solve();
 
-  // Load problem.
+  /**
+   * Load problem.
+   */
   void load_problem(Problem* problem);
 };
 
 class MILPSolver : Solver {
 public:
-  // Get objective function value.
+  /**
+   * Returns objective function value.
+   */
   inline double get_obj_value() {
     return _obj_value;
   }
 
-  // Columns
+  /**
+   * Returns array of columns.
+   */
   const double* get_col_solution();
 
 private:
   double _obj_value;
-  vector<double> solution_;
+  vector<double> _solution;
 };
 
-#endif // __LES_SOLVER_HPP
+#endif /* __LES_SOLVERS_SOLVER_HPP */

@@ -1,25 +1,31 @@
-// Copyright (c) 2012 Alexander Sviridenko
-//
-// Knapsack problem.
+/*
+ * Knapsack problem solver
+ *
+ * Copyright (c) 2012 Oleksandr Sviridenko
+ */
 
-#ifndef __LES_SOLVERS_KNAPSACK_PROBLEM_HPP
-#define __LES_SOLVERS_KNAPSACK_PROBLEM_HPP
+#ifndef __LES_SOLVERS_KNAPSACK_PROBLEM_SOLVER_HPP
+#define __LES_SOLVERS_KNAPSACK_PROBLEM_SOLVER_HPP
 
-#include <les/solver.hpp>
-#include <les/milp_problem.hpp>
+#include "solver.hpp"
+#include "../milp_problem.hpp"
 
-// Given a collection of items G = {g_1, g_2,... , g_n}, where each item g_i =
-// <v_i, w_i> worths v_i dollars, and weights w_i kgs, we would like to fill a
-// bag with max-capacity of W kgs with items from G, so that the total value of
-// items in the bag is maximized.
-class FractionalKnapsack : MILPSolver {
+/**
+ * Given a collection of items G = {g_1, g_2,... , g_n}, where each item g_i =
+ * <v_i, w_i> worths v_i dollars, and weights w_i kgs, we would like to fill a
+ * bag with max-capacity of W kgs with items from G, so that the total value of
+ * items in the bag is maximized.
+ */
+class FractionalKnapsackSolver : MILPSolver {
 public:
-  // Constructor, where values is array of values, weights is array of weights,
-  // n is number of items in the bag, max_weight is maximum weight that we can
-  // carry in the bag.
-  FractionalKnapsack(int* values, int* weights, size_t n, int max_weight) {
+  /**
+   * Constructor, where values is array of values, weights is array of weights,
+   * n is number of items in the bag, max_weight is maximum weight that we can
+   * carry in the bag.
+   */
+  FractionalKnapsackSolver(int* values, int* weights, size_t n, int max_weight) {
     _problem = new MILPP();
-    // Convert vector of ints to doubles
+    /* Convert vector of ints to doubles */
     double* tmp_values = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) {
       tmp_values[i] = (double)values[i];
@@ -27,7 +33,7 @@ public:
     _problem->set_obj_coefs(tmp_values, n);
     free(tmp_values);
     _problem->set_obj_sense(MILPP::OBJ_SENSE_MAXIMISATION);
-    // Convert vector of ints to doubles
+    /* Convert vector of ints to doubles */
     double* tmp_weights = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) {
       tmp_weights[i] = (double)weights[i];
@@ -72,11 +78,11 @@ public:
 
 private:
   MILPP* _problem;
-  // List of item indecies that was put to the bag
+  /* List of item indecies that was put to the bag */
   map<int, double> _bag_items;
   double _bag_value;
   double _bag_weight;
 };
 
 
-#endif // __LES_SOLVERS_KNAPSACK_PROBLEM_HPP
+#endif /* __LES_SOLVERS_KNAPSACK_PROBLEM_SOLVER_HPP */

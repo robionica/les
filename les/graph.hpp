@@ -1,16 +1,18 @@
-// Copyright (c) 2012 Alexander Sviridenko
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-// implied.  See the License for the specific language governing
-// permissions and limitations under the License.
+/*
+ * Copyright (c) 2012 Alexander Sviridenko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 
 #ifndef __LES_GRAPH_HPP
 #define __LES_GRAPH_HPP
@@ -19,7 +21,7 @@
 #include <algorithm>
 #include <vector>
 
-// Include required BOOST API
+/* Include required BOOST API */
 #include <boost/config.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
@@ -59,13 +61,17 @@ public:
     }
   }
 
-  // Returns number of vertices in the graph.
+  /**
+   * Returns number of vertices in the graph.
+   */
   inline size_t get_num_vertices() {
     return boost::num_vertices(*this);
   }
 
-  // Returns vertex with index vi.
-  // TODO: the method has to be improved.
+  /* TODO: the method has to be improved. */
+  /**
+   * Returns vertex with index vi.
+   */
   inline Graph::Vertex vertex(int vi) {
     //return boost::vertex(vi, *this); /* get vertex by position */
     boost::graph_traits<Graph>::vertex_iterator vit, vit_end, next;
@@ -81,10 +87,14 @@ public:
     return boost::vertices(*this);
   }
 
-  // Adds vertex.
+  /**
+   * Adds vertex.
+   */
   void add_vertex(int vi);
 
-  // Removes vertex.
+  /**
+   * Removes vertex.
+   */
   void remove_vertex(int vi);
 
   inline bool has_edge(int vi1, int vi2) {
@@ -92,7 +102,9 @@ public:
             boost::edge(vertex(vi2), vertex(vi1), *this).second);
   }
 
-  // Add and return edge between vertices v1 and v2.
+  /**
+   * Adds and returns edge between vertices v1 and v2.
+   */
   std::pair<Graph::Edge, bool> add_edge(int v1, int v2) {
     if (has_edge(v1, v2))
       return boost::edge(vertex(v1), vertex(v2), *this);
@@ -101,18 +113,24 @@ public:
     //boost::put(boost::vertex_index, *this, vertex(v2), v2);
   }
 
-  // Eliminating v is the operation, that adds an edge between
-  // each pair of non-adjacent neighbours of v, and then removes v.
+  /**
+   * Eliminates v is the operation, that adds an edge between
+   * each pair of non-adjacent neighbours of v, and then removes v.
+   */
   void eliminate_vertex(int v);
   void eliminate_vertices(vector<int>& vertices);
 
-  // Returns vector of vertex neighbors.
+  /**
+   * Returns vector of vertex neighbors.
+   */
   vector<int> get_vertex_neighbours(int v);
 
-  // Clones graph.
+  /**
+   * Clones graph.
+   */
   void clone(Graph& g);
 
   void dump();
 };
 
-#endif // __LES_GRAPH_HPP
+#endif /* __LES_GRAPH_HPP */

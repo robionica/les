@@ -1,9 +1,11 @@
-// Copyright (c) 2012 Alexander Sviridenko
+/*
+ * Copyright (c) 2012 Oleksander Sviridenko
+ */
 
 #ifndef __LES_SOLVERS_SYMPHONY_WRAPPER_HPP
 #define __LES_SOLVERS_SYMPHONY_WRAPPER_HPP
 
-// Include native symphony API
+/* Include native symphony API */
 #include <coin/OsiSymSolverInterface.hpp>
 
 #include <les/solvers/solver.hpp>
@@ -14,7 +16,7 @@ public:
   void load_problem(MILPP* problem);
 
   inline void solve() {
-    // Temporary solution to make solver not so verbose.
+    /* Temporary solution to make solver not so verbose. */
     setSymParam(OsiSymVerbosity, -2);
     branchAndBound();
   }
@@ -29,8 +31,7 @@ public:
 
 
 private:
-  // Problem
   MILPP* _problem;
 };
 
-#endif // __LES_SOLVERS_SYMPHONY_WRAPPER_HPP
+#endif /* __LES_SOLVERS_SYMPHONY_WRAPPER_HPP */

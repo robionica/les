@@ -49,12 +49,10 @@ test1()
   solver.solve(blocks);
   std::cout << "Objective value = " << solver.get_obj_value() << std::endl;
   std::cout << "Solution: ";
-
-  for (int i = 0; i < problem.get_num_cols(); i++)
-    std::cout << solver.get_col_value(i)
-              << " ";
+  for (int i = 0; i < problem.get_num_cols(); i++) {
+    std::cout << solver.get_col_value(i) << " ";
+  }
   std::cout << std::endl;
-
 }
 
 /**

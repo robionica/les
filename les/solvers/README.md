@@ -1,8 +1,8 @@
-# SYMPHONY solver support
+# Solvers
 
-## Install SYMPHONY
+## SYMPHONY solver support
 
-### Installing from binaries
+### Install from binaries
 
 Download the binaries from <http://www.coin-or.org/download/binary/SYMPHONY/>,
 for example [SYMPHONY-5.2.0-Linux-x86-Install](http://www.coin-or.org/download/binary/SYMPHONY/SYMPHONY-5.2.0-Linux-x86-Install). Move
@@ -15,7 +15,7 @@ to the directory with installer and run installation process:
 Installer will ask you to select library home directory, for example
 `/home/d2rk/SYMPHONY/`.
 
-## Setup solver
+### Setup
 
 Once SYMPHONY was installed, you need to edit Makefile. Open it and
 find the following line:
@@ -30,7 +30,7 @@ Next, build it:
 
     make
 
-## Known issues
+### Known issues
 
 *      CoinFinite.hpp: In function ‘bool CoinIsnan(double)’:
            CoinFinite.hpp: 109 :26: error: ‘_isnan’ was not declared in this scope

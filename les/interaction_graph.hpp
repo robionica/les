@@ -14,13 +14,8 @@
  * permissions and limitations under the License.
  */
 
-/**
- * @file interaction_graph.hpp
- * @brief Interaction graph
- */
-
-#ifndef __INTERACTION_GRAPH_HPP
-#define __INTERACTION_GRAPH_HPP
+#ifndef __LES_INTERACTION_GRAPH_HPP
+#define __LES_INTERACTION_GRAPH_HPP
 
 #include <algorithm>
 
@@ -39,6 +34,13 @@ public:
   /* Constructor */
   InteractionGraph(MILPP* problem);
 
+  /**
+   * Compute and return the connected components of an undirected graph
+   * using a DFS-based approach.
+   *
+   * Learn more:
+   * http://www.boost.org/doc/libs/1_49_0/libs/graph/doc/connected_components.html
+   */
   map< int, vector<int> > get_connected_components();
 
   inline MILPP* get_problem()

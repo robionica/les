@@ -1,8 +1,8 @@
-# Copyright (c) 2012 Alexander Sviridenko
+# Copyright (c) 2012 Oleksandr Sviridenko
 
 include ../../config.mk
 
-SYMPHONY_LIB_FILE_NAME = libsolver_symphony.so
+SYMPHONY_LIB_FILE_NAME = libles_symphony_wrapper.so
 SYMPHONY_LIB_FILE_PATH = $(LES_LIB_DIR_PATH)/$(SYMPHONY_LIB_FILE_NAME)
 
 INCLUDE_FLAGS = $(LES_INCLUDE_FLAGS) $(COINOR_INCLUDE_FLAGS)

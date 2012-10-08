@@ -28,7 +28,7 @@ demo_celar_reader:
 # SYMPHONY
 
 demo_symphony:
-	$(CXX) $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS) -lClp -lOsiClp -lCgl -lSym -lOsi -lOsiSym -lsolver_symphony
+	$(CXX) $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS) -lClp -lOsiClp -lCgl -lSym -lOsi -lOsiSym -lles_symphony_wrapper
 
 demo_threads:
 	g++ $@.cpp -o $@ $(SYMPHONY_INC) $(LIB) -lboost_thread -lboost_system
