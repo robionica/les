@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Oleksandr Sviridenko
+ # Copyright (c) 2012 Oleksandr Sviridenko
 
 include ../config.mk
 
