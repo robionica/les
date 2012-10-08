@@ -1,28 +1,25 @@
-
 # Local Elimination Solver (LES)
 
-Copyright (c) 2012 Alexander Sviridenko
+Copyright (c) 2012 Oleksander Sviridenko
 
 ## What is LES?
 
-LES is a library for solving a class of mathematical problems called
-[integer linear
-programming](http://en.wikipedia.org/wiki/Integer_linear_programming)
-(ILP) problems and its variants with help of local elimination
-algorithms (LEA).
+LES is a library for solving a class of mathematical problems called [integer
+linear programming](http://en.wikipedia.org/wiki/Integer_linear_programming)
+(ILP) problems and its variants with help of local elimination algorithms (LEA).
 
 ## What is it for, anyway?
 
-Many real [discrete optimization](http://en.wikipedia.org/wiki/Discrete_optimization) 
-problems (DOPs) from [OR](http://en.wikipedia.org/wiki/Operations_research) applications
-contain a huge number of variables and/or constraints that make the
-models intractable for currently available solvers. Usually, DOPs from
-applications have a special structure, and the matrices of constraints
-for large-scale problems have a lot of zero elements (sparse
-matrices), and the nonzero elements of the matrix often fall into a
-limited number of blocks. The block form of many DO problems is
-usually caused by the weak connectedness of subsystems of real-world
-systems.
+Many real [discrete
+optimization](http://en.wikipedia.org/wiki/Discrete_optimization) problems
+(DOPs) from [OR](http://en.wikipedia.org/wiki/Operations_research) applications
+contain a huge number of variables and/or constraints that make the models
+intractable for currently available solvers. Usually, DOPs from applications
+have a special structure, and the matrices of constraints for large-scale
+problems have a lot of zero elements (sparse matrices), and the nonzero elements
+of the matrix often fall into a limited number of blocks. The block form of many
+DO problems is usually caused by the weak connectedness of subsystems of
+real-world systems.
 
 One of the promising ways to exploit sparsity in the constraint matrix
 of DO problems are LEAs, including local decomposition algorithms,
@@ -36,25 +33,23 @@ work for you.
 
 First, of all, you need to install prerequisites:
 
-       sudo apt-get install gcc g++ git make
+    sudo apt-get install gcc g++ git make
 
 LES is also required some [Boost](http://www.boost.org/) libraries.
 They can be installed [manually](http://www.boost.org/doc/libs/1_48_0/more/getting_started/unix-variants.html#easy-build-and-install)
 or from repository:
 
-      sudo apt-get install libboost-all-dev
+    sudo apt-get install libboost-all-dev
+
+On this moment (maybe temporary) LES depends on [framework
+SYMPHONY](https://projects.coin-or.org/SYMPHONY). See INSTALL_SYMPHONY.md to
+learn how to install and setup it.
 
 Next, get the sources and build it:
 
-      git clone git://github.com/d2rk/les.git
-      cd les
-      make
-
-## Porting
-
-Supported solvers:
-
-* [SYMPHONY](https://github.com/d2rk/les/tree/master/porting/symphony#symphony-solver-support)
+    git clone git://github.com/d2rk/les.git
+    cd les
+    make
 
 ## Getting Started
 
@@ -64,4 +59,4 @@ Add path to LES library for your projects:
 
 ## Maintainers
 
-Alexander Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova.
+Oleksandr Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova.
