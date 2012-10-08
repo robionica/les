@@ -1,4 +1,4 @@
-# INSTALL SYMPHONY
+# Install SYMPHONY
 
 ## Install on Linux
 
@@ -17,14 +17,14 @@ Installer will ask you to select library home directory, for example
 
 ## Setup
 
-Once SYMPHONY was installed, you need to edit Makefile. Open it and
+Once SYMPHONY was installed, you need to edit config.mk. Open it and
 find the following line:
 
-    COINOR_SYMPHONY_DIR =
+    COINOR_HOME_DIR_PATH =
 
 and edit it according to SYMPHONY home directory, for instance:
 
-    COINOR_SYMPHONY_DIR = /home/d2rk/SYMPHONY
+    COINOR_HOME_DIR_PATH = /home/d2rk/SYMPHONY
 
 Next, build it:
 
