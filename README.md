@@ -42,8 +42,9 @@ or from repository:
     sudo apt-get install libboost-all-dev
 
 Note, on this moment (maybe temporary) LES depends on [framework
-SYMPHONY](https://projects.coin-or.org/SYMPHONY). See INSTALL_SYMPHONY.md to
-learn how to install and setup it proprly.
+SYMPHONY](https://projects.coin-or.org/SYMPHONY). See
+[INSTALL_SYMPHONY.md](https://github.com/d2rk/les/blob/relaxations/INSTALL_SYMPHONY.md)
+to learn how to install and setup it proprly.
 
 Next, get the sources and build it:
 
