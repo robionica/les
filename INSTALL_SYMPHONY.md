@@ -2,7 +2,13 @@
 
 ## Install on Linux
 
-### Install from binaries
+### Install prerequisites
+
+First, of all, you need to install prerequisites:
+
+    $ sudo apt-get install libblas-dev liblapack-dev
+
+### Install SYMPHONY from binaries
 
 Download the binaries from <http://www.coin-or.org/download/binary/SYMPHONY/>,
 for example [SYMPHONY-5.2.0-Linux-x86-Install](http://www.coin-or.org/download/binary/SYMPHONY/SYMPHONY-5.2.0-Linux-x86-Install), move

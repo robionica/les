@@ -25,7 +25,7 @@ One of the promising ways to exploit sparsity in the constraint matrix
 of DO problems are LEAs, including local decomposition algorithms,
 nonserial dynamic programming (NSDP) algorithms.
 
-## Installing on Ubuntu
+## Install on Ubuntu
 
 Tested on Ubuntu 11.10 x86. Please,
 [let me know](https://github.com/d2rk/les/issues), if it does not
@@ -43,7 +43,7 @@ or from repository:
 
 Note, on this moment (maybe temporary) LES depends on [framework
 SYMPHONY](https://projects.coin-or.org/SYMPHONY). See
-[INSTALL_SYMPHONY.md](https://github.com/d2rk/les/blob/relaxations/INSTALL_SYMPHONY.md)
+[INSTALL_SYMPHONY.md](https://github.com/d2rk/les/blob/relaxations/INSTALL_SYMPHONY.md#install-symphony)
 to learn how to install and setup it proprly.
 
 Next, get the sources and build it:
