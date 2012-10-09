@@ -35,15 +35,15 @@ First, of all, you need to install prerequisites:
 
     sudo apt-get install gcc g++ git make
 
-LES is also required some [Boost](http://www.boost.org/) libraries.
+LES also requires some [Boost](http://www.boost.org/) libraries.
 They can be installed [manually](http://www.boost.org/doc/libs/1_48_0/more/getting_started/unix-variants.html#easy-build-and-install)
 or from repository:
 
     sudo apt-get install libboost-all-dev
 
-On this moment (maybe temporary) LES depends on [framework
+Note, on this moment (maybe temporary) LES depends on [framework
 SYMPHONY](https://projects.coin-or.org/SYMPHONY). See INSTALL_SYMPHONY.md to
-learn how to install and setup it.
+learn how to install and setup it proprly.
 
 Next, get the sources and build it:
 

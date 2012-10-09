@@ -1,18 +1,19 @@
-# Copyright (c) 2012 Alexander Sviridenko
+# Copyright (c) 2012 Oleksandr Sviridenko
 
-CXX = g++-4.4
+#CXX = g++-4.4
 
-LES_HOME_PATH = $(dir $(lastword $(MAKEFILE_LIST)))
+# Consider $(dir $(lastword $(MAKEFILE_LIST)))
+LES_HOME_PATH = $(shell pwd)/..
 LES_LIB_DIR_PATH = $(LES_HOME_PATH)/lib
 
 LES_LIB_FILE_NAME = libles.so
 LES_LIB_FILE_PATH = $(LES_LIB_DIR_PATH)/$(LES_LIB_FILE_NAME)
 
-COINOR_HOME_DIR_PATH = /home/d2rk/lib/SYMPHONY
+COINOR_HOME_DIR_PATH = /home/d2rk/opt/SYMPHONY
 COINOR_INCLUDE_DIR_PATH = $(COINOR_HOME_DIR_PATH)/include
 COINOR_INCLUDE_FLAGS = -I$(COINOR_INCLUDE_DIR_PATH)
 COINOR_LIB_DIR_PATH = $(COINOR_HOME_DIR_PATH)/lib
-COINOR_LIB_FLAGS = -L$(COINOR_LIB_DIR_PATH) -Wl,--rpath -Wl,$(COINOR_LIB_DIR_PATH) -lCoinUtils -llapack -lblas
+COINOR_LIB_FLAGS = -L$(COINOR_LIB_DIR_PATH) -Wl,--rpath -Wl,$(COINOR_LIB_DIR_PATH) -lCoinUtils
 
 LES_INCLUDE_FLAGS = -I$(LES_HOME_PATH) -I$(COINOR_INCLUDE_DIR_PATH)
 LES_LIB_FLAGS = -L$(LES_LIB_DIR_PATH) -Wl,--rpath -Wl,$(LES_LIB_DIR_PATH) -lles $(COINOR_LIB_FLAGS)
