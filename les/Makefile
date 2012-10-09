@@ -1,8 +1,11 @@
  # Copyright (c) 2012 Oleksandr Sviridenko
 
-include ../config.mk
+OBJECTS =
 
-OBJECTS = decomposers/decomposer.o decomposers/tree_decomposition.o \
+include ../config.mk
+include solvers/Makefile
+
+OBJECTS += decomposers/decomposer.o decomposers/tree_decomposition.o \
 	decomposers/finkelstein.o graph.o interaction_graph.o milp_problem.o \
 	quasiblock_milp_problem.o packed_vector.o packed_matrix.o utils/math.o
 
