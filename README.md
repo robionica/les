@@ -25,38 +25,10 @@ One of the promising ways to exploit sparsity in the constraint matrix
 of DO problems are LEAs, including local decomposition algorithms,
 nonserial dynamic programming (NSDP) algorithms.
 
-## Install on Ubuntu
+## Install
 
-Tested on Ubuntu 11.10 x86. Please,
-[let me know](https://github.com/d2rk/les/issues), if it does not
-work for you.
-
-First, of all, you need to install prerequisites:
-
-    $ sudo apt-get install gcc g++ git make
-
-LES also requires some [Boost](http://www.boost.org/) libraries.
-They can be installed [manually](http://www.boost.org/doc/libs/1_48_0/more/getting_started/unix-variants.html#easy-build-and-install)
-or from repository:
-
-    $ sudo apt-get install libboost-all-dev
-
-Note, on this moment (maybe temporary) LES depends on [framework
-SYMPHONY](https://projects.coin-or.org/SYMPHONY). See
-[INSTALL_SYMPHONY.md](https://github.com/d2rk/les/blob/relaxations/INSTALL_SYMPHONY.md#install-symphony)
-to learn how to install and setup it proprly.
-
-Next, get the sources and build it:
-
-    $ git clone git://github.com/d2rk/les.git
-    $ cd les
-    $ make
-
-## Getting Started
-
-Add path to LES library for your projects:
-
-    LD_LIBRARY_PATH=/somewhere/les/lib/
+See README files of [les-cpp](https://github.com/d2rk/les-cpp) and
+[les-py](https://github.com/d2rk/les-py) repositories.
 
 ## Maintainers
 
