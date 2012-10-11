@@ -22,9 +22,9 @@ int main()
   solver.solve();
   cout << "Objective value = " << solver.get_obj_value() << endl;
   cout << "Solution: ";
-  for (int i = 0; i < problem.get_num_cols(); i++)
-    cout << solver.get_col_solution()[i]
-	 << " ";
+  for (int i = 0; i < problem.get_num_cols(); i++) {
+    cout << solver.get_col_solution()[i] << " ";
+  }
   cout << endl;
   return 0;
 }

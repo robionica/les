@@ -1,4 +1,6 @@
-// Copyright (c) 2012 Alexander Sviridenko
+/*
+ * Copyright (c) 2012 Oleksandr Sviridenko
+ */
 
 #include <cstdlib>
 #include <assert.h>
@@ -6,9 +8,9 @@
 #include <iostream>
 #include <vector>
 
-#include <les/packed_vector.hpp>
-
 #include <coin/CoinHelperFunctions.hpp>
+
+#include "packed_vector.hpp"
 
 #define max(a, b) ((a) > (b)) ? (a) : (b)
 
@@ -28,10 +30,9 @@ PackedVector::get_element_by_index(int i)
 {
   map<int, int>::iterator it;
   it = index_to_pos_mapping_.find(i);
-  if (it == index_to_pos_mapping_.end())
-    {
-      return 0.0;
-    }
+  if (it == index_to_pos_mapping_.end()) {
+    return 0.0;
+  }
   return get_element_by_pos(it->second);
 }
 
@@ -44,8 +45,9 @@ PackedVector::clear()
 void
 PackedVector::zero()
 {
-  for (int i = 0; i < get_num_elements(); i++)
+  for (int i = 0; i < get_num_elements(); i++) {
     elements_[i] = 0.0;
+  }
 }
 
 void
@@ -59,22 +61,21 @@ PackedVector::init(size_t size, const int* indices,
                    const double* elements)
 {
   clear();
-  if (size > 0)
-    {
-      reserve(size);
-      nr_elements_ = size;
-      CoinDisjointCopyN(indices, size, indices_);
-      if (elements != NULL)
-        CoinDisjointCopyN(elements, size, elements_);
-      else
-        zero();
-      CoinIotaN(orig_indices_, size, 0);
-      index_to_pos_mapping_.clear();
-      for (size_t i = 0; i < size; i++)
-        {
-          index_to_pos_mapping_[indices[i]] = i;
-        }
+  if (size > 0) {
+    reserve(size);
+    nr_elements_ = size;
+    CoinDisjointCopyN(indices, size, indices_);
+    if (elements != NULL) {
+      CoinDisjointCopyN(elements, size, elements_);
+    } else {
+      zero();
     }
+    CoinIotaN(orig_indices_, size, 0);
+    index_to_pos_mapping_.clear();
+    for (size_t i = 0; i < size; i++) {
+      index_to_pos_mapping_[indices[i]] = i;
+    }
+  }
 }
 
 void
@@ -92,11 +93,10 @@ PackedVector::init(vector<int>& indices, vector<double>& elements)
 void
 PackedVector::insert(int index, double element)
 {
-  if(capacity_ <= get_num_elements())
-    {
-      reserve(max(5, 2 * capacity_));
-      assert(capacity_ > get_num_elements());
-    }
+  if(capacity_ <= get_num_elements()) {
+    reserve(max(5, 2 * capacity_));
+    assert(capacity_ > get_num_elements());
+  }
   indices_[get_num_elements()] = index;
   index_to_pos_mapping_[index] = get_num_elements();
   elements_[get_num_elements()] = element;
@@ -107,31 +107,26 @@ PackedVector::insert(int index, double element)
 void
 PackedVector::reserve(int n)
 {
-  /* don't make allocated space smaller */
-  if (n <= capacity_)
+  /* Don't make allocated space smaller */
+  if (n <= capacity_) {
     return;
-
+  }
   capacity_ = n;
-
-  /* save pointers to existing data */
+  /* Save pointers to existing data */
   int* temp_indices = indices_;
   int* temp_orig_indices = orig_indices_;
   double* temp_elements = elements_;
-
-  /* allocate new space */
+  /* Allocate new space */
   indices_ = (int*) calloc(capacity_, sizeof(int));
   orig_indices_ = (int*) calloc(capacity_, sizeof(int));
   elements_ = (double*) calloc(capacity_, sizeof(double));
-
-  /* copy data to new space */
-  if (get_num_elements() > 0)
-    {
-      memcpy(indices_, temp_indices, get_num_elements());
-      memcpy(orig_indices_, temp_orig_indices, get_num_elements());
-      memcpy(elements_, temp_elements, get_num_elements());
-    }
-
-  /* free old data */
+  /* Copy data to new space */
+  if (get_num_elements() > 0) {
+    memcpy(indices_, temp_indices, get_num_elements());
+    memcpy(orig_indices_, temp_orig_indices, get_num_elements());
+    memcpy(elements_, temp_elements, get_num_elements());
+  }
+  /* Free old data */
   delete [] temp_elements;
   delete [] temp_orig_indices;
   delete [] temp_indices;

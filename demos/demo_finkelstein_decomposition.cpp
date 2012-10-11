@@ -1,7 +1,7 @@
 /*
  * Demo finkelsteain decomposition
  *
- * Copyright (c) 2012 Oleksander Sviridenko
+ * Copyright (c) 2012 Oleksandr Sviridenko
  */
 
 #include <iostream>

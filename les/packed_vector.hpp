@@ -1,18 +1,20 @@
-// Copyright (c) 2012 Alexander Sviridenko
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-// implied.  See the License for the specific language governing
-// permissions and limitations under the License.
-//
-// Packed vector interface.
+/*
+ * Packed vector interface
+ *
+ * Copyright (c) 2012 Oleksandr Sviridenko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 
 #ifndef __LES_PACKED_VECTOR_HPP
 #define __LES_PACKED_VECTOR_HPP
@@ -23,15 +25,14 @@
 
 using namespace std;
 
-// NOTE: Use i-th index or element by position use get_indices()[i] or
-// get_elements()[i].
 class PackedVector
 {
 public:
-  // Default constructor.
+  /**
+   * Default constructor.
+   */
   PackedVector();
 
-  // Initialization
   void init(size_t size, const int* indices, const double* elements);
   void init(vector<int>& indices);
   void init(vector<int>& indices, vector<double>& elements);
@@ -44,23 +45,33 @@ public:
     return nr_elements_;
   }
 
-  // Resizes the vector to contain n elements.
+  /**
+   * Resizes the vector to contain n elements.
+   */
   void resize(size_t n);
 
-  // Reset the vector, as it was just created an empty vector.
+  /**
+   * Resets the vector, as it was just created an empty vector.
+   */
   void clear();
 
-  // Return pointer to the array of elements.
+  /**
+   * Returns pointer to the array of elements.
+   */
   inline const double* get_elements() const {
     return elements_;
   }
 
-  // Just an alias for get_element_by_pos().
+  /**
+   * Just an alias for get_element_by_pos().
+   */
   inline double get_element(int pos) {
     return get_element_by_pos(pos);
   }
 
-  // Get element value by its position.
+  /**
+   * Returns element value by its position.
+   */
   double get_element_by_pos(int pos) {
     return elements_[pos];
   }
@@ -71,8 +82,9 @@ public:
     return (it != index_to_pos_mapping_.end());
   }
 
-  // Get element by index.
-  // XXX: if element doesn't exist return WHAT?. On this moment we return 0.0.
+  /**
+   * Returns element by index. Returns 0.0 if element doesn't exist.
+   */
   double get_element_by_index(int i);
 
   int* get_indices() const {
@@ -83,9 +95,11 @@ public:
     set_element_by_pos(pos, element);
   }
 
-  // Set an existing element in the packed vector.
-  // The first argument is the "pos" into the elements() array.
-  // See set_element_by_pos() and get_element_by_pos().
+  /**
+   * Sets an existing element in the packed vector. The first argument is the
+   * "pos" into the elements() array.  See set_element_by_pos() and
+   * get_element_by_pos().
+   */
   void set_element_by_pos(int pos, double element) {
     elements_[pos] = element;
   }
@@ -100,13 +114,17 @@ public:
     return get_index_by_pos(pos);
   }
 
-  // Get vector of indices of elements.
+  /**
+   * Returns vector of indices of elements.
+   */
   inline int get_index_by_pos(int pos) {
     assert(pos < get_num_elements());
     return indices_[pos];
   }
 
-  // Insert an element into the vector.
+  /**
+   * Inserts an element into the vector.
+   */
   void insert(int i, double element);
 
   void dump() {

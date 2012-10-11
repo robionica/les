@@ -1,22 +1,26 @@
-// Copyright (c) 2012 Alexander Sviridenko
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-// implied.  See the License for the specific language governing
-// permissions and limitations under the License.
+/*
+ * Copyright (c) 2012 Oleksandr Sviridenko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 
 #include <boost/foreach.hpp>
 
-#include "les/decomposers/finkelstein.hpp"
+#include "finkelstein.hpp"
 
-void FinkelsteinQBDecomposition::dump() {
+void
+FinkelsteinQBDecomposition::dump()
+{
   for (size_t i = 0; i < _U.size(); i++) {
     std::cout << " U" << i << " : {";
     BOOST_FOREACH(int row, _U[i]) {
@@ -42,48 +46,45 @@ void FinkelsteinQBDecomposition::dump() {
   }
 }
 
-vector<QBMILPP*> FinkelsteinQBDecomposition::get_subproblems()
+vector<QBMILPP*>
+FinkelsteinQBDecomposition::get_subproblems()
 {
   vector<QBMILPP*> subproblems;
-
-  // Decompose a problem by using finkelstein algorithm
+  /* Decompose a problem by using finkelstein algorithm */
   decompose(_problem);
-
   for (size_t i = 0; i < _U.size(); i++) {
     int nr_cols = ((i > 0) ? _S[i - 1].size() : 0) + _M[i].size()
       + (((_U.size() - i) > 1) ? _S[i].size() : 0);
     int nr_rows = _U[i].size();
     QBMILPP* subproblem = new QBMILPP(nr_cols , nr_rows);
     PackedMatrix* cons = subproblem->get_cons_matrix();
-
     // Define objective function for the subproblem.
     // XXX: Take the index of the first variable from M.
     int first_v = (!i) ? *(_M[i].begin()) : *(_S[i-1].begin());
     for (int j = first_v; j < (first_v + nr_cols); j++) {
       subproblem->set_obj_coef(j, _problem->get_obj_coef(j));
     }
-
-    // For each constraint...
+    /* For each constraint... */
     BOOST_FOREACH(int u, _U[i]) {
       PackedVector* row = _problem->get_row(u);
       if (i > 0) {
-	BOOST_FOREACH(int s, _S[i - 1]) {
-	  if (row->get_element_by_index(s) != 0.0) {
-	    cons->set_coefficient(u, s, row->get_element_by_index(s));
-	  }
-	}
+        BOOST_FOREACH(int s, _S[i - 1]) {
+          if (row->get_element_by_index(s) != 0.0) {
+            cons->set_coefficient(u, s, row->get_element_by_index(s));
+          }
+        }
       }
       BOOST_FOREACH(int m, _M[i]) {
-	if (row->get_element_by_index(m) != 0.0) {
-	  cons->set_coefficient(u, m, row->get_element_by_index(m));
-	}
+        if (row->get_element_by_index(m) != 0.0) {
+          cons->set_coefficient(u, m, row->get_element_by_index(m));
+        }
       }
       if ((_U.size() - i) > 1) {
-	BOOST_FOREACH(int s, _S[i]) {
-	  if (row->get_element_by_index(s) != 0.0) {
-	    cons->set_coefficient(u, s, row->get_element_by_index(s));
-	  }
-	}
+        BOOST_FOREACH(int s, _S[i]) {
+          if (row->get_element_by_index(s) != 0.0) {
+            cons->set_coefficient(u, s, row->get_element_by_index(s));
+          }
+        }
       }
       subproblem->set_row_upper_bound(u, _problem->get_row_upper_bound(u));
     }
@@ -109,56 +110,42 @@ FinkelsteinQBDecomposition::decompose_by_blocks(MILPP* problem)
   /* Decompose a problem by using finkelstein algorithm */
   decompose(problem);
 
-  for (size_t i = 0; i < _U.size(); i++)
-    {
-      next_block = new DecompositionBlock(problem);
-      left_part = next_block->get_left_part();
-      middle_part = next_block->get_middle_part();
-      right_part = next_block->get_right_part();
-
-      /* for each constraint */
-      for (set<int>::iterator u = _U[i].begin(); u != _U[i].end(); u++)
-        {
-          PackedVector* row = problem->get_row(*u);
-
-          if (i > 0)
-            {
-              for (set<int>::iterator s = _S[i - 1].begin();
-                   s != _S[i - 1].end(); s++)
-                {
-                  if (row->get_element_by_index(*s) != 0.0)
-                    left_part->set_coefficient(*u, *s,
-                                               row->get_element_by_index(*s));
-                }
-            }
-
-          for (set<int>::iterator m = _M[i].begin(); m != _M[i].end(); m++)
-            {
-              if (row->get_element_by_index(*m) != 0.0)
-                middle_part->set_coefficient(*u, *m,
-                                             row->get_element_by_index(*m));
-            }
-          if ((_U.size() - i) > 1)
-            {
-              for (set<int>::iterator s = _S[i].begin();
-                   s != _S[i].end(); s++)
-                if (row->get_element_by_index(*s) != 0.0)
-                  right_part->set_coefficient(*u, *s, row->get_element_by_index(*s));
-            }
+  for (size_t i = 0; i < _U.size(); i++) {
+    next_block = new DecompositionBlock(problem);
+    left_part = next_block->get_left_part();
+    middle_part = next_block->get_middle_part();
+    right_part = next_block->get_right_part();
+    /* for each constraint */
+    for (set<int>::iterator u = _U[i].begin(); u != _U[i].end(); u++) {
+      PackedVector* row = problem->get_row(*u);
+      if (i > 0) {
+        for (set<int>::iterator s = _S[i-1].begin(); s != _S[i-1].end(); s++) {
+          if (row->get_element_by_index(*s) != 0.0) {
+            left_part->set_coefficient(*u, *s, row->get_element_by_index(*s));
+          }
         }
-
-      if (prev_block)
-      {
+      }
+      for (set<int>::iterator m = _M[i].begin(); m != _M[i].end(); m++) {
+        if (row->get_element_by_index(*m) != 0.0) {
+          middle_part->set_coefficient(*u, *m, row->get_element_by_index(*m));
+        }
+        if ((_U.size() - i) > 1) {
+          for (set<int>::iterator s = _S[i].begin(); s != _S[i].end(); s++) {
+            if (row->get_element_by_index(*s) != 0.0) {
+              right_part->set_coefficient(*u, *s, row->get_element_by_index(*s));
+            }
+          }
+        }
+      }
+      if (prev_block) {
         //next_block->set_left_part(prev_block->get_right_part());
       }
       blocks->push_back(next_block);
       prev_block = next_block;
     }
-
   return blocks;
-}
+  }
 
-// By default initial_cols can be omitted. Thus default columns will be stored.
 // TODO: On this moment it returns nothing. Maybe we need some error status?
 void
 FinkelsteinQBDecomposition::decompose(MILPP* problem, vector<int>* initial_cols,

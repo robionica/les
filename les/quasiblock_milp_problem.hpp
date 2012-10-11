@@ -1,42 +1,48 @@
-// Copyright (c) 2012 Alexander Sviridenko
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-// implied.  See the License for the specific language governing
-// permissions and limitations under the License.
+/*
+ * Quasi-block MILP problem
+ *
+ * Copyright (c) 2012 Alexander Sviridenko
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 
-// Quasi-block MILP problem
-//
-// The following code snippet shows how to use QBMILPPGenerator to
-// generate quasi-block MILP problems.
-//
-//   QBMILPPGenerator generator(9, 4, 3, 2);
-//   QBMILPP* problem = generator.generate();
-//   problem->print();
+/**
+ * The following code snippet shows how to use QBMILPPGenerator to
+ * generate quasi-block MILP problems:
+ *
+ *   QBMILPPGenerator generator(9, 4, 3, 2);
+ *   QBMILPP* problem = generator.generate();
+ *   problem->print();
+ */
 
-#ifndef __LES_QBMILPP_HPP
-#define __LES_QBMILPP_HPP
+#ifndef __LES_QUASIBLOCK_MILP_PROBLEM_HPP
+#define __LES_QUASIBLOCK_MILP_PROBLEM_HPP
 
-#include <les/milp_problem.hpp>
-#include <les/packed_vector.hpp>
+#include "milp_problem.hpp"
+#include "packed_vector.hpp"
 
-// QBMILP stands for Quasi-Block MILP problem.
+/**
+ * QBMILP stands for Quasi-Block MILP problem.
+ */
 class QBMILPP : public MILPP
 {
 public:
 
   /* Default constractor */
   QBMILPP() : MILPP() {  }
-  QBMILPP(int nr_cols, int nr_rows) : MILPP(nr_cols, nr_rows) {}
-  QBMILPP(double* c, int nr_cols, double* A, int nr_rows, char* s, double* b) :
-    MILPP(c, nr_cols, A, nr_rows, s, b) {}
+  QBMILPP(int num_cols, int num_rows) : MILPP(num_cols, num_rows) {}
+  QBMILPP(double* c, int num_cols, double* A, int num_rows, char* s, double* b) :
+    MILPP(c, num_cols, A, num_rows, s, b) {}
 };
 
 #if 0
@@ -92,4 +98,4 @@ private:
 };
 #endif
 
-#endif  // __LES_QBMILPP_HXX
+#endif /* __LES_QUASIBLOCK_MILP_PROBLEM_HPP */

@@ -1,21 +1,11 @@
 /*
- * Copyright (c) 2012 Alexander Sviridenko
+ * Copyright (c) 2012 Oleksandr Sviridenko
  */
 
-/**
- * @file celar.hpp
- */
+#ifndef __LES_READERS_CELAR_HPP
+#define __LES_READERS_CELAR_HPP
 
-#ifndef __LES_CELAR_READER_HPP
-#define __LES_CELAR_READER_HPP
-
-#include <iostream>
-#include <fstream>
-#include <string>
-
-#include <les/packed_matrix.hpp>
-
-using namespace std;
+#include "../packed_matrix.hpp"
 
 /**
  * Parsing \c var_txt file:
@@ -50,58 +40,23 @@ using namespace std;
  * be used to compare the absolute value of the difference of the
  * values of the variables to the integer given in the field 5
  * (deviation). The semnatics of a constraint is therefore:
- *  
+ *
  *  |Field1 - Field2| Field4 Field5
- *      
+ *
  * \li \b Field 6: The index of weighting of the constraint. As for the
  * mobility of assigned variables, it is an index that varies from 0
  * to 4. Value 0 indicates a hard constraint. Values from 1 to 4
  * indicates increasing weights as given in the \c cst_txt field. If this
  * field is absent from the file, the constraint must be considered as
- * an hard constraint (index 0). 
+ * an hard constraint (index 0).
  */
 class CELARReader
 {
 public:
-  CELARReader()
-  {
-  }
+  CELARReader() { }
 
   void read(const char* var_txt, const char* dom_txt,
-            const char* ctr_txt, const char* cst_txt)
-  {
-    string line;
-
-    ifstream var_file(var_txt);
-
-    while(getline(var_file, line))
-      {
-        int n, d, v, i;
-        var_file >> n >> d >> v >> i;
-        //cout << "N=" << n << ", "
-        //     << "D=" << d << endl;
-      }
-
-    ifstream ctr_file(ctr_txt);
-
-    cout << "Parsing " << ctr_txt << endl;
-    int cons_id = 0;
-    while(getline(ctr_file, line))
-      {
-        int v1, v2; 
-        char type; /* the constraint type */
-        char op; /* operator: "=" or ">" */
-        int deviation;
-        ctr_file >> v1 >> v2 >> type >> op >> deviation;
-        v1--; /* fix values */
-        v2--;
-        //cout << "v1=" << v1 << ", " << "v2=" << v2 << " "
-        //     << op << " " << deviation << endl;
-        _cons_matrix.set_coefficient(cons_id, v1, 1.0);
-        _cons_matrix.set_coefficient(cons_id, v2, 1.0);
-        cons_id++;
-      }
-  }
+            const char* ctr_txt, const char* cst_txt);
 
   inline const PackedMatrix& get_cons_matrix() { return _cons_matrix; }
 
@@ -109,4 +64,4 @@ private:
   PackedMatrix _cons_matrix;
 };
 
-#endif /* __LES_CELAR_READER_HPP */
+#endif /* __LES_READERS_CELAR_HPP */

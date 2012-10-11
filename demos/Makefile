@@ -1,19 +1,14 @@
-# Copyright (c) 2012 Alexander Sviridenko
+# Copyright (c) 2012 Oleksandr Sviridenko
 
 include ../config.mk
 
 INCLUDE_FLAGS = -I. $(LES_INCLUDE_FLAGS)
 LIB_FLAGS = $(LES_LIB_FLAGS)
 
-DEMOS = demo_finkelstein_decomposition \
-	demo_interaction_graph \
-	demo_tree_decomposition \
-	demo_celar_reader
-
 demo_finkelstein_decomposition:
 	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
-demo_knapsack_problem:
+demo_knapsack_problem_solver:
 	g++ $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS)
 
 demo_interaction_graph:
@@ -27,10 +22,10 @@ demo_celar_reader:
 
 # SYMPHONY
 
-demo_symphony:
-	$(CXX) $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS) -lClp -lOsiClp -lCgl -lSym -lOsi -lOsiSym -lles_symphony_wrapper
+demo_pure_sym_solver:
+	$(CXX) $@.cpp -o $@ $(INCLUDE_FLAGS) $(LIB_FLAGS) -lClp -lOsiClp -lCgl -lSym -lOsi -lOsiSym
 
-demo_threads:
+demo_sym_solver_with_threads:
 	g++ $@.cpp -o $@ $(SYMPHONY_INC) $(LIB) -lboost_thread -lboost_system
 
 demo_symphony_with_lea:
