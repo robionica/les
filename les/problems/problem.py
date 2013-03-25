@@ -26,7 +26,7 @@ class Problem(object):
 
   def __init__(self, obj=[], cons_matrix=None, cons_senses=[], upper_bounds=[]):
     self._obj = None
-    self._set_obj_coefs(obj)
+    self.set_obj_coefs(obj)
     self._cons_matrix = None
     self._set_cons_matrix(cons_matrix)
     self._cons_senses = cons_senses
@@ -48,7 +48,7 @@ class Problem(object):
     else:
       self._cons_matrix = m
 
-  def _set_obj_coefs(self, coefs):
+  def set_obj_coefs(self, coefs):
     if isinstance(coefs, (tuple, list)):
       obj = dok_matrix((1, len(coefs)), dtype=np.float16)
       for i, c in enumerate(coefs):
