@@ -25,8 +25,8 @@ class DecompositionTree(nx.DiGraph):
     if not isinstance(problem, Problem):
       raise TypeError()
     self._problem = problem
-    self._root = id(root)
     self.add_node(root)
+    self._root = root.get_name()
 
   def get_root(self):
     return self._root
@@ -36,10 +36,11 @@ class DecompositionTree(nx.DiGraph):
       raise TypeError()
     name_format = self._problem.subproblem_name_format
     p._set_name(name_format % len(self))
-    super(DecompositionTree, self).add_node(id(p), subproblem=p)
+    super(DecompositionTree, self).add_node(p.get_name(), subproblem=p)
 
   def add_edge(self, sp1, sp2, shared_cols=[]):
-    nx.DiGraph.add_edge(self, id(sp1), id(sp2))
+    nx.DiGraph.add_edge(self, sp1.get_name(), sp2.get_name(),
+                        shared_cols=shared_cols)
     sp2.add_dependency(sp1, shared_cols)
 
   def get_subproblems(self):
