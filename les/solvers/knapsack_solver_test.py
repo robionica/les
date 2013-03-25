@@ -14,18 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.solvers.solver import Solver
+import unittest
 
-class MILPSolver(Solver):
-  """Base class for MILP problem solvers."""
+from les.solvers.knapsack_solver import KnapsackProblem, FractionalKnapsackSolver
 
-  def __init__(self):
-    Solver.__init__(self)
+class FractionalKnapsackSolverTest(unittest.TestCase):
 
-  def get_col_solution(self):
-    """Returns list of columns values."""
-    raise NotImplementedError()
-
-  def get_obj_value(self):
-    """Returns objective function value."""
-    raise NotImplementedError()
+  def test_solve(self):
+    v = [8, 11, 6, 4]
+    w = [5,  7, 4, 3]
+    W = 14
+    solution = [1.0, 1.0, 0.5, 0.0]
+    value = sum([float(v[i]) * solution[i] for i in range(len(v))])
+    problem = KnapsackProblem(v, w, W)
+    solver = FractionalKnapsackSolver()
+    solver.load_problem(problem)
+    solver.solve()
+    self.assertEqual(value, solver.get_obj_value())
+    for i in range(len(v)):
+      self.assertEqual(solution[i], solver.get_col_solution()[i])

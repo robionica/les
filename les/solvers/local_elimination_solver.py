@@ -147,4 +147,5 @@ class LocalEliminationSolver(MILPSolver):
     self._decomposition_tree = decomposition_tree
 
   def get_obj_value(self):
+    """Returns objective function value."""
     return self._obj_value
