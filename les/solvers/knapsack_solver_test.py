@@ -16,7 +16,23 @@
 
 import unittest
 
-from les.solvers.knapsack_solver import KnapsackProblem, FractionalKnapsackSolver
+from les.solvers import knapsack_solver
+
+class Knapsack01SolverTest(unittest.TestCase):
+
+  def test_solve(self):
+    v = [8, 11, 6, 4]
+    w = [5,  7, 4, 3]
+    W = 14
+    solution = [0.0, 1.0, 1.0, 1.0]
+    value = 21.0
+    problem = knapsack_solver.KnapsackProblem(v, w, W)
+    solver = knapsack_solver.Knapsack01Solver()
+    solver.load_problem(problem)
+    solver.solve()
+    self.assertEqual(value, solver.get_obj_value())
+    for i in range(len(v)):
+      self.assertEqual(solution[i], solver.get_col_solution()[i])
 
 class FractionalKnapsackSolverTest(unittest.TestCase):
 
@@ -26,8 +42,8 @@ class FractionalKnapsackSolverTest(unittest.TestCase):
     W = 14
     solution = [1.0, 1.0, 0.5, 0.0]
     value = sum([float(v[i]) * solution[i] for i in range(len(v))])
-    problem = KnapsackProblem(v, w, W)
-    solver = FractionalKnapsackSolver()
+    problem = knapsack_solver.KnapsackProblem(v, w, W)
+    solver = knapsack_solver.FractionalKnapsackSolver()
     solver.load_problem(problem)
     solver.solve()
     self.assertEqual(value, solver.get_obj_value())

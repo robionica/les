@@ -26,3 +26,19 @@ class KnapsackProblem(MILPProblem):
     cons_matrix = numpy.matrix([weights])
     MILPProblem.__init__(self, values, cons_matrix=cons_matrix, cons_senses=[],
                          upper_bounds=[max_weight])
+    self._weights = weights
+    self._values = values
+    self._max_weight = max_weight
+
+  def get_values(self):
+    return self._values
+
+  def get_weights(self):
+    return self._weights
+
+  def get_num_items(self):
+    return len(self._values)
+
+  def get_max_weight(self):
+    """Returns maximum weight that we can carry in the bag."""
+    return self._max_weight

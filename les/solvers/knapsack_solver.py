@@ -17,11 +17,65 @@
 from les.solvers.milp_solver import MILPSolver
 from les.problems.knapsack_problem import KnapsackProblem
 
-class FractionalKnapsackSolver(MILPSolver):
+class KnapsackSolverBase(MILPSolver):
+
+  def __init__(self):
+    MILPSolver.__init__(self)
+    self._problem = None
+
+  def load_problem(self, problem):
+    if not isinstance(problem, KnapsackProblem):
+      raise TypeError()
+    self._problem = problem
+
+class Knapsack01Solver(KnapsackSolverBase):
+  """A dynamic programming algorithm for the 0-1 knapsack problem."""
+
+  def __init__(self):
+    KnapsackSolverBase.__init__(self)
+
+  def solve(self):
+    W = self._problem.get_max_weight()
+    n = self._problem.get_num_items() - 1
+    v = self._problem.get_values()
+    w = self._problem.get_weights()
+    c = []                 # create an empty 2D array
+    for i in range(n + 1): # c[i][j] = value of the optimal solution using
+      temp = [0] * (W + 1) # items 1 through i and maximum weight j
+      c.append(temp)
+    for i in range(1, n + 1):
+      for j in range(1, W + 1):
+        if w[i] <= j: # if item i will fit within weight j
+          # add item i if value is better
+          if v[i] + c[i - 1][j - w[i]] > c[i - 1][j]:
+            c[i][j] = v[i] + c[i - 1][j - w[i]] # than without item i
+          else:
+            c[i][j] = c[i - 1][j] # otherwise, don't add item i
+        else:
+          c[i][j] = c[i - 1][j]
+    self._obj_value = float(c[n][W]) # final value is in c[n][W]
+    # Build col solution
+    i = len(c) - 1
+    W =  len(c[0])-1
+    # set everything to not marked
+    self._col_solution = [0.0] * (i + 1)
+    while (i >= 0 and W >=0):
+      if (i == 0 and c[i][W] >0 )or c[i][W] != c[i-1][W]:
+        self._col_solution[i] = 1.0
+        W = W - w[i]
+      i = i-1
+
+  def get_obj_value(self):
+    return self._obj_value
+
+  def get_col_solution(self):
+    return self._col_solution
+
+class FractionalKnapsackSolver(KnapsackSolverBase):
   """A greedy algorithm for the fractional knapsack problem."""
 
   def __init__(self):
-    self._problem = None
+    KnapsackSolverBase.__init__(self)
 
   def solve(self):
     n = self._problem.get_num_cols()
@@ -58,8 +112,3 @@ class FractionalKnapsackSolver(MILPSolver):
 
   def get_obj_value(self):
     return self._obj_value
-
-  def load_problem(self, problem):
-    if not isinstance(problem, KnapsackProblem):
-      raise TypeError()
-    self._problem = problem
