@@ -1,4 +1,4 @@
-<!--- -*- mode: markdown; --->
+<!--- -*- mode: markdown; -*- --->
 
 # Install SYMPHONY
 
