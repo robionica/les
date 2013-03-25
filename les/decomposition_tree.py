@@ -16,12 +16,14 @@
 
 import networkx as nx
 
-from les.problems.problem import Problem
+from les.problems.problem import Problem, Subproblem
 
 class DecompositionTree(nx.DiGraph):
 
   def __init__(self, problem, root):
     nx.DiGraph.__init__(self)
+    if not isinstance(problem, Problem):
+      raise TypeError()
     self._problem = problem
     self._root = id(root)
     self.add_node(root)
@@ -30,6 +32,8 @@ class DecompositionTree(nx.DiGraph):
     return self._root
 
   def add_node(self, p):
+    if not isinstance(p, Subproblem):
+      raise TypeError()
     name_format = self._problem.subproblem_name_format
     p._set_name(name_format % len(self))
     super(DecompositionTree, self).add_node(id(p), subproblem=p)
