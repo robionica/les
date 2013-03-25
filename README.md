@@ -42,11 +42,11 @@ in doubt, run:
 
         $ python setup.py test
 
-If some tests fail, this library may not work correctly on your system. Continue
-at your own risk.
+   If some tests fail, this library may not work correctly on your
+   system. Continue at your own risk.
 
 4. Install extra software such as solvers
-(e.g. [SYMPHONY](https://github.com/d2rk/les/blob/master/docs/install_symphony.md#install-symphony)
+(e.g. [SYMPHONY](https://github.com/d2rk/les/blob/master/docs/install_symphony.md#install-symphony))
 and setup environment.
 
 5. Run this command from the command prompt:
