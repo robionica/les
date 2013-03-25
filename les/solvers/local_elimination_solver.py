@@ -89,9 +89,7 @@ class LocalEliminationSolver(MILPSolver):
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
     # Solve subproblems if this wasn't done yet
-    for i, subproblem in enumerate(self._decomposition_tree.get_subproblems()):
-      name_format = self._problem.subproblem_name_format
-      subproblem._set_name(name_format % i)
+    for subproblem in self._decomposition_tree.get_subproblems():
       self.solve_subproblem(subproblem)
     # Initialize data-model
     self._data_model.init(self._decomposition_tree.get_subproblems())

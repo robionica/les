@@ -29,8 +29,10 @@ class DecompositionTree(nx.DiGraph):
   def get_root(self):
     return self._root
 
-  def add_node(self, sp):
-    super(DecompositionTree, self).add_node(id(sp), subproblem=sp)
+  def add_node(self, p):
+    name_format = self._problem.subproblem_name_format
+    p._set_name(name_format % len(self))
+    super(DecompositionTree, self).add_node(id(p), subproblem=p)
 
   def add_edge(self, sp1, sp2, shared_cols=[]):
     nx.DiGraph.add_edge(self, id(sp1), id(sp2))
