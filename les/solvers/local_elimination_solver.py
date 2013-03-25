@@ -70,6 +70,7 @@ class LocalEliminationSolver(MILPSolver):
   def __init__(self, data_model=None):
     MILPSolver.__init__(self)
     self._solutions = {}
+    self._obj_value = 0.0
     self._data_model = None
     if data_model:
       self.set_data_model(data_model)
@@ -102,6 +103,8 @@ class LocalEliminationSolver(MILPSolver):
       solutions = self._solutions[subproblem]
       for col_solution, obj_value in solutions:
         self._data_model.write_solution(subproblem, col_solution, obj_value)
+    # Get result objective value
+    self._obj_value = self._data_model.get_max_obj_value(subproblem.get_name())
 
   def solve_subproblem(self, subproblem):
     logger.info("Solving %s" % subproblem)
@@ -142,3 +145,6 @@ class LocalEliminationSolver(MILPSolver):
   def load_problem(self, problem, decomposition_tree):
     self._problem = problem
     self._decomposition_tree = decomposition_tree
+
+  def get_obj_value(self):
+    return self._obj_value
