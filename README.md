@@ -31,16 +31,16 @@ programming (NSDP) algorithms.
 
 1. Download the latest version of LES:
 
-    $ git clone git@github.com:d2rk/les.git
+        $ git clone git@github.com:d2rk/les.git
 
 2. To install LES, make sure you have Python 2.7 or greater installed. If you're
 in doubt, run:
 
-    $ python -V
+        $ python -V
 
 3. Run the tests:
 
-    $ python setup.py test
+        $ python setup.py test
 
 If some tests fail, this library may not work correctly on your system. Continue
 at your own risk.
@@ -51,7 +51,7 @@ and setup environment.
 
 5. Run this command from the command prompt:
 
-    $ python setup.py develop
+        $ python setup.py develop
 
 NOTE: on this moment we're using "development mode" to skip direct installation
 process. Once the work has been done you can remove the project source from a
