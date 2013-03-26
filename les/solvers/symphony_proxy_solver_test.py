@@ -31,6 +31,7 @@ class SymphonyProxySolverTest(unittest.TestCase):
                              [0., 0., 0., 0., 0., 0., 3., 4., 1.],
                              ])
     problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
+                          True,
                           cons_matrix,
                           None,
                           [7, 6, 9, 7, 3, 5])

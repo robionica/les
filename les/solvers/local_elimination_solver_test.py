@@ -30,6 +30,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
                                 [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                                 [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
     problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
+                          True,
                           cons_matrix,
                           None,
                           [7, 6, 9, 7, 3, 5])
@@ -46,6 +47,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
                                 [0., 2., 0., 0., 3., 0., 0.],
                                 [0., 0., 2., 0., 0., 3., 2.]])
     problem = MILPProblem([2, 3, 1, 5, 4, 6, 1],
+                          True,
                           cons_matrix,
                           None,
                           [6, 5, 4, 5])
