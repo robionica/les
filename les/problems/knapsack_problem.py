@@ -24,8 +24,9 @@ class KnapsackProblem(MILPProblem):
     if not isinstance(max_weight, (int, long)):
       raise TypeError()
     cons_matrix = numpy.matrix([weights])
-    MILPProblem.__init__(self, values, cons_matrix=cons_matrix, cons_senses=[],
-                         upper_bounds=[max_weight])
+    MILPProblem.__init__(self, values, True, cons_matrix=cons_matrix,
+                         rows_senses=[],
+                         rows_upper_bounds=[max_weight])
     self._weights = weights
     self._values = values
     self._max_weight = max_weight

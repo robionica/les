@@ -87,7 +87,7 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
     weight = 0.0 # current weight of the solution
     value = 0.0 # current value of the solution
     index = 0 # order[index] is the index in v and w of the item we're considering
-    W = self._problem.get_upper_bounds()[0]
+    W = self._problem.get_rows_upper_bounds()[0]
     knapsack = [0.0] * n
     while (weight < W) and (index < n):
       # if we can fit the entire order[index]-th item
