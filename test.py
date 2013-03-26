@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 import unittest
 
@@ -21,6 +22,8 @@ DEFAULT_VERBOSITY_LEVEL = 2
 TEST_FILE_SUFFIX = "*_test.py"
 TOP_DIR = os.path.dirname(os.path.realpath(__file__))
 SRC_DIR = os.path.join(TOP_DIR, "les")
+
+logging.disable(logging.CRITICAL)
 
 def make_testsuite():
   """Returns test suite."""
