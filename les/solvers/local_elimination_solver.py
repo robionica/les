@@ -31,10 +31,7 @@ class _RelaxedProblemGenerator(object):
 
   def __init__(self, subproblem):
     self._subproblem = subproblem
-    # TODO: consider to use csc matrix instead of csr
-    cons_matrix = hstack([subproblem.get_cons_matrix().getcol(i)
-                          for i in subproblem.get_local_cols()], format="csr")
-
+    cons_matrix = subproblem.get_cons_matrix()[:,list(subproblem.get_local_cols())]
     # Objective function
     obj = SparseVector((1, subproblem.get_num_cols()), dtype=np.float16)
     for i in subproblem.get_local_cols():
@@ -56,8 +53,7 @@ class _RelaxedProblemGenerator(object):
     self._genproblem.set_rows_upper_bounds(self._subproblem.get_rows_upper_bounds().copy())
     m = self._subproblem.get_cons_matrix()
     for i in self._subproblem.get_shared_cols():
-      col = m.getcol(i)
-      for ii, ij in zip(*col.nonzero()):
+      for ii, ij in zip(*m[:,i].nonzero()):
         self._genproblem.set_row_upper_bound(ii, \
         self._genproblem.get_rows_upper_bounds()[ii] - (m[ii, i+ij] * solution[i+ij]))
         # TODO: check row sense
