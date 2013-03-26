@@ -19,7 +19,7 @@ import numpy as np
 from scipy.sparse import csr_matrix, dok_matrix, hstack
 import logging
 
-from les.problems.problem import Problem
+from les.problems.milp_problem import MILPProblem
 from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 from les.solvers.milp_solver import MILPSolver
 from les.sparse_vector import SparseVector
@@ -40,8 +40,8 @@ class _RelaxedProblemGenerator(object):
     for i in subproblem.get_local_cols():
       obj[i] = subproblem.get_obj_coefs()[i]
     # Build gen problem
-    self._genproblem = Problem(obj, cons_matrix, [],
-                               subproblem.get_upper_bounds().copy())
+    self._genproblem = MILPProblem(obj, cons_matrix, [],
+                                   subproblem.get_upper_bounds().copy())
 
   def _gen_initial_solution(self, mask):
     solution = SparseVector((1, self._subproblem.get_num_cols()), dtype=np.float16)

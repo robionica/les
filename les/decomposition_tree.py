@@ -32,7 +32,7 @@ class DecompositionTree(nx.DiGraph):
     return self._root
 
   def add_node(self, p):
-    if not isinstance(p, Subproblem):
+    if not isinstance(p, Problem):
       raise TypeError()
     name_format = self._problem.subproblem_name_format
     p._set_name(name_format % len(self))
