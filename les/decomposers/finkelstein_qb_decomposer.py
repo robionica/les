@@ -60,9 +60,9 @@ class FinkelsteinQBDecomposer(Decomposer):
     for i in cols:
       obj[i] = problem.get_obj_coefs()[i]
     # Build sparse vector of upper bounds
-    upper_bounds = [problem.get_upper_bounds()[i] for i in rows]
+    upper_bounds = [problem.get_rows_upper_bounds()[i] for i in rows]
     # Build subproblem
-    sp = problem.build_subproblem(obj, cons_matrix, [], upper_bounds,
+    sp = problem.build_subproblem(obj, True, cons_matrix, [], upper_bounds,
                                     shared_cols=left_cols | right_cols)
     return sp
 

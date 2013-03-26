@@ -40,8 +40,8 @@ class _RelaxedProblemGenerator(object):
     for i in subproblem.get_local_cols():
       obj[i] = subproblem.get_obj_coefs()[i]
     # Build gen problem
-    self._genproblem = MILPProblem(obj, cons_matrix, [],
-                                   subproblem.get_upper_bounds().copy())
+    self._genproblem = MILPProblem(obj, True, cons_matrix, [],
+                                   subproblem.get_rows_upper_bounds().copy())
 
   def _gen_initial_solution(self, mask):
     solution = SparseVector((1, self._subproblem.get_num_cols()), dtype=np.float16)
@@ -53,15 +53,15 @@ class _RelaxedProblemGenerator(object):
     if not isinstance(mask, (int, long)):
       raise TypeError("mask: %s" % type(mask))
     solution = self._gen_initial_solution(mask)
-    self._genproblem.set_upper_bounds(self._subproblem.get_upper_bounds().copy())
+    self._genproblem.set_rows_upper_bounds(self._subproblem.get_rows_upper_bounds().copy())
     m = self._subproblem.get_cons_matrix()
     for i in self._subproblem.get_shared_cols():
       col = m.getcol(i)
       for ii, ij in zip(*col.nonzero()):
-        self._genproblem.set_upper_bound(ii, \
-        self._genproblem.get_upper_bounds()[ii] - (m[ii, i+ij] * solution[i+ij]))
+        self._genproblem.set_row_upper_bound(ii, \
+        self._genproblem.get_rows_upper_bounds()[ii] - (m[ii, i+ij] * solution[i+ij]))
         # TODO: check row sense
-        if self._genproblem.get_upper_bounds()[ii] < 0:
+        if self._genproblem.get_rows_upper_bounds()[ii] < 0:
           return None, None
     return self._genproblem, solution
 

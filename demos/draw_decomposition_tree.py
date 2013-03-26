@@ -27,9 +27,10 @@ cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
                          [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                          [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
 problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
-                      cons_matrix,
-                      None,
-                      [7, 6, 9, 7, 3, 5])
+                      maximaze=True,
+                      cons_matrix=cons_matrix,
+                      rows_senses=None,
+                      rows_upper_bounds=[7, 6, 9, 7, 3, 5])
 # Decompose the problem
 decomposer = FinkelsteinQBDecomposer()
 decomposer.decompose(problem)

@@ -15,66 +15,75 @@
 # limitations under the License.
 
 import numpy as np
-from scipy.sparse import csr_matrix, lil_matrix, dok_matrix
-from scipy.sparse.base import spmatrix
+from scipy import sparse
 
 from les.sparse_vector import SparseVector
 from les.problems.problem import Problem
 
 class MILPProblem(Problem):
+  """This class represents generic MILP problem."""
 
-  def __init__(self, obj=[], cons_matrix=None, cons_senses=[], upper_bounds=[]):
-    self._obj = None
-    self.set_obj_coefs(obj)
+  def __init__(self, obj_coefs=[], maximaze=True, cons_matrix=None,
+               rows_senses=[], rows_upper_bounds=[], rows_lower_bounds=[]):
+    self._obj_coefs = None
+    self.set_obj_coefs(obj_coefs)
     self._cons_matrix = None
     self._set_cons_matrix(cons_matrix)
-    self._cons_senses = cons_senses
-    self._upper_bounds = None
-    self.set_upper_bounds(upper_bounds)
+    self._rows_senses = rows_senses
+    self._rows_upper_bounds = None
+    self.set_rows_upper_bounds(rows_upper_bounds)
 
   def build_subproblem(self, *args, **kwargs):
     return MILPSubproblem(self, *args, **kwargs)
 
   def get_num_rows(self):
+    """Returns the number of rows."""
     return self._cons_matrix.shape[0]
 
   def get_num_cols(self):
+    """Returns the number of columns."""
     return self._cons_matrix.shape[1]
 
   def _set_cons_matrix(self, m):
     if isinstance(m, np.matrix):
-      self._cons_matrix = csr_matrix(m)
+      self._cons_matrix = sparse.csr_matrix(m)
     else:
       self._cons_matrix = m
 
   def set_obj_coefs(self, coefs):
     if isinstance(coefs, (tuple, list)):
-      obj = dok_matrix((1, len(coefs)), dtype=np.float16)
+      obj = sparse.dok_matrix((1, len(coefs)), dtype=np.float16)
       for i, c in enumerate(coefs):
         obj[0, i] = c
     else:
       obj = coefs
-    self._obj = SparseVector(obj)
+    self._obj_coefs = SparseVector(obj)
 
   def get_obj_coefs(self):
-    return self._obj
+    return self._obj_coefs
 
-  def get_upper_bounds(self):
-    return self._upper_bounds
+  def get_rows_upper_bounds(self):
+    return self._rows_upper_bounds
 
-  def set_upper_bound(self, i, v):
-    self._upper_bounds[i] = v
+  def set_row_upper_bound(self, i, v):
+    """Set a single row upper bound."""
+    self._rows_upper_bounds[i] = v
 
-  def set_upper_bounds(self, coefs):
-    if isinstance(coefs, dok_matrix):
-      self._upper_bounds = SparseVector(coefs)
-    elif isinstance(coefs, (tuple, list)):
-      m = dok_matrix((1, len(coefs)), dtype=np.float16)
-      for i, c in enumerate(coefs):
+  def set_row_bounds(self, lower, upper):
+    """Set a single row lower and upper bound."""
+    pass
+
+  def set_rows_upper_bounds(self, values):
+    """Set rows upper bounds."""
+    if isinstance(values, sparse.dok_matrix):
+      self._rows_upper_bounds = SparseVector(values)
+    elif isinstance(values, (tuple, list)):
+      m = sparse.dok_matrix((1, len(values)), dtype=np.float16)
+      for i, c in enumerate(values):
         m[0, i] = c
-      self._upper_bounds = SparseVector(m)
-    elif isinstance(coefs, SparseVector):
-      self._upper_bounds = coefs
+      self._rows_upper_bounds = SparseVector(m)
+    elif isinstance(values, SparseVector):
+      self._rows_upper_bounds = values
     else:
       raise TypeError()
 
@@ -82,21 +91,22 @@ class MILPProblem(Problem):
     return self._cons_matrix
 
   def check_col_solution(self, solution):
-    # TODO: solution can be a tuple, list or spmatrix
+    # TODO: solution can be a tuple, list or sparse.base.spmatrix
     if len(solution) != self.get_num_cols():
       raise Exception("%d != %d" % (solution.shape[1], self.get_num_cols()))
     v = self._cons_matrix.dot(solution)
     for i in range(len(v)):
       # TODO: add sense
-      if v[i] > self._upper_bounds[i]:
+      if v[i] > self._rows_upper_bounds[i]:
         return False
     return True
 
 class MILPSubproblem(MILPProblem):
 
-  def __init__(self, problem, obj=[], cons_matrix=None, cons_senses=[],
-               upper_bounds=[], shared_cols=[]):
-    MILPProblem.__init__(self, obj, cons_matrix, cons_senses, upper_bounds)
+  def __init__(self, problem, obj=[], maximaze=True, cons_matrix=None,
+               cons_senses=[], upper_bounds=[], shared_cols=[]):
+    MILPProblem.__init__(self, obj, maximaze, cons_matrix, cons_senses,
+                         upper_bounds)
     self._name = None
     self._problem = problem
     self._shared_cols = shared_cols

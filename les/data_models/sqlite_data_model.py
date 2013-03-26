@@ -28,14 +28,14 @@ _MAX_TIMEOUT = 5.0
 logger = logging.getLogger()
 
 class SQLiteCursorWrapper(sqlite3.Cursor):
-  """Substitutes sqlite3.Cursor, with a cursor that logs commands.
+  """Substitutes :class:`sqlite3.Cursor`, with a cursor that logs commands.
 
-  Inherits from sqlite3.Cursor class and extends methods such as execute,
-  executemany and execute script, so it logs SQL calls.
+  Inherits from :class:`sqlite3.Cursor` class and extends methods such as
+  execute, executemany and execute script, so it logs SQL calls.
   """
 
   def execute(self, sql, *args):
-    """Replaces execute() with a logging variant."""
+    """Replaces :func:`execute` with a logging variant."""
     if args:
       parameters = []
       for arg in args:
@@ -58,26 +58,28 @@ class SQLiteCursorWrapper(sqlite3.Cursor):
                                                         seq_parameters_list)
 
   def executescript(self, sql):
-    """Replaces executescript() with a logging variant."""
+    """Replaces :func:`executescript` with a logging variant."""
     logger.debug('SQL ExecuteScript: %s', sql)
     return super(SQLiteCursorWrapper, self).executescript(sql)
 
 class SQLiteConnectionWrapper(sqlite3.Connection):
-  """Substitutes sqlite3.Connection with a connection that logs commands.
+  """Substitutes :class:`sqlite3.Connection` with a connection that logs
+  commands.
 
-  Inherits from sqlite3.Connection class and overrides cursor replacing the
-  default cursor with an instance of SQLiteCursorWrapper. This automatically
-  makes execute, executemany, executescript and others use the
-  SQLiteCursorWrapper.
+  Inherits from :class:`sqlite3.Connection` class and overrides cursor replacing
+  the default cursor with an instance of :class:`SQLiteCursorWrapper`. This
+  automatically makes execute, executemany, executescript and others use the
+  :class:`SQLiteCursorWrapper`.
   """
 
   def cursor(self):
-    """Substitutes standard cursor() with a SQLiteCursorWrapper to log queries.
+    """Substitutes standard :func:`cursor` with a SQLiteCursorWrapper to log
+    queries.
 
-    Substitutes the standard sqlite.Cursor with SQLiteCursorWrapper to ensure
-    all cursor requests get intercepted.
+    Substitutes the standard :class:`sqlite.Cursor` with
+    :class:`SQLiteCursorWrapper` to ensure all cursor requests get intercepted.
 
-    Returns a SQLiteCursorWrapper instance.
+    Returns a :class:`SQLiteCursorWrapper` instance.
     """
     return super(SQLiteConnectionWrapper, self).cursor(SQLiteCursorWrapper)
 
@@ -105,11 +107,11 @@ class SQLiteDataStore(DataStore):
     )
 
   def get_connection(self, settings={}):
-    """Returns Connection instance to SQLite database."""
+    """Returns :class:`Connection` instance to SQLite database."""
     return self._connection and self._connection or self._connect(settings)
 
 class SQLiteDataModel(DBDataModel):
-  """This class represents data model based on SQLite DB."""
+  """This class represents data model based on SQLite database."""
 
   def __init__(self, db_name=None, verbose=False):
     DBDataModel.__init__(self, SQLiteDataStore(db_name, verbose=verbose))
