@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import numpy as np
 
 from les.problems import MILPProblem
@@ -22,6 +23,7 @@ from les.decomposers import FinkelsteinQBDecomposer
 from les.data_models import SQLiteDataModel
 
 # Build the problem
+start = time.clock()
 cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
                          [1., 2., 3., 2., 0., 0., 0., 0., 0.],
                          [0., 0., 1., 4., 3., 4., 2., 0., 0.],
@@ -33,13 +35,21 @@ problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
                       cons_matrix,
                       None,
                       [7, 6, 9, 7, 3, 5])
+end = time.clock()
+print "Build time: %6.4f second(s)" % (end - start)
 # Decompose the problem
+start = time.clock()
 decomposer = FinkelsteinQBDecomposer()
 decomposer.decompose(problem)
+end = time.clock()
+print "Decomposition time: %6.4f second(s)" % (end - start)
 # Initialize data model
 data_model = SQLiteDataModel()
 # Solving...
+start = time.clock()
 solver = LocalEliminationSolver(data_model=data_model)
 solver.load_problem(problem, decomposer.get_decomposition_tree())
 solver.solve()
+end = time.clock()
+print "Solving time: %6.4f second(s)" % (end - start)
 print "Ojective value:", solver.get_obj_value()
