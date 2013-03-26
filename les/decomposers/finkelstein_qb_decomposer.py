@@ -1,4 +1,5 @@
 # -*- coding: utf-8; -*-
+#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +34,14 @@ from les.decomposition_tree import DecompositionTree
 from les.problems.milp_problem import MILPProblem
 from les.sparse_vector import SparseVector
 
+def _get_indices(m, i):
+  start = m.indptr[i]
+  size = m.indptr[i + 1] - start
+  result = []
+  for j in range(start, start + size):
+    result.append(m.indices[j])
+  return result
+
 class FinkelsteinQBDecomposer(Decomposer):
   """This class represents Finkelstein QB decomposer for MILP problems."""
 
@@ -52,8 +61,7 @@ class FinkelsteinQBDecomposer(Decomposer):
     cols = left_cols | middle_cols | right_cols
     problem = self.get_problem()
     # Put rows one under one
-    cons_matrix = vstack([problem.get_cons_matrix().getrow(i) for i in rows],
-                         format="csr")
+    cons_matrix = problem.get_cons_matrix()[list(rows)]
     # Build sparse vector of obj function coefs
     # TODO: copy dtype
     obj = SparseVector((1, problem.get_num_cols()), dtype=np.float16)
@@ -89,23 +97,22 @@ class FinkelsteinQBDecomposer(Decomposer):
     self._u = []
     self._s = []
     self._m = []
-    matrix = problem.get_cons_matrix().tolil()
+    m = problem.get_cons_matrix()
+    col_matrix = m.tocsc()
     all_cols = set(initial_cols)
     prev_cols = set()
     prev_rows = set()
     prev_col_indices = set()
     all_rows = set()
-    rows_by_cols = dict() # cache
-    cols_by_rows = dict() # cache
     cntr = 0
     while True:
       prev_cols = set(all_cols)
       all_rows = set()
       all_cols = set()
       for c in prev_cols:
-        rows = rows_by_cols.setdefault(c, matrix.getcol(c).nonzero()[0])
+        rows = _get_indices(col_matrix, c)
         for row in rows:
-          all_cols.update(cols_by_rows.setdefault(row, matrix.getrow(row).nonzero()[1]))
+          all_cols.update(_get_indices(m, row))
         all_rows.update(rows)
       row_indices = all_rows - prev_rows
       if not len(row_indices):
@@ -113,7 +120,7 @@ class FinkelsteinQBDecomposer(Decomposer):
       self._m.append(set())
       col_indices = set()
       for i in row_indices:
-        col_indices.update(cols_by_rows[i])
+        col_indices.update(_get_indices(m, row))
       self._s.append(col_indices & prev_col_indices)
       self._m[cntr] = col_indices - self._s[cntr]
       self._m[cntr - 1] = self._m[cntr - 1] - self._s[cntr]
