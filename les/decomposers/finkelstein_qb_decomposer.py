@@ -27,7 +27,6 @@
 #
 
 import numpy as np
-from scipy.sparse import csr_matrix, vstack, dok_matrix
 
 from les.decomposers.decomposer import Decomposer
 from les.decomposition_tree import DecompositionTree

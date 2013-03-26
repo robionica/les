@@ -22,6 +22,8 @@ import unittest
 from les.problems.milp_problem import MILPProblem
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
 
+# TODO: test built subproblems
+
 class FinkelsteinQBDecomposerTest(unittest.TestCase):
 
   def test_decompose(self):
