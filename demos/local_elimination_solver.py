@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # -*- coding: utf-8; -*-
 #
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
@@ -43,11 +45,9 @@ decomposer = FinkelsteinQBDecomposer()
 decomposer.decompose(problem)
 end = time.clock()
 print "Decomposition time: %6.4f second(s)" % (end - start)
-# Initialize data model
-data_model = SQLiteDataModel()
 # Solving...
 start = time.clock()
-solver = LocalEliminationSolver(data_model=data_model)
+solver = LocalEliminationSolver(data_model=SQLiteDataModel())
 solver.load_problem(problem, decomposer.get_decomposition_tree())
 solver.solve()
 end = time.clock()
