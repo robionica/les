@@ -35,22 +35,22 @@ def _extract_indices(m, i):
 class InteractionGraph(networkx.Graph):
   """This class represents an interaction graph of a given problem."""
 
-  def __init__(self, problem):
+  def __init__(self, problem=None):
     networkx.Graph.__init__(self)
     self._problem = None
-    self._set_problem(problem)
-    m = problem.get_cons_matrix()
+    if problem:
+      self.read_problem(problem)
+
+  def read_problem(self, problem):
+    if not isinstance(problem, Problem):
+      raise TypeError()
     # TODO: improve this
     for p in xrange(problem.get_num_rows()):
-      J = _extract_indices(m, p)
+      J = _extract_indices(problem.get_cons_matrix(), p)
       for i in range(0, len(J)):
         for j in range(i, len(J)):
           self.add_edge(J[i], J[j])
+    self._problem = problem
 
   def get_problem(self):
     return self._problem
-
-  def _set_problem(self, problem):
-    if not isinstance(problem, Problem):
-      raise TypeError()
-    self._problem = problem
