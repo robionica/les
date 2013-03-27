@@ -18,6 +18,11 @@ class Problem(object):
 
   subproblem_name_format = "Z%d"
 
+  def set_name(self, name):
+    raise NotImplementedError()
+
+  def get_name(self):
+    raise NotImplementedError()
 
 class Subproblem(Problem):
 
