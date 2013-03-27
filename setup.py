@@ -21,9 +21,18 @@ from setuptools import setup, find_packages, Extension
 import sys
 import types
 
-SYMPHONY_HOME_DIR = os.environ.get("SYMPHONY_HOME_DIR")
+install_requires = [
+  "networkx",
+  "scipy",
+  "numpy"
+]
 
 extensions = []
+
+SYMPHONY_HOME_DIR = os.environ.get("SYMPHONY_HOME_DIR")
+# Do we have METIS or we have to provide the support for it...
+if os.environ.get("METIS_DLL"):
+  install_requires.append("metis")
 
 def setup_symphony(home_dir):
   """Setup SYMPHONY solver."""
@@ -49,7 +58,7 @@ def setup_symphony(home_dir):
       ["les/ext/coin/osi_sym_solver_interface.cc"],
       define_macros=[("BOOST_PYTHON_NO_PY_SIGNATURES", 1)],
       libraries=["boost_python",
-                   "OsiSym","Sym", "Cgl", "OsiClp", "Clp", "Osi", "CoinUtils"],
+                 "OsiSym","Sym", "Cgl", "OsiClp", "Clp", "Osi", "CoinUtils"],
       include_dirs=[include_dir],
       library_dirs=[lib_dir]
     )
@@ -72,11 +81,8 @@ def main():
     classifiers=[
       "License :: OSI Approved :: Apache Software License",
       ],
-    install_requires=[
-      "networkx",
-      "scipy",
-      "numpy"
-    ])
+    install_requires=install_requires
+  )
 
 if __name__ == "__main__":
   main()
