@@ -13,3 +13,4 @@
 # limitations under the License.
 
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
+from les.decomposers.metis_part_graph_decomposer import MetisPartGraphDecomposer
