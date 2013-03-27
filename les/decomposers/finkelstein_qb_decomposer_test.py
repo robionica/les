@@ -26,7 +26,7 @@ from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
 
 class FinkelsteinQBDecomposerTest(unittest.TestCase):
 
-  def test_decompose(self):
+  def test_decompose1(self):
     cons_matrix = numpy.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
                                 [1., 2., 3., 2., 0., 0., 0., 0., 0.],
                                 [0., 0., 1., 4., 3., 4., 2., 0., 0.],
@@ -44,6 +44,26 @@ class FinkelsteinQBDecomposerTest(unittest.TestCase):
     u = [set([0, 1]), set([2, 3]), set([4, 5])]
     s = [set([]), set([2, 3]), set([6])]
     m = [set([0, 1]), set([4, 5]), set([8, 7])]
+    for t, r in ((u, decomposer._u), (s, decomposer._s), (m, decomposer._m)):
+      self.assertEqual(len(t), len(r))
+      for i in range(len(t)):
+        self.assertEqual(t[i], r[i])
+
+  def test_decompose2(self):
+    cons_matrix = numpy.matrix([[3., 4., 1., 0., 0., 0., 0.],
+                                [0., 2., 3., 3., 0., 0., 0.],
+                                [0., 2., 0., 0., 3., 0., 0.],
+                                [0., 0., 2., 0., 0., 3., 2.]])
+    problem = MILPProblem([2, 3, 1, 5, 4, 6, 1],
+                          True,
+                          cons_matrix,
+                          None,
+                          [6, 5, 4, 5])
+    decomposer = FinkelsteinQBDecomposer()
+    decomposer.decompose(problem)
+    u = [set([0]), set([1, 2, 3])]
+    s = [set([]), set([1, 2])]
+    m = [set([0]), set([3, 4, 5, 6])]
     for t, r in ((u, decomposer._u), (s, decomposer._s), (m, decomposer._m)):
       self.assertEqual(len(t), len(r))
       for i in range(len(t)):
