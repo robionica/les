@@ -22,8 +22,7 @@
 using namespace boost::python;
 
 struct OsiSymSolverInterfaceWrap : OsiSymSolverInterface,
-                                   wrapper<OsiSymSolverInterface>
-{
+                                   wrapper<OsiSymSolverInterface> {
 public:
   OsiSymSolverInterfaceWrap() : OsiSymSolverInterface() {}
 
@@ -59,15 +58,40 @@ public:
 BOOST_PYTHON_MODULE(osi_sym_solver_interface)
 {
   class_<OsiSymSolverInterfaceWrap, boost::noncopyable>("OsiSymSolverInterface")
+    // Solve methods
+    .def("branch_and_bound", &OsiSymSolverInterfaceWrap::branchAndBound)
+    .def("initial_solve", &OsiSymSolverInterfaceWrap::initialSolve)
+    .def("resolve", &OsiSymSolverInterfaceWrap::resolve)
+    .def("multi_criteria_branch_and_bound",
+         &OsiSymSolverInterfaceWrap::multiCriteriaBranchAndBound)
+    // Methods returning info on how the solution process terminated
+    .def("is_abandoned", &OsiSymSolverInterfaceWrap::isAbandoned)
+    .def("is_proven_optimal", &OsiSymSolverInterfaceWrap::isProvenOptimal)
+    .def("is_proven_primal_infeasible",
+         &OsiSymSolverInterfaceWrap::isProvenPrimalInfeasible)
+    .def("is_proven_dual_infeasible",
+         &OsiSymSolverInterfaceWrap::isProvenDualInfeasible)
+    .def("is_iteration_limit_reached",
+         &OsiSymSolverInterfaceWrap::isIterationLimitReached)
+    .def("is_time_limit_reached", &OsiSymSolverInterfaceWrap::isTimeLimitReached)
+    .def("is_target_gap_reached", &OsiSymSolverInterfaceWrap::isTargetGapReached)
+    // Methods to expand a problem
     .def("add_col", &OsiSymSolverInterfaceWrap::addCol)
     .def("add_row", &OsiSymSolverInterfaceWrap::addRow)
-    .def("branch_and_bound", &OsiSymSolverInterfaceWrap::branchAndBound)
-    .def("set_integer", &OsiSymSolverInterfaceWrap::setInteger)
-    .def("get_col_solution", &OsiSymSolverInterfaceWrap::default_getColSolution)
-    .def("set_obj_sense", &OsiSymSolverInterfaceWrap::setObjSense)
+    // Problem query methods
     .def("get_num_cols", &OsiSymSolverInterfaceWrap::getNumCols)
     .def("get_num_rows", &OsiSymSolverInterfaceWrap::getNumRows)
+    .def("get_num_elements", &OsiSymSolverInterfaceWrap::getNumElements)
+    .def("get_obj_sense", &OsiSymSolverInterfaceWrap::getObjSense)
+    .def("get_infinity", &OsiSymSolverInterfaceWrap::getInfinity)
+    // Methods to set variable type
+    .def("set_integer", &OsiSymSolverInterfaceWrap::setInteger)
+    // Solution query methods
+    .def("get_col_solution", &OsiSymSolverInterfaceWrap::default_getColSolution)
     .def("get_obj_value", &OsiSymSolverInterfaceWrap::getObjValue)
+    // Methods to modify the objective, bounds, and solution
+    .def("set_obj_sense", &OsiSymSolverInterfaceWrap::setObjSense)
+    // Parameter set/get methods
     .def("set_sym_param", &OsiSymSolverInterfaceWrap::setSymParam)
     ;
 }
