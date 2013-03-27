@@ -24,6 +24,8 @@ from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 from les.solvers.milp_solver import MILPSolver
 from les.sparse_vector import SparseVector
 from les.data_models.data_model import DataModel
+from les import runtime
+from les.runtime import thread_pool
 
 logger = logging.getLogger()
 
@@ -82,12 +84,28 @@ class LocalEliminationSolver(MILPSolver):
   def get_data_model(self):
     return self._data_model
 
-  def solve(self):
+  def solve(self, max_num_threads=runtime.get_num_cpus()):
+    """Set `max_num_threads` as 0 to disable threading."""
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
+    if not isinstance(max_num_threads, (int, long)):
+      raise TypeError()
     # Solve subproblems if this wasn't done yet
-    for subproblem in self._decomposition_tree.get_subproblems():
-      self.solve_subproblem(subproblem)
+    solutions_storage = {}
+    if max_num_threads:
+      def report(request, result):
+        subproblem = request.args[0]
+        logger.info("T%d: %s solved" % (request.requestID, subproblem))
+      pool = thread_pool.ThreadPool(max_num_threads)
+      reqs = thread_pool.make_requests(self.solve_subproblem,
+                                       self._decomposition_tree.get_subproblems(),
+                                       report)
+      for req in reqs:
+        pool.put_request(req)
+      pool.wait()
+    else:
+      for subproblem in self._decomposition_tree.get_subproblems():
+        self.solve_subproblem(subproblem, )
     # Initialize data-model
     self._data_model.init(self._decomposition_tree.get_subproblems())
     # Process subproblems in a depth-first-search pre-ordering starting
@@ -118,11 +136,8 @@ class LocalEliminationSolver(MILPSolver):
           result_col_solution[i] = col_solution[c]
         for dep_subproblem, dep_cols in subproblem.get_dependencies().items():
           obj_value += sum([self._problem.get_obj_coefs()[i] * result_col_solution[i] for i in dep_cols])
-        self._register_solution(subproblem, result_col_solution, obj_value)
-
-  def _register_solution(self, subproblem, col_solution, obj_value):
-    """Registers solution for a given subproblem."""
-    self._solutions[subproblem].append((col_solution, obj_value))
+        # Registers solution for a given subproblem.
+        self._solutions[subproblem].append((result_col_solution, obj_value))
 
   def _solve_relaxed_problem(self, problem):
     # 1. Solve with help of R0 relaxation - try to solve problem without
