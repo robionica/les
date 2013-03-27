@@ -119,7 +119,7 @@ class FinkelsteinQBDecomposer(Decomposer):
       self._m.append(set())
       col_indices = set()
       for i in row_indices:
-        col_indices.update(_get_indices(m, row))
+        col_indices.update(_get_indices(m, i))
       self._s.append(col_indices & prev_col_indices)
       self._m[cntr] = col_indices - self._s[cntr]
       self._m[cntr - 1] = self._m[cntr - 1] - self._s[cntr]
