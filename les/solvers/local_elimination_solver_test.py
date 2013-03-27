@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +55,11 @@ class LocalEliminationSolverTest(unittest.TestCase):
                           [6, 5, 4, 5])
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
+    subproblems = decomposer.get_decomposition_tree().get_subproblems()
     solver = LocalEliminationSolver(data_model=SQLiteDataModel())
-    #solver.load_problem(problem, decomposer.get_decomposition_tree())
-    #solver.solve()
+    solver.load_problem(problem, decomposer.get_decomposition_tree())
+    solver.solve()
+    self.assertEqual(18.0, solver.get_obj_value())
+
+if __name__ == "__main__":
+  unittest.main()
