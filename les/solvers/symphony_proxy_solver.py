@@ -33,14 +33,23 @@ class SymphonyProxySolver(OsiSymSolverInterface, Solver):
     """Loads problem to the solver."""
     if not isinstance(problem, Problem):
       raise TypeError("Problem must be derived from Problem: %s" % type(problem))
-    # Objective functions
-    for i, coef in enumerate(problem.get_obj_coefs()):
-      (p, v) = coef
+    # Setup objective functions
+
+    # XXX: At some point we can not set column type when there is only one
+    # column in the problem. Otherwise SYMPHONY crashes with segmentation fault.
+
+    if problem.get_num_cols() > 1:
+      for i, coef in enumerate(problem.get_obj_coefs()):
+        (p, v) = coef
+        col = coin_utils.CoinPackedVector()
+        # NOTE: fix coef because of C++ signature
+        self.add_col(col, 0., 1., float(v))
+        # TODO: set column type
+        self.set_integer(i)
+    else:
       col = coin_utils.CoinPackedVector()
-      # NOTE: fix coef because of C++ signature
-      self.add_col(col, 0., 1., float(v))
-      # TODO: set column type
-      self.set_integer(i)
+      self.add_col(col, 0., 1., float(problem.get_obj_coefs().values()[0]))
+      self.set_integer(1)
     # Constraints
     for p, row in enumerate(problem.get_cons_matrix()):
       if not row.getnnz():

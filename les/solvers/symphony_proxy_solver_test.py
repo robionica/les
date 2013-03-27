@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # -*- coding: utf-8; -*-
 #
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
@@ -22,7 +24,7 @@ from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 
 class SymphonyProxySolverTest(unittest.TestCase):
 
-  def test_solve(self):
+  def test_solve1(self):
     cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
                              [1., 2., 3., 2., 0., 0., 0., 0., 0.],
                              [0., 0., 1., 4., 3., 4., 2., 0., 0.],
@@ -42,3 +44,12 @@ class SymphonyProxySolverTest(unittest.TestCase):
     col_solution = [1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
     for i in range(len(col_solution)):
       self.assertEqual(col_solution[i], solver.get_col_solution()[i])
+
+  def test_solve2(self):
+    problem = MILPProblem([2.0], True, np.matrix([[3.0]]), None, [1.0])
+    solver = SymphonyProxySolver()
+    solver.load_problem(problem)
+    solver.solve()
+
+if __name__ == "__main__":
+  unittest.main()
