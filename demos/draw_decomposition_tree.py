@@ -12,36 +12,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import networkx as nx
 import pylab as plot
 import numpy as np
+import sys
+import os
+import gzip
 
 from les.problems import MILPProblem
 from les.decomposers import FinkelsteinQBDecomposer
+from les.readers.mps_reader import MPSReader
 
-# Build the problem
-cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
-                         [1., 2., 3., 2., 0., 0., 0., 0., 0.],
-                         [0., 0., 1., 4., 3., 4., 2., 0., 0.],
-                         [0., 0., 2., 1., 1., 2., 5., 0., 0.],
-                         [0., 0., 0., 0., 0., 0., 2., 1., 2.],
-                         [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
-problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
-                      maximaze=True,
-                      cons_matrix=cons_matrix,
-                      rows_senses=None,
-                      rows_upper_bounds=[7, 6, 9, 7, 3, 5])
-# Decompose the problem
-decomposer = FinkelsteinQBDecomposer()
-decomposer.decompose(problem)
-# Draw decomposition tree
-g = decomposer.get_decomposition_tree()
-pos = nx.spring_layout(g)
-nx.draw_networkx_nodes(g, pos, node_color="white")
-nx.draw_networkx_edges(g, pos, edge_color="black", arrows=True)
-nx.draw_networkx_labels(g, pos, font_family="sans-serif")
-edge_labels = dict([((u,v), list(d["shared_cols"]))
-                    for u, v, d in g.edges(data=True)])
-nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
-plot.axis("off")
-plot.show() # or plot.savefig("decomposition_tree.png")
+def draw_decomposition_tree(g):
+  """Draws decomposition tree g."""
+  pos = nx.spring_layout(g)
+  nx.draw_networkx_nodes(g, pos, node_color="white")
+  nx.draw_networkx_edges(g, pos, edge_color="black", arrows=True)
+  nx.draw_networkx_labels(g, pos, font_family="sans-serif")
+  edge_labels = dict([((u,v), list(d["shared_cols"]))
+                      for u, v, d in g.edges(data=True)])
+  nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
+  plot.axis("off")
+  plot.show() # or plot.savefig("decomposition_tree.png")
+
+def main():
+  if len(sys.argv) < 2:
+    print("Please provide input problem", file=sys.stderr)
+    exit(0)
+  reader = None
+  filename = sys.argv[1]
+  if not os.path.exists(filename):
+    raise IOError("File doesn't exist: %s" % filename)
+  if filename.endswith(".gz"):
+    stream = gzip.open(filename, 'rb')
+    reader = MPSReader()
+    reader.parse(stream)
+    stream.close()
+  else:
+    raise Exception()
+  problem = reader.build_problem()
+  decomposer = FinkelsteinQBDecomposer()
+  decomposer.decompose(problem)
+  draw_decomposition_tree(decomposer.get_decomposition_tree())
+
+if __name__ == "__main__":
+  main()
