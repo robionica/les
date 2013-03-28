@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# USAGE: python draw_decomposition_tree.py FILENAME
+
 from __future__ import print_function
 
 import networkx as nx
@@ -19,11 +23,9 @@ import pylab as plot
 import numpy as np
 import sys
 import os
-import gzip
 
 from les.problems import BILPProblem
 from les.decomposers import FinkelsteinQBDecomposer
-from les.readers.mps_reader import MPSReader
 
 def draw_decomposition_tree(g):
   """Draws decomposition tree g."""
@@ -39,23 +41,17 @@ def draw_decomposition_tree(g):
 
 def main():
   if len(sys.argv) < 2:
-    print("Please provide input problem", file=sys.stderr)
+    print("USAGE: %s FILENAME" % sys.argv[0], file=sys.stderr)
+    print()
+    print("Please provide input problem.", file=sys.stderr)
     exit(0)
-  reader = None
-  filename = sys.argv[1]
-  if not os.path.exists(filename):
-    raise IOError("File doesn't exist: %s" % filename)
-  if filename.endswith(".gz"):
-    stream = gzip.open(filename, 'rb')
-    reader = MPSReader()
-    reader.parse(stream)
-    stream.close()
-  else:
-    raise Exception()
-  problem = reader.build_problem()
-  decomposer = FinkelsteinQBDecomposer()
-  decomposer.decompose(problem)
-  draw_decomposition_tree(decomposer.get_decomposition_tree())
+  try:
+    problem = BILPProblem.build(sys.argv[1])
+    decomposer = FinkelsteinQBDecomposer()
+    decomposer.decompose(problem)
+    draw_decomposition_tree(decomposer.get_decomposition_tree())
+  except KeyboardInterrupt, e:
+    print("Interrupting...", file=sys.stderr)
 
 if __name__ == "__main__":
   main()
