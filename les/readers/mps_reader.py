@@ -28,112 +28,115 @@ import bz2
 import gzip
 import types
 
-from les.problems.bilp_problem import BILPProblem
 from les.readers.reader import Reader
 
-class MPSReader(Reader):
+_MTS_FORMAT_REGEX = re.compile(r"""
+^NAME\s+(\w+)\s*\n
+ROWS\s*\n
+ ([-+\w\s\d]+)\s*\n
+COLUMNS\s*\n
+ ([-+\w\s\d]+)\s*\n
+RHS\s*\n
+ ([-+\w\s\d]+)\s*\n
+BOUNDS\s*\n
+ ([-+\w\s\d]+)\s*\n
+ENDATA\s*$
+""", re.M | re.X)
 
-  _NAME_SECTION = re.compile("^NAME\s+(\w+)$")
-  _ROWS_SECTION = re.compile("^ROWS\s*$")
-  _ROWS_ENTRY = re.compile("^\s+(\w)\s+(\w+)\s*$")
-  _COLS_SECTION = re.compile("^COLUMNS\s*$")
-  _COLS_ENTRY = re.compile("^\s+(\w+)\s+(\w+)\s+([+-]*\d+)(\s+(\w+)\s+([+-]*\d+))*\s*$")
-  _RHS_SECTION = re.compile("^RHS$")
-  _RHS_ENTRY = re.compile("^\s+(\w+)\s+(\w+)\s+([+-]*\d+)(\s+(\w+)\s+([+-]*\d+))*\s*$")
+_ROWS_ENTRY_REGEX = re.compile("^\s+(\w)\s+(\w+)\s*$")
+_COLS_ENTRY_REGEX = re.compile("^\s+(\w+)\s+(\w+)\s+([+-]*\d+)(\s+(\w+)\s+([+-]*\d+))*\s*$")
+_RHS_ENTRY_REGEX = re.compile("^\s+(\w+)\s+(\w+)\s+([+-]*\d+)(\s+(\w+)\s+([+-]*\d+))*\s*$")
+
+class MPSReader(Reader):
+  """This class represents MPS-format problem reader."""
 
   def __init__(self):
     Reader.__init__(self)
-
-  def reset(self):
-    self._rows = dict()
-    self._cols = dict()
-    self._vals = []
+    self._name = None
+    self._row_register = {}
+    self._rows_senses = []
+    self._col_register = {}
+    self._con_coefs = []
+    self._rhs_register = {}
     self._rhs = []
-    self._lines = []
-
-  def build_problem(self):
-    # Build A from scratch. Use dok format.
-    A = sparse.dok_matrix((len(self._rows), len(self._cols)),
-                          dtype=numpy.float16)
-    for i, j, v in self._vals:
-      A[i, j] = v
-    A = A.tocsr()
-    problem = BILPProblem(A[0,:].todense(),
-                          True,
-                          A[1:,:],
-                          [],
-                          self._rhs[1:],
-                          [])
-    return problem
 
   def parse(self, stream):
-    self.reset()
     if isinstance(stream, (types.FileType, bz2.BZ2File, gzip.GzipFile)):
-      self._lines = stream.readlines()
+      data = stream.read()
     elif isinstance(stream, types.StringType):
-      self._lines = stream.split("\n")
+      data = stream
     else:
       raise TypeError()
-    self._pos = 0
-    # Filter empty lines and comments
-    self._lines = filter(lambda line: len(line) and not line.startswith("*"),
-                         self._lines)
-    self._process_name_section()
-    self._process_rows_section()
-    self._process_cols_section()
-    self._process_rhs_section()
+    result = re.match(_MTS_FORMAT_REGEX, data)
+    if not result:
+      raise Exception()
+    self._name = result.group(1)
+    self._process_section(result.group(2), self._parse_rows_section)
+    self._process_section(result.group(3), self._parse_cols_section)
+    self._process_section(result.group(4), self._parse_rhs_section)
+    self._process_section(result.group(5), self._parse_bounds_section)
 
-  def _process_rhs_section(self):
-    for self._pos in range(self._pos + 1, len(self._lines), 1):
-      if re.match(self._RHS_SECTION, self._lines[self._pos]):
-        break
-    for self._pos in range(self._pos + 1, len(self._lines), 1):
-      result = re.match(self._RHS_ENTRY, self._lines[self._pos])
-      if result:
-        rhs_name, row_name, v = result.group(1), result.group(2), result.group(3)
-        self._rhs[self._rows[row_name][0]] = float(v)
-        if result.group(4):
-          row_name, v = result.group(5), result.group(6)
-          self._rhs[self._rows[row_name][0]] = float(v)
-      else:
-        break
-    self._pos -= 1
+  def _process_section(self, section, callback):
+    # Split by lines, filter empty lines and comments
+    lines = filter(lambda line: len(line) and not line.startswith("*"),
+                   section.split("\n"))
+    callback(lines)
 
-  def _process_cols_section(self):
-    for self._pos in range(self._pos + 1, len(self._lines), 1):
-      if re.match(self._COLS_SECTION, self._lines[self._pos]):
-        break
-    for self._pos in range(self._pos + 1, len(self._lines), 1):
-      result = re.match(self._COLS_ENTRY, self._lines[self._pos])
-      if result:
-        col_name, row_name, v = result.group(1), result.group(2), result.group(3)
-        j = self._cols.setdefault(col_name, len(self._cols))
-        self._vals.append((self._rows[row_name][0], j, float(v)))
-        if result.group(4):
-          row_name, v = result.group(5), result.group(6)
-          self._vals.append((self._rows[row_name][0], j, float(v)))
-      else:
-        break
-    self._pos -= 1
+  def get_rhs(self):
+    return self._rhs
 
-  def _process_rows_section(self):
-    for self._pos in range(self._pos + 1, len(self._lines), 1):
-      if re.match(self._ROWS_SECTION, self._lines[self._pos]):
+  def get_name(self):
+    return self._name
+
+  def get_con_coefs(self):
+    return self._con_coefs
+
+  def get_rows_senses(self):
+    return self._rows_senses
+
+  def _parse_bounds_section(self, lines):
+    pass
+
+  def _parse_rhs_section(self, lines):
+    self._rhs_register = {}
+    for line in lines:
+      result = re.match(_RHS_ENTRY_REGEX, line)
+      if not result:
         break
-    for self._pos in range(self._pos + 1, len(self._lines), 1):
-      result = re.match(self._ROWS_ENTRY, self._lines[self._pos])
+      rhs_name, row_name, v = result.group(1), result.group(2), result.group(3)
+      if not rhs_name in self._rhs_register:
+        self._rhs_register[rhs_name] = len(self._rhs_register)
+        self._rhs.append([0.0] * len(self._row_register))
+      rhs_id = self._rhs_register[rhs_name]
+      self._rhs[rhs_id][self._row_register[row_name]] = float(v)
+      if result.group(4):
+        row_name, v = result.group(5), result.group(6)
+        self._rhs[rhs_id][self._row_register[row_name]] = float(v)
+
+  def _parse_cols_section(self, lines):
+    self._col_register = {}
+    self._con_coefs = []
+    for line in lines:
+      result = re.match(_COLS_ENTRY_REGEX, line)
+      if not result:
+        break
+      col_name, row_name, v = result.group(1), result.group(2), result.group(3)
+      j = self._col_register.setdefault(col_name, len(self._col_register))
+      self._con_coefs.append((self._row_register[row_name], j, float(v)))
+      if result.group(4):
+        row_name, v = result.group(5), result.group(6)
+        self._con_coefs.append((self._row_register[row_name], j, float(v)))
+
+  def _parse_rows_section(self, lines):
+    self._row_register = {}
+    self._rows_senses = []
+    for line in lines:
+      result = re.match(_ROWS_ENTRY_REGEX, line)
       if result:
         sense, name = result.group(1), result.group(2)
-        self._rows[name] = (len(self._rows), sense)
+        if name in self._row_register:
+          raise Exception("%s was already registered" % name)
+        self._row_register[name] = len(self._row_register)
+        self._rows_senses.append(sense)
       else:
         break
-    self._pos -= 1
-    self._rhs = [0.0] * len(self._rows)
-
-  def _process_name_section(self):
-    for self._pos in range(self._pos, len(self._lines), 1):
-      result = re.match(self._NAME_SECTION, self._lines[self._pos])
-      if result:
-        name = result.group(1)
-        break
-    self._name = name
