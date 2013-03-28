@@ -19,7 +19,7 @@
 import numpy as np
 import unittest
 
-from les.problems.milp_problem import MILPProblem
+from les.problems.bilp_problem import BILPProblem
 from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 
 class SymphonyProxySolverTest(unittest.TestCase):
@@ -32,7 +32,7 @@ class SymphonyProxySolverTest(unittest.TestCase):
                              [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                              [0., 0., 0., 0., 0., 0., 3., 4., 1.],
                              ])
-    problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
+    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
                           True,
                           cons_matrix,
                           None,
@@ -46,7 +46,7 @@ class SymphonyProxySolverTest(unittest.TestCase):
       self.assertEqual(col_solution[i], solver.get_col_solution()[i])
 
   def test_solve2(self):
-    problem = MILPProblem([2.0], True, np.matrix([[3.0]]), None, [1.0])
+    problem = BILPProblem([2.0], True, np.matrix([[3.0]]), None, [1.0])
     solver = SymphonyProxySolver()
     solver.load_problem(problem)
     solver.solve()
