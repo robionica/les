@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.problems.milp_problem import MILPProblem
+from les.problems.bilp_problem import *

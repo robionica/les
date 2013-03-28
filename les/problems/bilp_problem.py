@@ -14,14 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""In binary problems, each variable can only take on the value of 0 or 1. This
+may represent the selection or rejection of an option, the turning on or off
+of switches, a yes/no answer, or many other situations.
+
+    :math:`f(x) = \\sum_{j=1}^{n}{c_{j}x_{j}}{ \\rightarrow max}`
+
+        subject to
+
+    :math:`\\sum_{j=1}^{n}{a_{ij}x_j \\leq b_i, \quad i=\\overline{1,m}},
+    \quad x_j=\{0,1\}, \quad j=\\overline{1,n}`
+
+"""
+
 import numpy as np
 from scipy import sparse
 
 from les.sparse_vector import SparseVector
 from les.problems.problem import Problem
 
-class MILPProblem(Problem):
-  """This class represents generic MILP problem."""
+__all__ = ["BILPProblem", "ZOLPProblem"]
+
+class BILPProblem(Problem):
+  """This class represents generic binary integer linear programming (BILP)
+  problem or zero-one linear programming (ZOLP) problem.
+  """
 
   def __init__(self, obj_coefs=[], maximaze=True, cons_matrix=None,
                rows_senses=[], rows_upper_bounds=[], rows_lower_bounds=[]):
@@ -34,7 +51,7 @@ class MILPProblem(Problem):
     self.set_rows_upper_bounds(rows_upper_bounds)
 
   def build_subproblem(self, *args, **kwargs):
-    return MILPSubproblem(self, *args, **kwargs)
+    return BILPSubproblem(self, *args, **kwargs)
 
   def get_num_rows(self):
     """Returns the number of rows."""
@@ -101,11 +118,13 @@ class MILPProblem(Problem):
         return False
     return True
 
-class MILPSubproblem(MILPProblem):
+ZOLPProblem = BILPProblem
+
+class BILPSubproblem(BILPProblem):
 
   def __init__(self, problem, obj=[], maximaze=True, cons_matrix=None,
                cons_senses=[], upper_bounds=[], shared_cols=[]):
-    MILPProblem.__init__(self, obj, maximaze, cons_matrix, cons_senses,
+    BILPProblem.__init__(self, obj, maximaze, cons_matrix, cons_senses,
                          upper_bounds)
     self._name = None
     self._problem = problem

@@ -15,16 +15,22 @@
 # limitations under the License.
 
 class Problem(object):
+  """Base problem class for all available problems."""
 
   subproblem_name_format = "Z%d"
 
   def set_name(self, name):
+    """Sets problem name."""
     raise NotImplementedError()
 
   def get_name(self):
+    """Returns the problem name."""
+    raise NotImplementedError()
+
+  def build_subproblem(self, *args, **kwargs):
+    """Builds and returns subproblem for the current problem instance."""
     raise NotImplementedError()
 
 class Subproblem(Problem):
 
-  def build_subproblem(self, problem, *args, **kwargs):
-    raise NotImplementedError()
+  pass
