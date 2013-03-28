@@ -1,16 +1,30 @@
 # -*- coding: utf-8; -*-
+#
+# Copyright (c) 2012-2013 Oleksandr Sviridenko
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-"""Given a collection of items G = {g_1, g_2,... , g_n}, where each item g_i =
-<v_i, w_i> worths v_i dollars, and weights w_i kgs, we would like to fill a bag
-with max-capacity of W kgs with items from G, so that the total value of items
-in the bag is maximized.
+"""Given a collection of items :math:`G = {g_1, g_2,... , g_n}`, where each item
+:math:`g_i = <v_i, w_i>` worths :math:`v_i` dollars, and weights :math:`w_i`
+kgs, we would like to fill a bag with max-capacity of :math:`W` kgs with items
+from :math:`G`, so that the total value of items in the bag is maximized.
 """
 
 import numpy
 
-from les.problems.milp_problem import MILPProblem
+from les.problems.bilp_problem import BILPProblem
 
-class KnapsackProblem(MILPProblem):
+class KnapsackProblem(BILPProblem):
   """Constructor, where values is array of values, weights is array of weights,
   n is number of items in the bag, max_weight is maximum weight that we can
   carry in the bag.
@@ -24,7 +38,7 @@ class KnapsackProblem(MILPProblem):
     if not isinstance(max_weight, (int, long)):
       raise TypeError()
     cons_matrix = numpy.matrix([weights])
-    MILPProblem.__init__(self, values, True, cons_matrix=cons_matrix,
+    BILPProblem.__init__(self, values, True, cons_matrix=cons_matrix,
                          rows_senses=[],
                          rows_upper_bounds=[max_weight])
     self._weights = weights

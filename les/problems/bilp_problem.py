@@ -27,11 +27,19 @@ of switches, a yes/no answer, or many other situations.
 
 """
 
+import os
 import numpy as np
 from scipy import sparse
+import gzip
+import types
 
 from les.sparse_vector import SparseVector
 from les.problems.problem import Problem
+from les.readers.mps_reader import MPSReader
+
+_READERS = {
+  ".mps": MPSReader
+}
 
 __all__ = ["BILPProblem", "ZOLPProblem"]
 
@@ -49,6 +57,51 @@ class BILPProblem(Problem):
     self._rows_senses = rows_senses
     self._rows_upper_bounds = None
     self.set_rows_upper_bounds(rows_upper_bounds)
+
+  @classmethod
+  def build(cls, data):
+    if isinstance(data, MPSReader):
+      return cls._build_from_mps(data)
+    elif type(data) is types.StringType:
+      # The file name has been provided. Detect reader and read the problem.
+      if not os.path.exists(data):
+        raise IOError("File doesn't exist: %s" % data)
+      root, ext = os.path.splitext(data)
+      if data.endswith(".gz"):
+        stream = gzip.open(data, "rb")
+        root, ext = os.path.splitext(root)
+      else:
+        stream = open(data, "r")
+      reader_class = _READERS.get(ext)
+      if not reader_class:
+        raise Exception("Doesn't know how to read %s format."
+                        "See available formats."
+                        % ext)
+      reader = reader_class()
+      reader.parse(stream)
+      stream.close()
+      return cls.build(reader)
+    else:
+      raise TypeError("Don't know how to handle this data")
+
+  @classmethod
+  def _build_from_mps(cls, reader):
+    # Build A from scratch. Use dok format.
+    A = sparse.dok_matrix((len(reader._row_register), len(reader._col_register)),
+                          dtype=np.float16)
+    for i, j, v in reader.get_con_coefs():
+      A[i, j] = v
+    A = A.tocsr()
+    rhs = reader.get_rhs()[0]
+    if not len(rhs) == A.shape[0]:
+      raise Exception()
+    problem = BILPProblem(A[0,:].todense(),
+                          True,
+                          A[1:,:],
+                          [],
+                          rhs[1:],
+                          [])
+    return problem
 
   def build_subproblem(self, *args, **kwargs):
     return BILPSubproblem(self, *args, **kwargs)
