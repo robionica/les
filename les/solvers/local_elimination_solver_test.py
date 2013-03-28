@@ -17,7 +17,7 @@
 import numpy
 import unittest
 
-from les.problems import MILPProblem
+from les.problems import BILPProblem
 from les.solvers.local_elimination_solver import LocalEliminationSolver
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
 from les.data_models.sqlite_data_model import SQLiteDataModel
@@ -31,7 +31,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
                                 [0., 0., 2., 1., 1., 2., 5., 0., 0.],
                                 [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                                 [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
-    problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
+    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
                           True,
                           cons_matrix,
                           None,
@@ -48,7 +48,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
                                 [0., 2., 3., 3., 0., 0., 0.],
                                 [0., 2., 0., 0., 3., 0., 0.],
                                 [0., 0., 2., 0., 0., 3., 2.]])
-    problem = MILPProblem([2, 3, 1, 5, 4, 6, 1],
+    problem = BILPProblem([2, 3, 1, 5, 4, 6, 1],
                           True,
                           cons_matrix,
                           None,

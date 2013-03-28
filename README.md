@@ -6,9 +6,10 @@ Copyright (c) 2012-2013 Oleksander Sviridenko
 
 ## What is LES?
 
-LES is a library for solving a class of mathematical problems called [integer
-linear programming](http://en.wikipedia.org/wiki/Integer_linear_programming)
-(ILP) problems and its variants with help of local elimination algorithms (LEA).
+LES is a library for solving a class of mathematical problems called [binary
+integer linear
+programming](http://en.wikipedia.org/wiki/Integer_linear_programming) (BILP)
+problems and its variants with help of local elimination algorithms (LEA).
 
 ## What is it for, anyway?
 

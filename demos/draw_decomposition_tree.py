@@ -21,7 +21,7 @@ import sys
 import os
 import gzip
 
-from les.problems import MILPProblem
+from les.problems import BILPProblem
 from les.decomposers import FinkelsteinQBDecomposer
 from les.readers.mps_reader import MPSReader
 

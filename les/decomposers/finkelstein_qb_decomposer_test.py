@@ -19,7 +19,7 @@
 import numpy
 import unittest
 
-from les.problems.milp_problem import MILPProblem
+from les.problems.bilp_problem import BILPProblem
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
 
 # TODO: test built subproblems
@@ -34,7 +34,7 @@ class FinkelsteinQBDecomposerTest(unittest.TestCase):
                                 [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                                 [0., 0., 0., 0., 0., 0., 3., 4., 1.],
                                 ])
-    problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
+    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
                           True,
                           cons_matrix,
                           None,
@@ -54,7 +54,7 @@ class FinkelsteinQBDecomposerTest(unittest.TestCase):
                                 [0., 2., 3., 3., 0., 0., 0.],
                                 [0., 2., 0., 0., 3., 0., 0.],
                                 [0., 0., 2., 0., 0., 3., 2.]])
-    problem = MILPProblem([2, 3, 1, 5, 4, 6, 1],
+    problem = BILPProblem([2, 3, 1, 5, 4, 6, 1],
                           True,
                           cons_matrix,
                           None,

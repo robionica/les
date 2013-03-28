@@ -15,11 +15,16 @@
 # limitations under the License.
 
 class Solver(object):
+  """Base solver class."""
 
   def load_problem(self, problem):
     raise NotImplementedError()
 
   def get_problem(self):
+    raise NotImplementedError()
+
+  def get_problem_type(self):
+    """Returns the problem type."""
     raise NotImplementedError()
 
   def solve(self):

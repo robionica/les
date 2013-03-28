@@ -28,7 +28,7 @@ import bz2
 import gzip
 import types
 
-from les.problems.milp_problem import MILPProblem
+from les.problems.bilp_problem import BILPProblem
 from les.readers.reader import Reader
 
 class MPSReader(Reader):
@@ -58,7 +58,7 @@ class MPSReader(Reader):
     for i, j, v in self._vals:
       A[i, j] = v
     A = A.tocsr()
-    problem = MILPProblem(A[0,:].todense(),
+    problem = BILPProblem(A[0,:].todense(),
                           True,
                           A[1:,:],
                           [],

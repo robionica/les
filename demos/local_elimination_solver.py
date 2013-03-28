@@ -19,7 +19,7 @@
 import time
 import numpy as np
 
-from les.problems import MILPProblem
+from les.problems import BILPProblem
 from les.solvers import LocalEliminationSolver
 from les.decomposers import FinkelsteinQBDecomposer
 from les.data_models import SQLiteDataModel
@@ -32,7 +32,7 @@ cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
                          [0., 0., 2., 1., 1., 2., 5., 0., 0.],
                          [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                          [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
-problem = MILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
+problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
                       True,
                       cons_matrix,
                       None,

@@ -13,10 +13,12 @@
 # limitations under the License.
 
 """The interaction graph of the discrete optimization problem (DOP) is called an
-undirected graph G=(X,E), such that:
+undirected graph :math:`G=(X,E)`, such that:
 
-1. Vertices X of G correspond to variables of the DOP;
-2. Two vertices of G are adjacent if corresponding variables interact.
+1. Vertices :math:`X` of :math:`G` correspond to variables of the DOP;
+2. Two vertices of :math:`G` are adjacent if corresponding variables interact.
+
+Interaction graph of variables is also called constraint graph.
 """
 
 import networkx

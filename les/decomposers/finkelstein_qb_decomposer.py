@@ -30,7 +30,7 @@ import numpy as np
 
 from les.decomposers.decomposer import Decomposer
 from les.decomposition_tree import DecompositionTree
-from les.problems.milp_problem import MILPProblem
+from les.problems.bilp_problem import BILPProblem
 from les.sparse_vector import SparseVector
 
 def _get_indices(m, i):
@@ -42,7 +42,7 @@ def _get_indices(m, i):
   return result
 
 class FinkelsteinQBDecomposer(Decomposer):
-  """This class represents Finkelstein QB decomposer for MILP problems."""
+  """This class represents Finkelstein QB decomposer for ILP problems."""
 
   def __init__(self):
     self._u = []
@@ -51,8 +51,8 @@ class FinkelsteinQBDecomposer(Decomposer):
     self._decomposition_tree = None
 
   def _set_problem(self, problem):
-    if not isinstance(problem, MILPProblem):
-      raise TypeError("problem must be derived from MILPProblem: %s",
+    if not isinstance(problem, BILPProblem):
+      raise TypeError("problem must be derived from BILPProblem: %s",
                       type(problem))
     super(FinkelsteinQBDecomposer, self)._set_problem(problem)
 
