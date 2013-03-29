@@ -25,7 +25,7 @@ import numpy as np
 from les.problems import BILPProblem
 from les.solvers import LocalEliminationSolver
 from les.decomposers import FinkelsteinQBDecomposer
-from les.data_models import SQLiteDataModel
+from les.solvers import LocalEliminationSolver
 
 def solve(problem):
   # Decompose the problem
@@ -36,7 +36,7 @@ def solve(problem):
   print("Decomposition time: %6.4f second(s)" % (end - start))
   # Solving...
   start = time.clock()
-  solver = LocalEliminationSolver(data_model=SQLiteDataModel())
+  solver = LocalEliminationSolver()
   solver.load_problem(problem, decomposer.get_decomposition_tree())
   solver.solve()
   end = time.clock()
