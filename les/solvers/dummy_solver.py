@@ -16,18 +16,21 @@
 
 """Dummy solver."""
 
-from les.solvers.solver import Solver
+import numpy
+
+from les.solvers.milp_solver import MILPSolver
 from les.problems.bilp_problem import BILPProblem
 
-class DummySolver(Solver):
+class DummySolver(MILPSolver):
   """This class represents dummy solver, which solves BILPProblem derived
   problems.
   """
 
   def __init__(self):
+    MILPSolver.__init__(self)
     self._problem = None
-    self._col_solution = None
-    self._obj_value = None
+    self._col_solution = []
+    self._obj_value = 0.0
 
   def get_problem(self):
     return self._problem
@@ -47,6 +50,6 @@ class DummySolver(Solver):
     self._col_solution = [1.] * self._problem.get_num_cols()
     if self._problem.check_col_solution(self._col_solution):
       self._obj_value = self._problem.get_obj_coefs().sum()
-      return True
-    self._col_solution = None
-    return False
+      return
+    self._col_solution = []
+    self._obj_value = 0.0
