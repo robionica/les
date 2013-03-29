@@ -26,6 +26,9 @@ from les.problems import BILPProblem
 from les.solvers import LocalEliminationSolver
 from les.decomposers import FinkelsteinQBDecomposer
 from les.solvers import LocalEliminationSolver
+from les.solvers.dummy_solver import DummySolver
+from les.solvers.knapsack_solver import FractionalKnapsackSolver
+from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 
 def solve(problem):
   # Decompose the problem
@@ -36,7 +39,9 @@ def solve(problem):
   print("Decomposition time: %6.4f second(s)" % (end - start))
   # Solving...
   start = time.clock()
-  solver = LocalEliminationSolver()
+  solver = LocalEliminationSolver(master_solver=SymphonyProxySolver,
+                                  relaxation_solvers=[DummySolver,
+                                                      FractionalKnapsackSolver])
   solver.load_problem(problem, decomposer.get_decomposition_tree())
   solver.solve()
   end = time.clock()
