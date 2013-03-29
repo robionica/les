@@ -4,14 +4,16 @@ Local Elimination Solver (LES)
 
 Copyright (c) 2012-2013 Oleksander Sviridenko
 
-## What is LES?
+What is LES?
+------------
 
 LES is a library for solving a class of mathematical problems called [binary
 integer linear
 programming](http://en.wikipedia.org/wiki/Integer_linear_programming) (BILP)
 problems and its variants with help of local elimination algorithms (LEA).
 
-## What is it for, anyway?
+What is it for, anyway?
+-----------------------
 
 Many real
 [discrete optimization](http://en.wikipedia.org/wiki/Discrete_optimization)
@@ -28,7 +30,8 @@ One of the promising ways to exploit sparsity in the constraint matrix of DO
 problems are LEAs, including local decomposition algorithms, nonserial dynamic
 programming (NSDP) algorithms.
 
-## Installation
+Installation
+------------
 
 1. Download the latest version of LES:
 
@@ -59,6 +62,14 @@ NOTE: on this moment we're using "development mode" to skip direct installation
 process. Once the work has been done you can remove the project source from a
 staging area using `$ python setup.py develop --uninstall`.
 
-## Maintainers
+License
+-------
+
+This software is licensed under the [Apache License, Version
+2.0](http://www.apache.org/licenses/LICENSE-2.0.html). See the included NOTICE
+file for more information.
+
+Maintainers
+-----------
 
 Oleksandr Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova.
