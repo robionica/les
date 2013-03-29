@@ -86,6 +86,7 @@ class LocalEliminationSolver(MILPSolver):
 
   def solve(self, max_num_threads=runtime.get_num_cpus()):
     """Set `max_num_threads` as 0 to disable threading."""
+    logger.info("Solving problem %s" % self._problem.get_name())
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
     if not isinstance(max_num_threads, (int, long)):
