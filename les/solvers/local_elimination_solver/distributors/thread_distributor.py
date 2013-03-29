@@ -30,6 +30,10 @@ class ThreadDistributor(Distributor):
     self.set_max_num_threads(max_num_threads or runtime.get_num_cpus())
     self._subproblems = []
 
+  def __str__(self):
+    return "%s[max_num_threads=%d]" % (self.__class__.__name__,
+                                       self.get_max_num_threads())
+
   def set_max_num_threads(self, n):
     if not isinstance(n, (int, long)):
       raise TypeError()
@@ -48,6 +52,7 @@ class ThreadDistributor(Distributor):
     self._subproblems.append(subproblem)
 
   def run(self, callback):
+    logger.info("Running %s..." % self)
     pool = thread_pool.ThreadPool(self._max_num_threads)
     reqs = thread_pool.make_requests(callback, self._subproblems, self._reporter)
     for req in reqs:
