@@ -24,8 +24,9 @@ class KnapsackSolverBase(MILPSolver):
     self._problem = None
 
   def load_problem(self, problem):
+    # Try to convert problem to KnapsackProblem if required. Raises TypeError.
     if not isinstance(problem, KnapsackProblem):
-      raise TypeError()
+      problem = KnapsackProblem.build(problem)
     self._problem = problem
 
 class Knapsack01Solver(KnapsackSolverBase):
@@ -76,8 +77,10 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
 
   def __init__(self):
     KnapsackSolverBase.__init__(self)
+    self._is_fractional = False
 
   def solve(self):
+    self._is_fractional = False
     n = self._problem.get_num_cols()
     v = self._problem.get_obj_coefs()
     m = self._problem.get_cons_matrix()
@@ -103,9 +106,14 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
         knapsack[order[index]] = fraction
         weight = W
         value = value + v[order[index]] * fraction
+        self._is_fractional = True
       index = index + 1
     self._obj_value = value
     self._col_solution = knapsack
+
+  def is_fractional(self):
+    """Returns whether or not solution contains fractional coefficient."""
+    return self._is_fractional
 
   def get_col_solution(self):
     return self._col_solution
