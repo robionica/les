@@ -17,12 +17,12 @@
 from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
 from les.ext.coin import coin_utils
 from les.problems.problem import Problem
-from les.solvers.solver import Solver
+from les.solvers.milp_solver import MILPSolver
 
-class SymphonyProxySolver(OsiSymSolverInterface, Solver):
+class SymphonyProxySolver(OsiSymSolverInterface, MILPSolver):
 
   def __init__(self):
-    Solver.__init__(self)
+    MILPSolver.__init__(self)
     OsiSymSolverInterface.__init__(self)
     self.set_sym_param("verbosity", -2)
 
