@@ -14,18 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
+
 class Problem(object):
   """Base problem class for all available problems."""
 
   subproblem_name_format = "Z%d"
 
+  def __init__(self):
+    self._name = None
+
   def set_name(self, name):
     """Sets problem name."""
-    raise NotImplementedError()
+    if not type(name) is types.StringType:
+      raise TypeError()
+    self._name = name
 
   def get_name(self):
     """Returns the problem name."""
-    raise NotImplementedError()
+    return self._name
 
   def build_subproblem(self, *args, **kwargs):
     """Builds and returns subproblem for the current problem instance."""

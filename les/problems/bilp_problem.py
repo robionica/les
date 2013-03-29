@@ -50,6 +50,7 @@ class BILPProblem(Problem):
 
   def __init__(self, obj_coefs=[], maximaze=True, cons_matrix=None,
                rows_senses=[], rows_upper_bounds=[], rows_lower_bounds=[]):
+    Problem.__init__(self)
     self._obj_coefs = None
     self.set_obj_coefs(obj_coefs)
     self._cons_matrix = None
@@ -101,6 +102,7 @@ class BILPProblem(Problem):
                           [],
                           rhs[1:],
                           [])
+    problem.set_name(reader.get_name())
     return problem
 
   def build_subproblem(self, *args, **kwargs):
