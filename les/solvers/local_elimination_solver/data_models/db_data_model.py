@@ -16,7 +16,7 @@
 
 import types
 
-from les.data_models.data_model import DataModel
+from .data_model import DataModel
 
 class DataStore(object):
   """This class represents interface to the actual data stores such as SQLite,

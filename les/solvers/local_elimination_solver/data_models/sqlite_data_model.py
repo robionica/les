@@ -21,7 +21,7 @@ except ImportError:
   import sqlite3
 import types
 
-from les.data_models.db_data_model import DBDataModel, DataStore
+from .db_data_model import DBDataModel, DataStore
 
 _MAX_TIMEOUT = 5.0
 

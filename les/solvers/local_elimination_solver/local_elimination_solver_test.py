@@ -18,9 +18,10 @@ import numpy
 import unittest
 
 from les.problems import BILPProblem
-from les.solvers.local_elimination_solver import LocalEliminationSolver
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
-from les.data_models.sqlite_data_model import SQLiteDataModel
+
+from .local_elimination_solver import LocalEliminationSolver
+from .data_models.sqlite_data_model import SQLiteDataModel
 
 class LocalEliminationSolverTest(unittest.TestCase):
 

@@ -23,9 +23,11 @@ from les.problems.bilp_problem import BILPProblem
 from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 from les.solvers.milp_solver import MILPSolver
 from les.sparse_vector import SparseVector
-from les.data_models.data_model import DataModel
-from les import runtime
-from les.runtime import thread_pool
+
+from .data_models.data_model import DataModel
+from .data_models.sqlite_data_model import SQLiteDataModel
+from .distributors import ThreadDistributor
+from .distributors.distributor import Distributor
 
 logger = logging.getLogger()
 
@@ -64,8 +66,12 @@ class _RelaxedProblemGenerator(object):
     return self._genproblem, solution
 
 class LocalEliminationSolver(MILPSolver):
+  """This class represents local elimination solver (LES), which implements
+  local elimination algorithm (LEA). The solver solves discrete optimization
+  problems (DOP) defined by DILP class.
+  """
 
-  def __init__(self, data_model=None):
+  def __init__(self, data_model=SQLiteDataModel()):
     MILPSolver.__init__(self)
     self._solutions = {}
     self._obj_value = 0.0
@@ -84,29 +90,24 @@ class LocalEliminationSolver(MILPSolver):
   def get_data_model(self):
     return self._data_model
 
-  def solve(self, max_num_threads=runtime.get_num_cpus()):
-    """Set `max_num_threads` as 0 to disable threading."""
+  def solve(self, distributor=ThreadDistributor()):
+    """By default ThreadDistributor() instance will be used. Set `distributor`
+    to `None` to disable distributors.
+    """
     logger.info("Solving problem %s" % self._problem.get_name())
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
-    if not isinstance(max_num_threads, (int, long)):
+    if not isinstance(distributor, Distributor):
       raise TypeError()
     # Solve subproblems if this wasn't done yet
     solutions_storage = {}
-    if max_num_threads:
-      def report(request, result):
-        subproblem = request.args[0]
-        logger.info("T%d: %s solved" % (request.requestID, subproblem))
-      pool = thread_pool.ThreadPool(max_num_threads)
-      reqs = thread_pool.make_requests(self.solve_subproblem,
-                                       self._decomposition_tree.get_subproblems(),
-                                       report)
-      for req in reqs:
-        pool.put_request(req)
-      pool.wait()
+    if distributor:
+      for subproblem in self._decomposition_tree.get_subproblems():
+        distributor.put(subproblem)
+      distributor.run(self._solve_subproblem)
     else:
       for subproblem in self._decomposition_tree.get_subproblems():
-        self.solve_subproblem(subproblem, )
+        self._solve_subproblem(subproblem, )
     # Initialize data-model
     self._data_model.init(self._decomposition_tree.get_subproblems())
     # Process subproblems in a depth-first-search pre-ordering starting
@@ -121,7 +122,7 @@ class LocalEliminationSolver(MILPSolver):
     # Get result objective value
     self._obj_value = self._data_model.get_max_obj_value(subproblem.get_name())
 
-  def solve_subproblem(self, subproblem):
+  def _solve_subproblem(self, subproblem):
     logger.info("Solving %s" % subproblem)
     # register space for solutions
     self._solutions[subproblem] = []
