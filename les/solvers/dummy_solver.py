@@ -17,6 +17,36 @@
 """Dummy solver."""
 
 from les.solvers.solver import Solver
+from les.problems.bilp_problem import BILPProblem
 
 class DummySolver(Solver):
-  pass
+  """This class represents dummy solver, which solves BILPProblem derived
+  problems.
+  """
+
+  def __init__(self):
+    self._problem = None
+    self._col_solution = None
+    self._obj_value = None
+
+  def get_problem(self):
+    return self._problem
+
+  def load_problem(self, problem):
+    if not isinstance(problem, BILPProblem):
+      raise TypeError()
+    self._problem = problem
+
+  def get_col_solution(self):
+    return self._col_solution
+
+  def get_obj_value(self):
+    return self._obj_value
+
+  def solve(self):
+    self._col_solution = [1.] * self._problem.get_num_cols()
+    if self._problem.check_col_solution(self._col_solution):
+      self._obj_value = self._problem.get_obj_coefs().sum()
+      return True
+    self._col_solution = None
+    return False

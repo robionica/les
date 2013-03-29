@@ -22,6 +22,7 @@ import logging
 from les.problems.bilp_problem import BILPProblem
 from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 from les.solvers.milp_solver import MILPSolver
+from les.solvers.dummy_solver import DummySolver
 from les.sparse_vector import SparseVector
 
 from .data_models.data_model import DataModel
@@ -145,9 +146,10 @@ class LocalEliminationSolver(MILPSolver):
     # 1. Solve with help of R0 relaxation - try to solve problem without
     #    constraints
     # Build max local solution
-    col_solution = [1.] * problem.get_num_cols()
-    if problem.check_col_solution(col_solution):
-      return col_solution, problem.get_obj_coefs().sum()
+    solver = DummySolver()
+    solver.load_problem(problem)
+    if solver.solve():
+      return solver.get_col_solution(), solver.get_obj_value()
     # TODO: add (2)
     # 3. Solve with help of R2 relaxation - use proxy solver
     solver = SymphonyProxySolver()
