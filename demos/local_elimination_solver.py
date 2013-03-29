@@ -41,7 +41,7 @@ def solve(problem):
   solver.solve()
   end = time.clock()
   print("Solving time: %6.4f second(s)" % (end - start))
-  print("Ojective value:", solver.get_obj_value())
+  print("Objective value:", solver.get_obj_value())
 
 def main():
   if len(sys.argv) < 2:
