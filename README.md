@@ -2,7 +2,7 @@
 
 Local Elimination Solver (LES)
 
-Copyright (c) 2012-2013 Oleksander Sviridenko
+Copyright (c) 2012-2013 Oleksandr Sviridenko
 
 What is LES?
 ------------
