@@ -16,13 +16,10 @@
 
 import networkx as nx
 import numpy as np
-from scipy.sparse import csr_matrix, dok_matrix, hstack
 import logging
 
 from les.problems.bilp_problem import BILPProblem
-from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 from les.solvers.milp_solver import MILPSolver
-from les.solvers.dummy_solver import DummySolver
 from les.sparse_vector import SparseVector
 
 from .data_models.data_model import DataModel
@@ -72,13 +69,32 @@ class LocalEliminationSolver(MILPSolver):
   problems (DOP) defined by DILP class.
   """
 
-  def __init__(self, data_model=SQLiteDataModel()):
+  def __init__(self, master_solver, relaxation_solvers=[],
+               data_model=SQLiteDataModel(), distributor=ThreadDistributor()):
     MILPSolver.__init__(self)
+    if not issubclass(master_solver, MILPSolver):
+      raise TypeError("master_solver must be subclass of MILPSolver: %s"
+                      % master_solver)
+    self._master_solver = master_solver
+    self._relaxation_solvers = []
     self._solutions = {}
     self._obj_value = 0.0
     self._data_model = None
+    self._distributor = None
+    if distributor:
+      self.set_distributor(distributor)
+    if relaxation_solvers:
+      self.set_relaxation_solvers(relaxation_solvers)
     if data_model:
       self.set_data_model(data_model)
+
+  def set_relaxation_solvers(self, solvers):
+    if not isinstance(solvers, (list, tuple)):
+      raise TypeError()
+    for solver in solvers:
+      if not issubclass(solver, MILPSolver):
+        raise TypeError()
+    self._relaxation_solvers = solvers
 
   def get_problem(self):
     return self._problem
@@ -89,17 +105,23 @@ class LocalEliminationSolver(MILPSolver):
     self._data_model = data_model
 
   def get_data_model(self):
+    """Returns DataModel based instance."""
     return self._data_model
 
-  def solve(self, distributor=ThreadDistributor()):
+  def set_distributor(self, distributor):
+    if not isinstance(distributor, Distributor):
+      raise TypeError()
+    self._distributor = distributor
+
+  def solve(self, distributor=None):
     """By default ThreadDistributor() instance will be used. Set `distributor`
     to `None` to disable distributors.
     """
     logger.info("Solving problem %s" % self._problem.get_name())
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
-    if not isinstance(distributor, Distributor):
-      raise TypeError()
+    if distributor:
+      self.set_destributor(distributor)
     # Solve subproblems if this wasn't done yet
     solutions_storage = {}
     if distributor:
@@ -143,16 +165,16 @@ class LocalEliminationSolver(MILPSolver):
         self._solutions[subproblem].append((result_col_solution, obj_value))
 
   def _solve_relaxed_problem(self, problem):
-    # 1. Solve with help of R0 relaxation - try to solve problem without
-    #    constraints
-    # Build max local solution
-    solver = DummySolver()
-    solver.load_problem(problem)
-    if solver.solve():
-      return solver.get_col_solution(), solver.get_obj_value()
-    # TODO: add (2)
-    # 3. Solve with help of R2 relaxation - use proxy solver
-    solver = SymphonyProxySolver()
+    for solver_class in self._relaxation_solvers:
+      solver = solver_class()
+      solver.load_problem(problem)
+      solver.solve()
+      if len(solver.get_col_solution()) \
+            and not sum(solver.get_col_solution()) % 1.0 \
+            and problem.check_col_solution(solver.get_col_solution()):
+        return solver.get_col_solution(), solver.get_obj_value()
+    # Use master solver
+    solver = self._master_solver()
     solver.load_problem(problem)
     solver.solve()
     return solver.get_col_solution(), abs(solver.get_obj_value())

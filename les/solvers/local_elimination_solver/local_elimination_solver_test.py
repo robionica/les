@@ -19,6 +19,7 @@ import unittest
 
 from les.problems import BILPProblem
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
+from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 
 from .local_elimination_solver import LocalEliminationSolver
 from .data_models.sqlite_data_model import SQLiteDataModel
@@ -39,7 +40,8 @@ class LocalEliminationSolverTest(unittest.TestCase):
                           [7, 6, 9, 7, 3, 5])
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
-    solver = LocalEliminationSolver(data_model=SQLiteDataModel())
+    solver = LocalEliminationSolver(master_solver=SymphonyProxySolver,
+                                    data_model=SQLiteDataModel())
     solver.load_problem(problem, decomposer.get_decomposition_tree())
     solver.solve()
     self.assertEqual(39.0, solver.get_obj_value())
@@ -57,7 +59,8 @@ class LocalEliminationSolverTest(unittest.TestCase):
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
     subproblems = decomposer.get_decomposition_tree().get_subproblems()
-    solver = LocalEliminationSolver(data_model=SQLiteDataModel())
+    solver = LocalEliminationSolver(master_solver=SymphonyProxySolver,
+                                    data_model=SQLiteDataModel())
     solver.load_problem(problem, decomposer.get_decomposition_tree())
     solver.solve()
     self.assertEqual(18.0, solver.get_obj_value())
