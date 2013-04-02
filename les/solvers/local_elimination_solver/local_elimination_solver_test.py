@@ -21,8 +21,8 @@ from les.problems import BILPProblem
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
 from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
 
-from .local_elimination_solver import LocalEliminationSolver
-from .data_models.sqlite_data_model import SQLiteDataModel
+from les.solvers.local_elimination_solver.local_elimination_solver import LocalEliminationSolver
+from les.solvers.local_elimination_solver.data_models.sqlite_data_model import SQLiteDataModel
 
 class LocalEliminationSolverTest(unittest.TestCase):
 
