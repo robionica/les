@@ -1,0 +1,2 @@
+from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
+from les.ext.coin.osi_clp_solver_interface import OsiClpSolverInterface

@@ -55,7 +55,7 @@ public:
   }
 };
 
-BOOST_PYTHON_MODULE(osi_sym_solver_interface)
+BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
 {
   class_<OsiSymSolverInterfaceWrap, boost::noncopyable>("OsiSymSolverInterface")
     // Solve methods
