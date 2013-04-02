@@ -20,9 +20,9 @@ import numpy as np
 import unittest
 
 from les.problems.bilp_problem import BILPProblem
-from les.solvers.symphony_proxy_solver import SymphonyProxySolver
+from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
 
-class SymphonyProxySolverTest(unittest.TestCase):
+class OsiSymSolverInterfaceTest(unittest.TestCase):
 
   def test_solve1(self):
     cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
@@ -37,7 +37,7 @@ class SymphonyProxySolverTest(unittest.TestCase):
                           cons_matrix,
                           None,
                           [7, 6, 9, 7, 3, 5])
-    solver = SymphonyProxySolver()
+    solver = OsiSymSolverInterface()
     solver.load_problem(problem)
     solver.solve()
     self.assertEqual(39.0, solver.get_obj_value())
@@ -47,7 +47,7 @@ class SymphonyProxySolverTest(unittest.TestCase):
 
   def test_solve2(self):
     problem = BILPProblem([2.0], True, np.matrix([[3.0]]), None, [1.0])
-    solver = SymphonyProxySolver()
+    solver = OsiSymSolverInterface()
     solver.load_problem(problem)
     solver.solve()
 
