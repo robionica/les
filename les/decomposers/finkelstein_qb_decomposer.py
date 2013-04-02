@@ -90,14 +90,16 @@ class FinkelsteinQBDecomposer(Decomposer):
   def decompose(self, problem, initial_cols=[0], max_separator_size=0,
                 merge_empty_blocks=True):
     """Decomposes problem into subproblems starting by initial cols. By default
-    starts from column 0.
+    starts from column 0. Default max separator size is 11.
     """
+    if max_separator_size:
+      raise NotImplementedError()
     self._set_problem(problem)
     self._u = []
     self._s = []
     self._m = []
-    m = problem.get_cons_matrix()
-    col_matrix = m.tocsc()
+    row_matrix = problem.get_cons_matrix()
+    col_matrix = row_matrix.tocsc()
     all_cols = set(initial_cols)
     prev_cols = set()
     prev_rows = set()
@@ -111,7 +113,7 @@ class FinkelsteinQBDecomposer(Decomposer):
       for c in prev_cols:
         rows = _get_indices(col_matrix, c)
         for row in rows:
-          all_cols.update(_get_indices(m, row))
+          all_cols.update(_get_indices(row_matrix, row))
         all_rows.update(rows)
       row_indices = all_rows - prev_rows
       if not len(row_indices):
@@ -119,7 +121,7 @@ class FinkelsteinQBDecomposer(Decomposer):
       self._m.append(set())
       col_indices = set()
       for i in row_indices:
-        col_indices.update(_get_indices(m, i))
+        col_indices.update(_get_indices(row_matrix, i))
       self._s.append(col_indices & prev_col_indices)
       self._m[cntr] = col_indices - self._s[cntr]
       self._m[cntr - 1] = self._m[cntr - 1] - self._s[cntr]

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 #
-# -*- coding: utf-8; -*-
-#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +19,6 @@ import unittest
 
 from les.problems.bilp_problem import BILPProblem
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
-
-# TODO: test built subproblems
 
 class FinkelsteinQBDecomposerTest(unittest.TestCase):
 
@@ -68,6 +64,29 @@ class FinkelsteinQBDecomposerTest(unittest.TestCase):
       self.assertEqual(len(t), len(r))
       for i in range(len(t)):
         self.assertEqual(t[i], r[i])
+
+  def test_decompose3(self):
+    cons_matrix = numpy.matrix(
+      [[ 4.,  0.,  1.,  1.,  3.,  1.,  3.,  0.,  3.,  1.,
+         2.,  0.,  3.,  2.,  0.,  0.,  0.,  0.,  0.,  0.],
+       [ 2.,  0.,  2.,  2.,  4.,  0.,  3.,  1.,  1.,  0., 
+         1.,  6.,  1.,  1.,  0.,  0.,  0.,  0.,  0.,  0.],
+       [ 0.,  1.,  2.,  1.,  3.,  1.,  1.,  2.,  4.,  6.,
+         0.,  2.,  0.,  1.,  0.,  0.,  0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+         2.,  1.,  2.,  1.,  2.,  0.,  4.,  1.,  2.,  2.],
+       [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+         0.,  3.,  1.,  2.,  2.,  3.,  0.,  2.,  4.,  0.]]
+      )
+    problem = BILPProblem([1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                           1, 2],
+                          True,
+                          cons_matrix,
+                          None,
+                          [6, 5, 4, 5, 6])
+    decomposer = FinkelsteinQBDecomposer()
+    decomposer.decompose(problem)
+
 
 if __name__ == "__main__":
   unittest.main()
