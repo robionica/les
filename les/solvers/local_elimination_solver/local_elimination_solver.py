@@ -185,7 +185,6 @@ class LocalEliminationSolver(MILPSolver):
     solver = self._master_solver()
     solver.load_problem(problem)
     solver.solve()
-    self._stats['master_solver'] += 1
     return solver.get_col_solution(), abs(solver.get_obj_value())
 
   def load_problem(self, problem, decomposition_tree):
