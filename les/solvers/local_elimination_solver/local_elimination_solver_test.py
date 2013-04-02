@@ -61,7 +61,6 @@ class LocalEliminationSolverTest(unittest.TestCase):
     tree = decomposer.get_decomposition_tree()
     subproblems = tree.get_subproblems()
     self.assertEqual(2, len(subproblems))
-    print [str(_) for _ in subproblems]
     solver = LocalEliminationSolver(master_solver=OsiSymSolverInterface,
                                     distributor=None)
     solver.load_problem(problem, decomposer.get_decomposition_tree())
