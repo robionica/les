@@ -13,5 +13,4 @@
 # limitations under the License.
 
 from les.solvers.local_elimination_solver import LocalEliminationSolver
-from les.solvers.symphony_proxy_solver import SymphonyProxySolver
 from les.solvers.dummy_solver import DummySolver

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # -*- coding: utf-8; -*-
 #
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
@@ -19,11 +21,20 @@ try:
   from pysqlite2 import dbapi2 as sqlite3
 except ImportError:
   import sqlite3
+import threading
 import types
 
 from .db_data_model import DBDataModel, DataStore
 
 _MAX_TIMEOUT = 5.0
+
+_SUBPROBLEM_SCHEMA = """
+CREATE TABLE IF NOT EXISTS %(name)s(
+  %(cols)s,
+  value DOUBLE,
+  PRIMARY KEY (%(key)s)
+);
+"""
 
 logger = logging.getLogger()
 
@@ -86,94 +97,119 @@ class SQLiteConnectionWrapper(sqlite3.Connection):
 class SQLiteDataStore(DataStore):
   """SQLite database interface wrapper."""
 
-  def __init__(self, name=None, verbose=False, check_same_thread=True):
+  def __init__(self, name=None, verbose=False):
     DataStore.__init__(self, name or ":memory:")
-    self._check_same_thread = check_same_thread
     if verbose:
       self._sql_conn = SQLiteConnectionWrapper
     else:
       self._sql_conn = sqlite3.Connection
-    self._connection = None
-    if check_same_thread:
-      self._connection = self._connect()
-
-  def _connect(self, settings={}):
-    return sqlite3.connect(
+    self._connection = sqlite3.connect(
       self._name,
-      check_same_thread=self._check_same_thread,
+      check_same_thread=False,
       timeout=_MAX_TIMEOUT,
-      factory=self._sql_conn,
-      **settings
+      factory=self._sql_conn
     )
+    self.__connection_lock = threading.RLock()
 
-  def get_connection(self, settings={}):
+  def get_connection(self):
     """Returns :class:`Connection` instance to SQLite database."""
-    return self._connection and self._connection or self._connect(settings)
+    self.__connection_lock.acquire()
+    return self._connection
+
+  def release_connection(self, conn):
+    """Releases a connection for use by other operations.
+
+    If a transaction is supplied, no action is taken.
+    """
+    conn.commit()
+    self.__connection_lock.release()
 
 class SQLiteDataModel(DBDataModel):
-  """This class represents data model based on SQLite database."""
+  """This class represents data model based on SQLite database. Helps to store
+  problem data in an SQLite database.
+  """
 
   def __init__(self, db_name=None, verbose=False):
     DBDataModel.__init__(self, SQLiteDataStore(db_name, verbose=verbose))
+    self._subproblems = None
 
   def __del__(self):
-    conn = self._data_store.get_connection()
+    conn = self.get_data_store().get_connection()
     conn.commit()
     conn.close()
 
   def get_max_obj_value(self, name):
     conn = self._data_store.get_connection()
-    result = conn.execute("SELECT MAX(value) FROM %s_solutions" % name)
+    result = conn.execute("SELECT MAX(value) FROM %s" % name)
     return result.fetchone()[0]
 
-  def init(self, subproblems):
+  def _configure_subproblem(self, problem):
+    def join_cols(joiner, cols, frmt="x%d"):
+      return joiner.join(["x%d" % i for i in cols])
+    # Create table
+    sql_script = _SUBPROBLEM_SCHEMA % {
+      'name': problem.get_name(),
+      'cols': join_cols(", ", problem.get_shared_cols() | problem.get_local_cols(),
+                        "x%d INTEGER DEFAULT NULL"),
+      'key': join_cols(",", problem.get_shared_cols())
+    }
+    # Create indices
+    for another_subproblem, cols in problem.get_dependencies().items():
+      sql_script += "CREATE INDEX IF NOT EXISTS %s_index ON %s(%s);" \
+          % (join_cols("_", cols), problem.get_name(), join_cols(", ", cols))
+    try:
+      conn = self.get_data_store().get_connection()
+      conn.executescript(sql_script)
+      self.get_data_store().release_connection(conn)
+    except sqlite3.OperationalError, e:
+      print e
+      print "SQLite script:", sql_script
+      raise Exception()
+
+  def configure(self, subproblems):
+    """Configures data model, creates tables for each subproblem."""
     for subproblem in subproblems:
-      sql_script = "CREATE TABLE IF NOT EXISTS %s_solutions(%s, value DOUBLE, PRIMARY KEY (%s));\n" \
-          % (subproblem.get_name(),
-             ", ".join(["x%d INTEGER DEFAULT NULL" % i for i in subproblem.get_shared_cols() | subproblem.get_local_cols()]),
-             ", ".join(["x%d" % i for i in subproblem.get_shared_cols()]))
-      for another_subproblem, cols in subproblem.get_dependencies().items():
-        sql_script += ";\n".join(["CREATE INDEX IF NOT EXISTS %s_index ON %s_solutions(%s);" \
-                            % ("_".join(["x" + str(i) for i in cols]),
-                               subproblem.get_name(),
-                               ", ".join(["x" + str(i) for i in cols]))])
-      self.get_data_store().get_connection().executescript(sql_script)
+      self._configure_subproblem(subproblem)
+    self._subproblems = subproblems
 
-  def write_solution(self, subproblem, col_solution, obj_value):
-    tbl_cols = []
-    tbl_vals = []
-    cols = subproblem.get_shared_cols() | subproblem.get_local_cols()
-    tbl_name = subproblem.get_name() + "_solutions"
-
-    if not subproblem.get_dependencies():
-      tbl_cols = []
-      tbl_vals = []
-      for i in cols:
-        tbl_cols.append("x%d" % i)
-        tbl_vals.append(int(col_solution[i]))
-      sql_stmt = "INSERT OR REPLACE INTO %s(%s, value) VALUES(%s)" \
-          % (tbl_name, ", ".join(tbl_cols), ", ".join(["?"] * (len(cols) + 1)))
-      self.get_data_store().get_connection().execute(sql_stmt, tbl_vals + [float(obj_value)])
+  def process(self, s):
+    if not s.get_dependencies():
       return
+    conn = self.get_data_store().get_connection()
+    try:
+      cursor = conn.execute("SELECT * FROM %s" % s.get_name())
+      cols = list(map(lambda x: x[0], cursor.description))
+      for row in cursor:
+        m = dict(zip(cols, row))
+        obj_value = m["value"]
+        del m["value"]
+        dep_tbls = []
+        deps = []
+        for sp, xcols in s.get_dependencies().items():
+          where = []
+          dep_tbls.append(sp.get_name())
+          for i in xcols:
+            where.append("%s.x%d=%d" % (sp.get_name(), i, m["x%d" % i]))
+          deps.append("FROM %s WHERE %s" % (sp.get_name(), " AND ".join(where)))
+        stmt = "UPDATE %s SET value = %f + (%s %s) WHERE %s" \
+            % (s.get_name(), obj_value,
+               " + ".join(["SELECT MAX("+name + ".value)" for name in dep_tbls]),
+               " ".join(deps),
+               " AND ".join(["%s=%d" % (c, v) for c, v in m.items()]),
+               )
+        conn.execute(stmt)
+    finally:
+      self.get_data_store().release_connection(conn)
 
-    dep_tbls = []
-    deps = []
-    where = []
-    rcols = set()
-    for sp, xcols in subproblem.get_dependencies().items():
-      dep_tbls.append(sp.get_name() + "_s")
-      rcols |= xcols
-      for i in xcols:
-        where.append("x%d=%d" % (i, col_solution[i]))
-      deps.append("FROM %s_solutions %s_s WHERE %s" % (sp.get_name(), sp.get_name(), " AND ".join(where)))
-    tbl_cols = []
-    tbl_vals = []
-    for i in cols:
-      tbl_cols.append("x%d" % i)
-      tbl_vals.append(int(col_solution[i]))
-    sql_stmt = "INSERT OR REPLACE INTO %s(%s, value) SELECT %s + %s %s" \
-        % (tbl_name, ", ".join(tbl_cols),
-           ", ".join(map(str, tbl_vals + [obj_value])),
-           " + ".join(["MAX("+name + ".value)" for name in dep_tbls]),
-           " ".join(deps))
-    self._data_store.get_connection().execute(sql_stmt)
+  def put(self, subproblem, col_solution, obj_value):
+    cols = []
+    vals = []
+    name = subproblem.get_name()
+    for i in subproblem.get_shared_cols() | subproblem.get_local_cols():
+      cols.append("x%d" % i)
+      vals.append(int(col_solution[i]))
+    stmt = "INSERT INTO %s(%s, value) VALUES(%s)" \
+        % (name, ", ".join(cols), ", ".join(["?"] * (len(cols) + 1)))
+    conn = self.get_data_store().get_connection()
+    conn.execute(stmt, vals + [float(obj_value)])
+    self.get_data_store().release_connection(conn)

@@ -17,15 +17,19 @@
 import networkx as nx
 import numpy as np
 import logging
+import time
+import pprint
 
 from les.problems.bilp_problem import BILPProblem
 from les.solvers.milp_solver import MILPSolver
 from les.sparse_vector import SparseVector
 
+from les.decomposition_tree import DecompositionTree
 from .data_models.data_model import DataModel
 from .data_models.sqlite_data_model import SQLiteDataModel
 from .distributors import ThreadDistributor
 from .distributors.distributor import Distributor
+from les.solvers.dummy_solver import DummySolver
 
 logger = logging.getLogger()
 
@@ -77,10 +81,13 @@ class LocalEliminationSolver(MILPSolver):
                       % master_solver)
     self._master_solver = master_solver
     self._relaxation_solvers = []
-    self._solutions = {}
     self._obj_value = 0.0
     self._data_model = None
     self._distributor = None
+    self._stats = {
+      'relaxation_solvers': dict([(cls.__name__, 0) for cls in relaxation_solvers]),
+      'master_solver': 0,
+    }
     if distributor:
       self.set_distributor(distributor)
     if relaxation_solvers:
@@ -97,6 +104,7 @@ class LocalEliminationSolver(MILPSolver):
     self._relaxation_solvers = solvers
 
   def get_problem(self):
+    """Returns the problem instance that has to be solved by this solver."""
     return self._problem
 
   def set_data_model(self, data_model):
@@ -107,6 +115,9 @@ class LocalEliminationSolver(MILPSolver):
   def get_data_model(self):
     """Returns DataModel based instance."""
     return self._data_model
+
+  def get_distributor(self):
+    return self._distributor
 
   def set_distributor(self, distributor):
     if not isinstance(distributor, Distributor):
@@ -122,38 +133,34 @@ class LocalEliminationSolver(MILPSolver):
       raise Exception("Error, nothing to solve!")
     if distributor:
       self.set_destributor(distributor)
+    # Configure data-model
+    self._data_model.configure(self._decomposition_tree.get_subproblems())
     # Solve subproblems if this wasn't done yet
-    solutions_storage = {}
-    if distributor:
+    if self.get_distributor():
       for subproblem in self._decomposition_tree.get_subproblems():
-        distributor.put(subproblem)
-      distributor.run(self._solve_subproblem)
+        self._distributor.put(subproblem)
+      self._distributor.run(self._solve_subproblem)
     else:
       for subproblem in self._decomposition_tree.get_subproblems():
         self._solve_subproblem(subproblem, )
-    # Initialize data-model
-    self._data_model.init(self._decomposition_tree.get_subproblems())
     # Process subproblems in a depth-first-search pre-ordering starting
     for node in nx.dfs_preorder_nodes(self._decomposition_tree,
                                       self._decomposition_tree.get_root()):
       subproblem = self._decomposition_tree.node[node]["subproblem"]
       cols = subproblem.get_shared_cols() | subproblem.get_local_cols()
       shared_cols = subproblem.get_shared_cols()
-      solutions = self._solutions[subproblem]
-      for col_solution, obj_value in solutions:
-        self._data_model.write_solution(subproblem, col_solution, obj_value)
+      self._data_model.process(subproblem)
     # Get result objective value
     self._obj_value = self._data_model.get_max_obj_value(subproblem.get_name())
 
   def _solve_subproblem(self, subproblem):
     logger.info("Solving %s" % subproblem)
-    # register space for solutions
-    self._solutions[subproblem] = []
     # TODO: len(shared_cols) < max separator size
     generator = _RelaxedProblemGenerator(subproblem)
     # TODO: this is maximization pattern, add minimization pattern
     for mask in range((1 << len(subproblem.get_shared_cols())) - 1, -1, -1):
       # Start to iterate over possible assigns for shared columns
+      start = time.clock()
       relaxed_problem, result_col_solution = generator.gen(mask)
       if relaxed_problem:
         col_solution, obj_value = self._solve_relaxed_problem(relaxed_problem)
@@ -162,7 +169,7 @@ class LocalEliminationSolver(MILPSolver):
         for dep_subproblem, dep_cols in subproblem.get_dependencies().items():
           obj_value += sum([self._problem.get_obj_coefs()[i] * result_col_solution[i] for i in dep_cols])
         # Registers solution for a given subproblem.
-        self._solutions[subproblem].append((result_col_solution, obj_value))
+        self._data_model.put(subproblem, result_col_solution, obj_value)
 
   def _solve_relaxed_problem(self, problem):
     for solver_class in self._relaxation_solvers:
@@ -172,14 +179,23 @@ class LocalEliminationSolver(MILPSolver):
       if len(solver.get_col_solution()) \
             and not sum(solver.get_col_solution()) % 1.0 \
             and problem.check_col_solution(solver.get_col_solution()):
+        self._stats['relaxation_solvers'][solver_class.__name__] += 1
         return solver.get_col_solution(), solver.get_obj_value()
     # Use master solver
     solver = self._master_solver()
     solver.load_problem(problem)
     solver.solve()
+    self._stats['master_solver'] += 1
     return solver.get_col_solution(), abs(solver.get_obj_value())
 
   def load_problem(self, problem, decomposition_tree):
+    """Loads problem and its decomposition model represented by decomposition
+    tree.
+    """
+    if not isinstance(problem, BILPProblem):
+      raise TypeError()
+    if not isinstance(decomposition_tree, DecompositionTree):
+      raise TypeError()
     self._problem = problem
     self._decomposition_tree = decomposition_tree
 
