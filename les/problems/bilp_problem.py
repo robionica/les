@@ -60,19 +60,19 @@ class BILPProblem(Problem):
     self.set_rows_upper_bounds(rows_upper_bounds)
 
   @classmethod
-  def build(cls, data):
-    if isinstance(data, MPSReader):
-      return cls._build_from_mps(data)
-    elif type(data) is types.StringType:
+  def build(cls, model):
+    if isinstance(model, MPSReader):
+      return cls._build_from_mps(model)
+    elif type(model) is types.StringType:
       # The file name has been provided. Detect reader and read the problem.
-      if not os.path.exists(data):
-        raise IOError("File doesn't exist: %s" % data)
-      root, ext = os.path.splitext(data)
-      if data.endswith(".gz"):
-        stream = gzip.open(data, "rb")
+      if not os.path.exists(model):
+        raise IOError("File doesn't exist: %s" % model)
+      root, ext = os.path.splitext(model)
+      if model.endswith(".gz"):
+        stream = gzip.open(model, "rb")
         root, ext = os.path.splitext(root)
       else:
-        stream = open(data, "r")
+        stream = open(model, "r")
       reader_class = _READERS.get(ext)
       if not reader_class:
         raise Exception("Doesn't know how to read %s format."
@@ -83,7 +83,7 @@ class BILPProblem(Problem):
       stream.close()
       return cls.build(reader)
     else:
-      raise TypeError("Don't know how to handle this data")
+      raise TypeError("Don't know how to handle this model")
 
   @classmethod
   def _build_from_mps(cls, reader):
