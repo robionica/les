@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # -*- coding: utf-8; -*-
 #
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
@@ -36,16 +38,22 @@ class Knapsack01SolverTest(unittest.TestCase):
 
 class FractionalKnapsackSolverTest(unittest.TestCase):
 
-  def test_solve(self):
-    v = [8, 11, 6, 4]
-    w = [5,  7, 4, 3]
-    W = 14
-    solution = [1.0, 1.0, 0.5, 0.0]
-    value = sum([float(v[i]) * solution[i] for i in range(len(v))])
-    problem = knapsack_solver.KnapsackProblem(v, w, W)
+  def test_solve1(self):
+    problem = knapsack_solver.KnapsackProblem([8, 11, 6, 4], [5,  7, 4, 3], 14)
     solver = knapsack_solver.FractionalKnapsackSolver()
     solver.load_problem(problem)
     solver.solve()
-    self.assertEqual(value, solver.get_obj_value())
-    for i in range(len(v)):
-      self.assertEqual(solution[i], solver.get_col_solution()[i])
+    self.assertEqual(22., solver.get_obj_value())
+    self.assertEqual([1.0, 1.0, 0.5, 0.0], solver.get_col_solution())
+
+  def test_solve2(self):
+    problem = knapsack_solver.KnapsackProblem([50, 140, 60, 60], [5, 20, 10, 12],
+                                              30)
+    solver = knapsack_solver.FractionalKnapsackSolver()
+    solver.load_problem(problem)
+    solver.solve()
+    self.assertEqual(220., solver.get_obj_value())
+    self.assertEqual([1., 1., 0.5, 0.], solver.get_col_solution())
+
+if __name__ == '__main__':
+  unittest.main()
