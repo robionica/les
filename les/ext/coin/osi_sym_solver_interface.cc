@@ -58,6 +58,8 @@ public:
 BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
 {
   class_<OsiSymSolverInterfaceWrap, boost::noncopyable>("OsiSymSolverInterface")
+    // Constructors and destructors
+    .def("reset", &OsiSymSolverInterfaceWrap::reset)
     // Solve methods
     .def("branch_and_bound", &OsiSymSolverInterfaceWrap::branchAndBound)
     .def("initial_solve", &OsiSymSolverInterfaceWrap::initialSolve)
