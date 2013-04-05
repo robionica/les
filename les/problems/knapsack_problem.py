@@ -51,7 +51,7 @@ class KnapsackProblem(BILPProblem):
       # Sum all the constraints over the first one
       weights = data.get_cons_matrix().sum(0).tolist()[0]
       max_weight = data.get_rows_upper_bounds().sum()
-      return cls(data.get_obj_coefs().values(), weights, max_weight)
+      return cls(data.get_obj_coefs().tocsr().data.tolist(), weights, max_weight)
     else:
       raise TypeError()
 
