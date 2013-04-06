@@ -18,14 +18,14 @@
 
 from les.ext.coin import _osi_clp_solver_interface
 from les.ext.coin import coin_utils
-from les.solvers.milp_solver import MILPSolver
+from les.solvers.bilp_solver import BILPSolver
 from les.problems.problem import Problem
 
 class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
-                            MILPSolver):
+                            BILPSolver):
 
   def __init__(self):
-    MILPSolver.__init__(self)
+    BILPSolver.__init__(self)
     _osi_clp_solver_interface.OsiClpSolverInterface.__init__(self)
     self.set_log_level(0) # switch off printout
 

@@ -24,7 +24,7 @@ import networkx as nx
 import logging
 
 from les.problems.bilp_problem import BILPProblem
-from les.solvers.milp_solver import MILPSolver
+from les.solvers.bilp_solver import BILPSolver
 
 from les.decomposition_tree import DecompositionTree
 from les.solvers.local_elimination_solver.data_models.data_model import DataModel
@@ -43,7 +43,7 @@ class Statistics(object):
         }
     }
 
-class LocalEliminationSolver(MILPSolver):
+class LocalEliminationSolver(BILPSolver):
   """This class represents local elimination solver (LES), which implements
   local elimination algorithm (LEA). The solver solves discrete optimization
   problems (DOP) defined by DILP class.
@@ -59,7 +59,7 @@ class LocalEliminationSolver(MILPSolver):
   def __init__(self, master_solver_factory, relaxation_solver_classes=[],
                data_model=SQLiteDataModel(),
                distributor_factory=ThreadDistributorFactory()):
-    MILPSolver.__init__(self)
+    BILPSolver.__init__(self)
     self._obj_value = 0.0
     self._distributor = None
     self._decomposition_tree = None

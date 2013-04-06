@@ -16,7 +16,7 @@ import logging
 import numpy as np
 import time
 
-from les.solvers.milp_solver import MILPSolver
+from les.solvers.bilp_solver import BILPSolver
 from les.sparse_vector import SparseVector
 from les.problems.bilp_problem import BILPProblem
 
@@ -25,14 +25,14 @@ class Settings(object):
   def __init__(self, data_model, master_solver_factory, relaxation_solver_classes):
     self._data_model = data_model
     # TODO: check solver builder
-    #if not issubclass(master_solver_factory, MILPSolver):
-    #  raise TypeError("master_solver must be subclass of MILPSolver: %s"
+    #if not issubclass(master_solver_factory, BILPSolver):
+    #  raise TypeError("master_solver must be subclass of BILPSolver: %s"
     #                  % master_solver_class)
     self._master_solver_factory = master_solver_factory
     if not isinstance(relaxation_solver_classes, (list, tuple)):
       raise TypeError()
     for solver in relaxation_solver_classes:
-      if not issubclass(solver, MILPSolver):
+      if not issubclass(solver, BILPSolver):
         raise TypeError()
     self._relaxation_solver_classes = relaxation_solver_classes
 
@@ -109,8 +109,8 @@ class LocalSolver(object):
       solver = solver_class()
       solver.load_problem(problem)
       solver.solve()
-      if len(solver.get_col_solution()) \
-            and not sum(solver.get_col_solution()) % 1.0 \
+      s = sum(solver.get_col_solution())
+      if s > 0 and not s % 1.0 \
             and problem.check_col_solution(solver.get_col_solution()):
         #self._stats['relaxation_solvers'][solver_class.__name__] += 1
         return solver.get_col_solution(), solver.get_obj_value()

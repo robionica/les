@@ -19,13 +19,14 @@
 from les.ext.coin import _osi_sym_solver_interface
 from les.ext.coin import coin_utils
 from les.problems.problem import Problem
-from les.solvers.milp_solver import MILPSolver
+from les.solvers.bilp_solver import BILPSolver
 
 class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
-                            MILPSolver):
+                            BILPSolver):
+  """This class represents OSI Solver Interface for SYMPHONY."""
 
   def __init__(self):
-    MILPSolver.__init__(self)
+    BILPSolver.__init__(self)
     _osi_sym_solver_interface.OsiSymSolverInterface.__init__(self)
 
   def solve(self):
