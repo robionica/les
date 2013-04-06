@@ -53,11 +53,36 @@ public:
     }
     return lst;
   }
+
+  virtual void loadProblem1() {
+    OsiSymSolverInterface::loadProblem();
+  }
+
+  virtual void loadProblem2(const CoinPackedMatrix& matrix,
+                            const double* collb, const double* colub,
+                            const double* obj,
+                            const double* rowlb,
+                            const double* rowub) {
+    OsiSymSolverInterface::loadProblem(matrix, collb, colub, obj, rowlb, rowub);
+  }
+
+  virtual bool setHintParam1(int key) {
+    return OsiSymSolverInterface::setHintParam(static_cast<OsiHintParam>(key),
+                                               true, OsiHintTry);
+  }
+
+  virtual bool setHintParam2(int key, bool yesNo) {
+    return OsiSymSolverInterface::setHintParam(static_cast<OsiHintParam>(key),
+                                               yesNo, OsiHintTry);
+  }
 };
 
 BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
 {
-  class_<OsiSymSolverInterfaceWrap, boost::noncopyable>("OsiSymSolverInterface")
+  class_<OsiSolverInterface, boost::shared_ptr<OsiSolverInterface>,
+         boost::noncopyable>("OsiSolverInterface", no_init);
+  class_<OsiSymSolverInterfaceWrap, bases<OsiSolverInterface>,
+         boost::noncopyable>("OsiSymSolverInterface")
     // Constructors and destructors
     .def("reset", &OsiSymSolverInterfaceWrap::reset)
     // Solve methods
@@ -77,6 +102,9 @@ BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
          &OsiSymSolverInterfaceWrap::isIterationLimitReached)
     .def("is_time_limit_reached", &OsiSymSolverInterfaceWrap::isTimeLimitReached)
     .def("is_target_gap_reached", &OsiSymSolverInterfaceWrap::isTargetGapReached)
+    // Methods to input a problem
+    .def("load_problem", &OsiSymSolverInterfaceWrap::loadProblem1)
+    .def("load_problem", &OsiSymSolverInterfaceWrap::loadProblem2)
     // Methods to expand a problem
     .def("add_col", &OsiSymSolverInterfaceWrap::addCol)
     .def("add_row", &OsiSymSolverInterfaceWrap::addRow)
@@ -95,5 +123,7 @@ BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
     .def("set_obj_sense", &OsiSymSolverInterfaceWrap::setObjSense)
     // Parameter set/get methods
     .def("set_sym_param", &OsiSymSolverInterfaceWrap::setSymParam)
+    .def("set_hint_param", &OsiSymSolverInterfaceWrap::setHintParam1)
+    .def("set_hint_param", &OsiSymSolverInterfaceWrap::setHintParam2)
     ;
 }
