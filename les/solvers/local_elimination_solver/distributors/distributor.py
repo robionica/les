@@ -13,9 +13,15 @@
 # limitations under the License.
 
 class Distributor(object):
-  """This is base class for all distributros, which allows local elimination
+  """This is base class for all distributors, which allows local elimination
   solver to solve subproblems in parallel.
   """
+
+  def __init__(self, local_solver_settings):
+    self._local_solver_settings = local_solver_settings
+
+  def get_local_solver_settings(self):
+    return self._local_solver_settings
 
   def put(self, subproblem):
     raise NotImplementedError()

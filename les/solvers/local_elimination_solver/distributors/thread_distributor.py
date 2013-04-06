@@ -16,23 +16,25 @@ import logging
 
 from les import runtime
 from les.runtime import thread_pool
-
-from .distributor import Distributor
+from les.solvers.local_elimination_solver.distributors.distributor import Distributor
+from les.solvers.local_elimination_solver.local_solver import LocalSolver
 
 logger = logging.getLogger()
 
 class ThreadDistributor(Distributor):
 
-  def __init__(self, max_num_threads=0, reporter=None):
-    Distributor.__init__(self)
+  def __init__(self, local_solver_settings, max_num_threads=0,
+               reporter=None):
+    Distributor.__init__(self, local_solver_settings)
     self._max_num_threads = 0
     self._reporter = reporter or self._default_reporter
     self.set_max_num_threads(max_num_threads or runtime.get_num_cpus())
     self._subproblems = []
 
   def __str__(self):
-    return "%s[max_num_threads=%d]" % (self.__class__.__name__,
-                                       self.get_max_num_threads())
+    return "%s[max_num_threads=%d, num_tasks=%d]" % (self.__class__.__name__,
+                                                     self.get_max_num_threads(),
+                                                     len(self._subproblems))
 
   def set_max_num_threads(self, n):
     if not isinstance(n, (int, long)):
@@ -51,10 +53,15 @@ class ThreadDistributor(Distributor):
     """Put subproblems in order they come."""
     self._subproblems.append(subproblem)
 
-  def run(self, callback):
+  def _callback(self, subproblem):
+    solver = LocalSolver(self.get_local_solver_settings())
+    solver.solve(subproblem)
+
+  def run(self):
     logger.info("Running %s..." % self)
     pool = thread_pool.ThreadPool(self._max_num_threads)
-    reqs = thread_pool.make_requests(callback, self._subproblems, self._reporter)
+    reqs = thread_pool.make_requests(self._callback, self._subproblems,
+                                     self._reporter)
     for req in reqs:
       pool.put_request(req)
     pool.wait()
