@@ -24,7 +24,7 @@ except ImportError:
 import threading
 import types
 
-from .db_data_model import DBDataModel, DataStore
+from les.solvers.local_elimination_solver.data_models.db_data_model import DBDataModel, DataStore
 
 _MAX_TIMEOUT = 5.0
 
