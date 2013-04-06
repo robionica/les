@@ -18,6 +18,7 @@ import types
 
 class Problem(object):
   """Base problem class for all available problems."""
+  DEFAULT_NAME = "UNKNOWN"
 
   subproblem_name_format = "Z%d"
 
@@ -31,8 +32,8 @@ class Problem(object):
     self._name = name
 
   def get_name(self):
-    """Returns the problem name."""
-    return self._name
+    """Returns the problem name. Return DEFAULT_NAME if name wasn't defined."""
+    return self._name or self.__class__.DEFAULT_NAME
 
   def build_subproblem(self, *args, **kwargs):
     """Builds and returns subproblem for the current problem instance."""

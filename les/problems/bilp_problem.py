@@ -59,6 +59,11 @@ class BILPProblem(Problem):
     self._rows_upper_bounds = None
     self.set_rows_upper_bounds(rows_upper_bounds)
 
+  def __str__(self):
+    return "%s[num_rows=%d, num_cols=%d]" % (self.__class__.__name__,
+                                             self.get_num_rows(),
+                                             self.get_num_cols())
+
   @classmethod
   def build(cls, model):
     if isinstance(model, MPSReader):
@@ -176,6 +181,7 @@ class BILPProblem(Problem):
 ZOLPProblem = BILPProblem
 
 class BILPSubproblem(BILPProblem):
+  """Subproblem name will be set automatically by solver."""
 
   def __init__(self, problem, obj=[], maximaze=True, cons_matrix=None,
                cons_senses=[], upper_bounds=[], shared_cols=[]):
@@ -191,20 +197,48 @@ class BILPSubproblem(BILPProblem):
     return "%s[num_shared_cols=%d, num_local_cols=%d]" \
         % (self._name, len(self._shared_cols), len(self._local_cols))
 
-  def _set_name(self, name):
-    """Sets subproblem name. Done automatically by solver."""
-    if not isinstance(name, str):
-      raise TypeError()
-    self._name = name
-
-  def get_name(self):
-    return self._name
+  def __add__(self, other):
+    # Build objective function
+    c1 = zip(*self.get_obj_coefs().keys())
+    c2 = zip(*other.get_obj_coefs().keys())
+    obj = SparseVector((1, self.get_num_cols()), dtype=np.float16)
+    for u in (self.get_obj_coefs(), other.get_obj_coefs()):
+      for ij, c in zip(u.keys(), u.values()):
+        obj[ij[1]] = c
+    # Build constraint matrix
+    m1 = self.get_cons_matrix().tocoo()
+    m2 = other.get_cons_matrix().tocoo()
+    cons_matrix = sparse.coo_matrix(
+      (m1.data.tolist() + m2.data.tolist(),
+       zip(*(zip(m1.row, m1.col)
+             + zip(map(lambda x: x + m1.shape[0], m2.row), m2.col)))),
+      shape=(self.get_cons_matrix().shape[0] + other.get_cons_matrix().shape[0],
+             self.get_cons_matrix().shape[1])
+    )
+    c1 = zip(*self.get_rows_upper_bounds().keys())
+    c2 = zip(*other.get_rows_upper_bounds().keys())
+    upper_bounds = SparseVector((1, m1.shape[0] + m2.shape[0]), dtype=np.float16)
+    for u in (self.get_rows_upper_bounds(), other.get_rows_upper_bounds()):
+      offset = len(upper_bounds.values())
+      for ij, c in zip(u.keys(), u.values()):
+        upper_bounds[ij[1] + offset] = c
+    # Build the new problem
+    return BILPSubproblem(self._problem,
+                          obj=obj, maximaze=True, cons_matrix=cons_matrix.tocsr(),
+                          cons_senses=[], upper_bounds=upper_bounds,
+                          shared_cols=self.get_shared_cols() ^ other.get_shared_cols())
 
   def get_shared_cols(self):
     return self._shared_cols
 
+  def get_num_shared_cols(self):
+    return len(self._shared_cols)
+
   def get_local_cols(self):
     return self._local_cols
+
+  def get_num_local_cols(self):
+    return len(self._local_cols)
 
   def get_dependencies(self):
     return self._deps
@@ -215,3 +249,8 @@ class BILPSubproblem(BILPProblem):
     if not len(shared_cols):
       raise Exception("No shared cols")
     self._deps[subproblem] = shared_cols
+
+  def remove_dependecy(self, other):
+    if not isinstance(other, BILPProblem):
+      raise TypeError()
+    del self._deps[other]
