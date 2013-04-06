@@ -28,7 +28,7 @@ from les.decomposers import FinkelsteinQBDecomposer
 from les.solvers import LocalEliminationSolver
 from les.solvers.dummy_solver import DummySolver
 from les.solvers.knapsack_solver import FractionalKnapsackSolver
-from les.ext.coin import OsiSymSolverInterface, OsiClpSolverInterface
+from les.ext.coin import OsiSymSolverInterfaceFactory, OsiClpSolverInterface
 
 def solve(problem):
   # Decompose the problem
@@ -39,10 +39,12 @@ def solve(problem):
   print("Decomposition time: %6.4f second(s)" % (end - start))
   # Solving...
   start = time.clock()
-  solver = LocalEliminationSolver(master_solver=OsiSymSolverInterface,
-                                  relaxation_solvers=[DummySolver,
-                                                      FractionalKnapsackSolver,
-                                                      OsiClpSolverInterface])
+  solver = LocalEliminationSolver(
+    master_solver_factory=OsiSymSolverInterfaceFactory(params={"verbosity": -2}),
+    relaxation_solver_classes=[DummySolver,
+                               FractionalKnapsackSolver,
+                               OsiClpSolverInterface]
+  )
   solver.load_problem(problem, decomposer.get_decomposition_tree())
   solver.solve()
   end = time.clock()
