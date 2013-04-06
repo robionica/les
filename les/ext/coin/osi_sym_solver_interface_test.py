@@ -36,10 +36,7 @@ class OsiSymSolverInterfaceTest(unittest.TestCase):
                              [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                              [0., 0., 0., 0., 0., 0., 3., 4., 1.],
                              ])
-    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
-                          True,
-                          cons_matrix,
-                          None,
+    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6], cons_matrix,
                           [7, 6, 9, 7, 3, 5])
     self.si.load_problem(problem)
     self.si.solve()
@@ -49,9 +46,9 @@ class OsiSymSolverInterfaceTest(unittest.TestCase):
       self.assertEqual(col_solution[i], self.si.get_col_solution()[i])
 
   def test_solve2(self):
-    problem = BILPProblem([2.0], True, np.matrix([[3.0]]), None, [1.0])
+    problem = BILPProblem([2.0], np.matrix([[3.0]]), [1.0])
     self.si.load_problem(problem)
     self.si.solve()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   unittest.main()

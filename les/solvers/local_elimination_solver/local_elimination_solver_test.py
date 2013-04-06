@@ -40,10 +40,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
                                 [0., 0., 2., 1., 1., 2., 5., 0., 0.],
                                 [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                                 [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
-    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
-                          True,
-                          cons_matrix,
-                          None,
+    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6], cons_matrix,
                           [7, 6, 9, 7, 3, 5])
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
@@ -61,11 +58,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
                                 [0., 2., 3., 3., 0., 0., 0.],
                                 [0., 2., 0., 0., 3., 0., 0.],
                                 [0., 0., 2., 0., 0., 3., 2.]])
-    problem = BILPProblem([2, 3, 1, 5, 4, 6, 1],
-                          True,
-                          cons_matrix,
-                          None,
-                          [6, 5, 4, 5])
+    problem = BILPProblem([2, 3, 1, 5, 4, 6, 1], cons_matrix, [6, 5, 4, 5])
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
     tree = decomposer.get_decomposition_tree()

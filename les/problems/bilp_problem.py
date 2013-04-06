@@ -48,16 +48,14 @@ class BILPProblem(Problem):
   problem or zero-one linear programming (ZOLP) problem.
   """
 
-  def __init__(self, obj_coefs=[], maximaze=True, cons_matrix=None,
-               rows_senses=[], rows_upper_bounds=[], rows_lower_bounds=[]):
+  def __init__(self, obj_coefs=[], cons_matrix=None, rhs=[], maximaze=True):
     Problem.__init__(self)
     self._obj_coefs = None
     self.set_obj_coefs(obj_coefs)
     self._cons_matrix = None
     self._set_cons_matrix(cons_matrix)
-    self._rows_senses = rows_senses
-    self._rows_upper_bounds = None
-    self.set_rows_upper_bounds(rows_upper_bounds)
+    self._rhs = None
+    self.set_rhs(rhs)
 
   def __str__(self):
     return "%s[num_rows=%d, num_cols=%d]" % (self.__class__.__name__,
@@ -101,12 +99,7 @@ class BILPProblem(Problem):
     rhs = reader.get_rhs()[0]
     if not len(rhs) == A.shape[0]:
       raise Exception()
-    problem = BILPProblem(A[0,:].todense(),
-                          True,
-                          A[1:,:],
-                          [],
-                          rhs[1:],
-                          [])
+    problem = BILPProblem(A[0,:].todense(), A[1:,:], rhs[1:])
     problem.set_name(reader.get_name())
     return problem
 
@@ -139,28 +132,24 @@ class BILPProblem(Problem):
   def get_obj_coefs(self):
     return self._obj_coefs
 
-  def get_rows_upper_bounds(self):
-    return self._rows_upper_bounds
+  def get_rhs(self):
+    return self._rhs
 
   def set_row_upper_bound(self, i, v):
     """Set a single row upper bound."""
-    self._rows_upper_bounds[i] = v
+    self._rhs[i] = v
 
-  def set_row_bounds(self, lower, upper):
-    """Set a single row lower and upper bound."""
-    pass
-
-  def set_rows_upper_bounds(self, values):
+  def set_rhs(self, values):
     """Set rows upper bounds."""
     if isinstance(values, sparse.dok_matrix):
-      self._rows_upper_bounds = SparseVector(values)
+      self._rhs = SparseVector(values)
     elif isinstance(values, (tuple, list)):
       m = sparse.dok_matrix((1, len(values)), dtype=np.float16)
       for i, c in enumerate(values):
         m[0, i] = c
-      self._rows_upper_bounds = SparseVector(m)
+      self._rhs = SparseVector(m)
     elif isinstance(values, SparseVector):
-      self._rows_upper_bounds = values
+      self._rhs = values
     else:
       raise TypeError()
 
@@ -174,7 +163,7 @@ class BILPProblem(Problem):
     v = self._cons_matrix.dot(solution)
     for i in range(len(v)):
       # TODO: add sense
-      if v[i] > self._rows_upper_bounds[i]:
+      if v[i] > self._rhs[i]:
         return False
     return True
 
@@ -183,10 +172,9 @@ ZOLPProblem = BILPProblem
 class BILPSubproblem(BILPProblem):
   """Subproblem name will be set automatically by solver."""
 
-  def __init__(self, problem, obj=[], maximaze=True, cons_matrix=None,
-               cons_senses=[], upper_bounds=[], shared_cols=[]):
-    BILPProblem.__init__(self, obj, maximaze, cons_matrix, cons_senses,
-                         upper_bounds)
+  def __init__(self, problem, obj_coefs=[], cons_matrix=None, rhs=[],
+               maximaze=True, shared_cols=[]):
+    BILPProblem.__init__(self, obj_coefs, cons_matrix, rhs, maximaze)
     self._name = None
     self._problem = problem
     self._shared_cols = shared_cols
@@ -215,17 +203,17 @@ class BILPSubproblem(BILPProblem):
       shape=(self.get_cons_matrix().shape[0] + other.get_cons_matrix().shape[0],
              self.get_cons_matrix().shape[1])
     )
-    c1 = zip(*self.get_rows_upper_bounds().keys())
-    c2 = zip(*other.get_rows_upper_bounds().keys())
-    upper_bounds = SparseVector((1, m1.shape[0] + m2.shape[0]), dtype=np.float16)
-    for u in (self.get_rows_upper_bounds(), other.get_rows_upper_bounds()):
+    c1 = zip(*self.get_rhs().keys())
+    c2 = zip(*other.get_rhs().keys())
+    rhs = SparseVector((1, m1.shape[0] + m2.shape[0]), dtype=np.float16)
+    for u in (self.get_rhs(), other.get_rhs()):
       offset = len(upper_bounds.values())
       for ij, c in zip(u.keys(), u.values()):
-        upper_bounds[ij[1] + offset] = c
+        rhs[ij[1] + offset] = c
     # Build the new problem
     return BILPSubproblem(self._problem,
-                          obj=obj, maximaze=True, cons_matrix=cons_matrix.tocsr(),
-                          cons_senses=[], upper_bounds=upper_bounds,
+                          obj_coefs=obj, cons_matrix=cons_matrix.tocsr(),
+                          rhs=rhs,
                           shared_cols=self.get_shared_cols() ^ other.get_shared_cols())
 
   def get_shared_cols(self):

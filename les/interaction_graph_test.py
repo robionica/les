@@ -32,10 +32,7 @@ class InteractionGraphTest(unittest.TestCase):
                                 [0., 0., 0., 0., 0., 0., 2., 1., 2.],
                                 [0., 0., 0., 0., 0., 0., 3., 4., 1.],
                                 ])
-    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6],
-                          True,
-                          cons_matrix,
-                          None,
+    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6], cons_matrix,
                           [7, 6, 9, 7, 3, 5])
     g = InteractionGraph(problem)
     self.assertEqual(9, len(g.nodes()))

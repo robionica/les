@@ -38,9 +38,8 @@ class KnapsackProblem(BILPProblem):
     if not isinstance(max_weight, (int, long, numpy.float32)):
       raise TypeError("max_weight can be an in or long: %s" % type(max_weight))
     cons_matrix = numpy.matrix([weights])
-    BILPProblem.__init__(self, values, True, cons_matrix=cons_matrix,
-                         rows_senses=[],
-                         rows_upper_bounds=[max_weight])
+    BILPProblem.__init__(self, obj_coefs=values, cons_matrix=cons_matrix,
+                         rhs=[max_weight])
     self._weights = weights
     self._values = values
     self._max_weight = max_weight
@@ -50,7 +49,7 @@ class KnapsackProblem(BILPProblem):
     if isinstance(data, BILPProblem):
       # Sum all the constraints over the first one
       weights = data.get_cons_matrix().sum(0).tolist()[0]
-      max_weight = data.get_rows_upper_bounds().sum()
+      max_weight = data.get_rhs().sum()
       return cls(data.get_obj_coefs().tocsr().data.tolist(), weights, max_weight)
     else:
       raise TypeError()

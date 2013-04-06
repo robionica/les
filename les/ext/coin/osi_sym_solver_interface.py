@@ -61,6 +61,6 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
       for i, v in zip(row.indices, row.data):
         r.insert(int(i), float(v))
       # NOTE: fix coef because of C++ signature
-      self.add_row(r, "L", float(problem.get_rows_upper_bounds()[p]), 1.)
+      self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
     # Set objective function sense
     self.set_obj_sense(-1)

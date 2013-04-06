@@ -63,14 +63,14 @@ class FinkelsteinQBDecomposer(Decomposer):
     cons_matrix = problem.get_cons_matrix()[list(rows)]
     # Build sparse vector of obj function coefs
     # TODO: copy dtype
-    obj = SparseVector((1, problem.get_num_cols()), dtype=np.float16)
+    obj_coefs = SparseVector((1, problem.get_num_cols()), dtype=np.float16)
     for i in cols:
-      obj[i] = problem.get_obj_coefs()[i]
+      obj_coefs[i] = problem.get_obj_coefs()[i]
     # Build sparse vector of upper bounds
-    upper_bounds = [problem.get_rows_upper_bounds()[i] for i in rows]
+    rhs = [problem.get_rhs()[i] for i in rows]
     # Build subproblem
-    sp = problem.build_subproblem(obj, True, cons_matrix, [], upper_bounds,
-                                    shared_cols=left_cols | right_cols)
+    sp = problem.build_subproblem(obj_coefs=obj_coefs, cons_matrix=cons_matrix,
+                                  rhs=rhs, shared_cols=left_cols | right_cols)
     return sp
 
   def _build_decomposition_tree(self):
