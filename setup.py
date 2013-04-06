@@ -74,6 +74,17 @@ def setup_symphony(home_dir):
       library_dirs=[lib_dir]
     )
   )
+  extensions.append(
+    Extension(
+      "les.ext.coin._osi_presolve",
+      ["les/ext/coin/osi_presolve.cc"],
+      define_macros=[("BOOST_PYTHON_NO_PY_SIGNATURES", 1)],
+      libraries=["boost_python",
+                 "OsiSym","Sym", "Cgl", "OsiClp", "Clp", "Osi", "CoinUtils"],
+      include_dirs=[include_dir],
+      library_dirs=[lib_dir]
+    )
+  )
 
 def main():
   if SYMPHONY_HOME_DIR:
