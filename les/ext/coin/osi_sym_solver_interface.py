@@ -27,7 +27,6 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
   def __init__(self):
     MILPSolver.__init__(self)
     _osi_sym_solver_interface.OsiSymSolverInterface.__init__(self)
-    self.set_sym_param("verbosity", -2)
 
   def solve(self):
     self.branch_and_bound()

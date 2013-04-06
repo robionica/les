@@ -24,6 +24,10 @@ from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
 
 class OsiSymSolverInterfaceTest(unittest.TestCase):
 
+  def setUp(self):
+    self.si = OsiSymSolverInterface()
+    self.si.set_sym_param("verbosity", -2)
+
   def test_solve1(self):
     cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
                              [1., 2., 3., 2., 0., 0., 0., 0., 0.],
@@ -37,19 +41,17 @@ class OsiSymSolverInterfaceTest(unittest.TestCase):
                           cons_matrix,
                           None,
                           [7, 6, 9, 7, 3, 5])
-    solver = OsiSymSolverInterface()
-    solver.load_problem(problem)
-    solver.solve()
-    self.assertEqual(39.0, solver.get_obj_value())
+    self.si.load_problem(problem)
+    self.si.solve()
+    self.assertEqual(39.0, self.si.get_obj_value())
     col_solution = [1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
     for i in range(len(col_solution)):
-      self.assertEqual(col_solution[i], solver.get_col_solution()[i])
+      self.assertEqual(col_solution[i], self.si.get_col_solution()[i])
 
   def test_solve2(self):
     problem = BILPProblem([2.0], True, np.matrix([[3.0]]), None, [1.0])
-    solver = OsiSymSolverInterface()
-    solver.load_problem(problem)
-    solver.solve()
+    self.si.load_problem(problem)
+    self.si.solve()
 
 if __name__ == "__main__":
   unittest.main()
