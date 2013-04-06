@@ -16,8 +16,10 @@
 
 from les.solvers.solver import Solver
 
-class MILPSolver(Solver):
-  """Base class for MILP problem solvers."""
+class BILPSolver(Solver):
+  """Base solver class for 0-1 integer linear programming or binary integer linear
+  programming problems represented by :class:`BILPProblem` class.
+  """
 
   def __init__(self):
     Solver.__init__(self)
