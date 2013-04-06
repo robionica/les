@@ -15,10 +15,24 @@
 // limitations under the License.
 
 #include <coin/CoinPackedVector.hpp>
+#include <coin/CoinPackedMatrix.hpp>
 
 #include <boost/python.hpp>
 
 using namespace boost::python;
+
+struct CoinPackedMatrixWrap : CoinPackedMatrix, wrapper<CoinPackedMatrix> {
+public:
+  CoinPackedMatrixWrap() : CoinPackedMatrix() {}
+
+  void appendRow1(const CoinPackedVectorBase& vec) {
+    CoinPackedMatrix::appendRow(vec);
+  }
+
+  void appendCol1(const CoinPackedVectorBase& vec) {
+    CoinPackedMatrix::appendCol(vec);
+  }
+};
 
 BOOST_PYTHON_MODULE(coin_utils)
 {
@@ -27,5 +41,15 @@ BOOST_PYTHON_MODULE(coin_utils)
   class_<CoinPackedVectorBase, boost::noncopyable,
          boost::shared_ptr<CoinPackedVector> >("CoinPackedVector")
     .def("insert", &CoinPackedVector::insert)
+    ;
+
+  class_<CoinPackedMatrixWrap, boost::noncopyable>("CoinPackedMatrix")
+    // Query members
+    .def("get_num_rows", &CoinPackedMatrixWrap::getNumRows)
+    .def("get_num_cols", &CoinPackedMatrixWrap::getNumCols)
+    .def("get_size_vector_lengths", &CoinPackedMatrixWrap::getSizeVectorLengths)
+    // Modifying members
+    .def("append_row", &CoinPackedMatrixWrap::appendRow1)
+    .def("append_col", &CoinPackedMatrixWrap::appendCol1)
     ;
 }
