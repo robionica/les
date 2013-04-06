@@ -14,189 +14,134 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""LocalEliminationSolver represents the general class of local elimination
+algorithms (LEA) for computing information, that have decomposition approach and
+that allow to calculate some global information about a solution of the entire
+problem using local computations.
+"""
+
 import networkx as nx
-import numpy as np
 import logging
-import time
-import pprint
 
 from les.problems.bilp_problem import BILPProblem
 from les.solvers.milp_solver import MILPSolver
-from les.sparse_vector import SparseVector
 
 from les.decomposition_tree import DecompositionTree
-from .data_models.data_model import DataModel
-from .data_models.sqlite_data_model import SQLiteDataModel
-from .distributors import ThreadDistributor
-from .distributors.distributor import Distributor
-from les.solvers.dummy_solver import DummySolver
+from les.solvers.local_elimination_solver.data_models.data_model import DataModel
+from les.solvers.local_elimination_solver.data_models.sqlite_data_model import SQLiteDataModel
+from les.solvers.local_elimination_solver.distributors.thread_distributor_factory import ThreadDistributorFactory
+from les.solvers.local_elimination_solver.distributors.distributor_factory import DistributorFactory
+from les.solvers.local_elimination_solver import local_solver
 
-logger = logging.getLogger()
+class Statistics(object):
 
-class _RelaxedProblemGenerator(object):
-
-  def __init__(self, subproblem):
-    self._subproblem = subproblem
-    cons_matrix = subproblem.get_cons_matrix()[:,list(subproblem.get_local_cols())]
-    # Objective function
-    obj = SparseVector((1, subproblem.get_num_cols()), dtype=np.float16)
-    for i in subproblem.get_local_cols():
-      obj[i] = subproblem.get_obj_coefs()[i]
-    # Build gen problem
-    self._genproblem = BILPProblem(obj, True, cons_matrix, [],
-                                   subproblem.get_rows_upper_bounds().copy())
-
-  def _gen_initial_solution(self, mask):
-    solution = SparseVector((1, self._subproblem.get_num_cols()), dtype=np.float16)
-    for c, i in enumerate(self._subproblem.get_shared_cols()):
-      solution[i] = (mask >> c) & 1
-    return solution
-
-  def gen(self, mask):
-    if not isinstance(mask, (int, long)):
-      raise TypeError("mask: %s" % type(mask))
-    solution = self._gen_initial_solution(mask)
-    self._genproblem.set_rows_upper_bounds(self._subproblem.get_rows_upper_bounds().copy())
-    m = self._subproblem.get_cons_matrix()
-    for i in self._subproblem.get_shared_cols():
-      for ii, ij in zip(*m[:,i].nonzero()):
-        self._genproblem.set_row_upper_bound(ii, \
-        self._genproblem.get_rows_upper_bounds()[ii] - (m[ii, i+ij] * solution[i+ij]))
-        # TODO: check row sense
-        if self._genproblem.get_rows_upper_bounds()[ii] < 0:
-          return None, None
-    return self._genproblem, solution
+  def __init__(self):
+    self._stats = {
+      'calls': {
+        'relaxation_solvers': dict([(cls.__name__, 0) for cls in relaxation_solver_classes]),
+        'master_solver': 0,
+        }
+    }
 
 class LocalEliminationSolver(MILPSolver):
   """This class represents local elimination solver (LES), which implements
   local elimination algorithm (LEA). The solver solves discrete optimization
   problems (DOP) defined by DILP class.
+
+  Set `distributor` to `None` to disable distributors. In this case solver will
+  solve subproblems one by one. By default ThreadDistributor() instance will be
+  used.
   """
 
-  def __init__(self, master_solver, relaxation_solvers=[],
-               data_model=SQLiteDataModel(), distributor=ThreadDistributor()):
-    MILPSolver.__init__(self)
-    if not issubclass(master_solver, MILPSolver):
-      raise TypeError("master_solver must be subclass of MILPSolver: %s"
-                      % master_solver)
-    self._master_solver = master_solver
-    self._relaxation_solvers = []
-    self._obj_value = 0.0
-    self._data_model = None
-    self._distributor = None
-    self._stats = {
-      'relaxation_solvers': dict([(cls.__name__, 0) for cls in relaxation_solvers]),
-      'master_solver': 0,
-    }
-    if distributor:
-      self.set_distributor(distributor)
-    if relaxation_solvers:
-      self.set_relaxation_solvers(relaxation_solvers)
-    if data_model:
-      self.set_data_model(data_model)
+  # Logger for this class
+  logger = logging.getLogger()
 
-  def set_relaxation_solvers(self, solvers):
-    if not isinstance(solvers, (list, tuple)):
+  def __init__(self, master_solver_factory, relaxation_solver_classes=[],
+               data_model=SQLiteDataModel(),
+               distributor_factory=ThreadDistributorFactory()):
+    MILPSolver.__init__(self)
+    self._obj_value = 0.0
+    self._distributor = None
+    self._decomposition_tree = None
+    if not isinstance(data_model, DataModel):
       raise TypeError()
-    for solver in solvers:
-      if not issubclass(solver, MILPSolver):
-        raise TypeError()
-    self._relaxation_solvers = solvers
+    self._data_model = data_model
+    self._local_solver_settings = local_solver.Settings(data_model,
+                                                        master_solver_factory,
+                                                        relaxation_solver_classes)
+    if distributor_factory:
+      if not isinstance(distributor_factory, DistributorFactory):
+        raise TypeError("distributor_factory must be derived from"
+                        " DistributorFactory")
+      self._distributor = distributor_factory.build(self._local_solver_settings)
 
   def get_problem(self):
     """Returns the problem instance that has to be solved by this solver."""
     return self._problem
 
-  def set_data_model(self, data_model):
-    if not isinstance(data_model, DataModel):
-      raise TypeError()
-    self._data_model = data_model
-
   def get_data_model(self):
-    """Returns DataModel based instance."""
+    """Returns :class:`DataModel` based instance."""
     return self._data_model
 
-  def get_distributor(self):
-    return self._distributor
-
-  def set_distributor(self, distributor):
-    if not isinstance(distributor, Distributor):
-      raise TypeError()
-    self._distributor = distributor
-
-  def solve(self, distributor=None):
-    """By default ThreadDistributor() instance will be used. Set `distributor`
-    to `None` to disable distributors.
-    """
-    logger.info("Solving problem %s" % self._problem.get_name())
+  def solve(self):
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
-    if distributor:
-      self.set_destributor(distributor)
-    # Configure data-model
+    self.logger.info("Solving problem %s" % self._problem.get_name())
+    # If we have only one subproblem, skip the process and solve it with pure
+    # master solver
+    if self._decomposition_tree.get_num_nodes() == 1:
+      raise NotImplementedError()
     self._data_model.configure(self._decomposition_tree.get_subproblems())
-    # Solve subproblems if this wasn't done yet
-    if self.get_distributor():
+    if self._distributor:
       for subproblem in self._decomposition_tree.get_subproblems():
         self._distributor.put(subproblem)
-      self._distributor.run(self._solve_subproblem)
+      self._distributor.run()
     else:
       for subproblem in self._decomposition_tree.get_subproblems():
-        self._solve_subproblem(subproblem, )
-    # Process subproblems in a depth-first-search pre-ordering starting
+        solver = local_solver.LocalSolver(self._local_solver_settings)
+        solver.solve(subproblem)
+    # Process subproblems in a depth-first-search pre-ordering starting from the
+    # root
     for node in nx.dfs_preorder_nodes(self._decomposition_tree,
                                       self._decomposition_tree.get_root()):
       subproblem = self._decomposition_tree.node[node]["subproblem"]
       cols = subproblem.get_shared_cols() | subproblem.get_local_cols()
       shared_cols = subproblem.get_shared_cols()
       self._data_model.process(subproblem)
-    # Get result objective value
     self._obj_value = self._data_model.get_max_obj_value(subproblem.get_name())
 
-  def _solve_subproblem(self, subproblem):
-    logger.info("Solving %s" % subproblem)
-    # TODO: len(shared_cols) < max separator size
-    generator = _RelaxedProblemGenerator(subproblem)
-    # TODO: this is maximization pattern, add minimization pattern
-    for mask in range((1 << len(subproblem.get_shared_cols())) - 1, -1, -1):
-      # Start to iterate over possible assigns for shared columns
-      start = time.clock()
-      relaxed_problem, result_col_solution = generator.gen(mask)
-      if relaxed_problem:
-        col_solution, obj_value = self._solve_relaxed_problem(relaxed_problem)
-        for c, i in enumerate(subproblem.get_local_cols()):
-          result_col_solution[i] = col_solution[c]
-        for dep_subproblem, dep_cols in subproblem.get_dependencies().items():
-          obj_value += sum([self._problem.get_obj_coefs()[i] * result_col_solution[i] for i in dep_cols])
-        # Registers solution for a given subproblem.
-        self._data_model.put(subproblem, result_col_solution, obj_value)
-
-  def _solve_relaxed_problem(self, problem):
-    for solver_class in self._relaxation_solvers:
-      solver = solver_class()
-      solver.load_problem(problem)
-      solver.solve()
-      if len(solver.get_col_solution()) \
-            and not sum(solver.get_col_solution()) % 1.0 \
-            and problem.check_col_solution(solver.get_col_solution()):
-        self._stats['relaxation_solvers'][solver_class.__name__] += 1
-        return solver.get_col_solution(), solver.get_obj_value()
-    # Use master solver
-    solver = self._master_solver()
-    solver.load_problem(problem)
-    solver.solve()
-    return solver.get_col_solution(), abs(solver.get_obj_value())
-
-  def load_problem(self, problem, decomposition_tree):
+  # NOTE: on this moment it's user responsibility to preprocess problem and
+  # build decomposition tree.
+  def load_problem(self, problem, decomposition_tree, max_num_shared_cols=10):
     """Loads problem and its decomposition model represented by decomposition
     tree.
+
+    Process decomposition tree and merge nodes according to max_num_shared_cols
+    value.
     """
     if not isinstance(problem, BILPProblem):
       raise TypeError()
     if not isinstance(decomposition_tree, DecompositionTree):
-      raise TypeError()
+      raise TypeError("decomposition_tree must be derived from DecompositionTree")
+    self._original_decomposition_tree = decomposition_tree
+    self._decomposition_tree = decomposition_tree.copy()
+    has_updates = True
+    while has_updates:
+      has_updates = False
+      for node in self._decomposition_tree.get_nodes(data=True):
+        # Instead of computing the total number of shared cols from edges we can
+        # simply take this number directly from the problem
+        subproblem = node[1].get("subproblem")
+        if subproblem.get_num_shared_cols() <= max_num_shared_cols:
+          continue
+        edges = sorted(self._decomposition_tree.in_edges(node[0], data=True)
+                     + self._decomposition_tree.out_edges(node[0], data=True),
+                     key=lambda e: len(e[2].get("shared_cols")), reverse=True)
+        self.logger.info("Merge subproblems %s and %s" % (edges[0][0], edges[0][1]))
+        self._decomposition_tree.merge_nodes(edges[0][0], edges[0][1])
+        has_updates = True
+        break
     self._problem = problem
-    self._decomposition_tree = decomposition_tree
 
   def get_obj_value(self):
     """Returns objective function value."""

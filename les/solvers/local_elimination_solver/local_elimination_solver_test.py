@@ -19,10 +19,17 @@ import unittest
 
 from les.problems import BILPProblem
 from les.decomposers.finkelstein_qb_decomposer import FinkelsteinQBDecomposer
-from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
+from les.ext.coin import OsiSymSolverInterfaceFactory
 
 from les.solvers.local_elimination_solver.local_elimination_solver import LocalEliminationSolver
 from les.solvers.local_elimination_solver.data_models.sqlite_data_model import SQLiteDataModel
+
+class _OsiSymSolverInterfaceFactory(OsiSymSolverInterfaceFactory):
+
+  def build(self):
+    si = OsiSymSolverInterfaceFactory.build(self)
+    si.set_sym_param("verbosity", -2)
+    return si
 
 class LocalEliminationSolverTest(unittest.TestCase):
 
@@ -40,8 +47,11 @@ class LocalEliminationSolverTest(unittest.TestCase):
                           [7, 6, 9, 7, 3, 5])
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
-    solver = LocalEliminationSolver(master_solver=OsiSymSolverInterface,
-                                    data_model=SQLiteDataModel())
+    solver = LocalEliminationSolver(
+      master_solver_factory=_OsiSymSolverInterfaceFactory(),
+      distributor_factory=None,
+      data_model=SQLiteDataModel()
+    )
     solver.load_problem(problem, decomposer.get_decomposition_tree())
     solver.solve()
     self.assertEqual(39.0, solver.get_obj_value())
@@ -61,8 +71,10 @@ class LocalEliminationSolverTest(unittest.TestCase):
     tree = decomposer.get_decomposition_tree()
     subproblems = tree.get_subproblems()
     self.assertEqual(2, len(subproblems))
-    solver = LocalEliminationSolver(master_solver=OsiSymSolverInterface,
-                                    distributor=None)
+    solver = LocalEliminationSolver(
+      master_solver_factory=_OsiSymSolverInterfaceFactory(),
+      distributor_factory=None
+    )
     solver.load_problem(problem, decomposer.get_decomposition_tree())
     solver.solve()
     self.assertEqual(18.0, solver.get_obj_value())
