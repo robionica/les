@@ -14,3 +14,10 @@
 
 from les.solvers.local_elimination_solver import LocalEliminationSolver
 from les.solvers.dummy_solver import DummySolver
+from les.solvers.dummy_solver_factory import DummySolverFactory
+from les.solvers.knapsack_solver import FractionalKnapsackSolver
+from les.solvers.knapsack_solver_factory import FractionalKnapsackSolverFactory
+from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
+from les.ext.coin.osi_clp_solver_interface import OsiClpSolverInterface
+from les.ext.coin.osi_sym_solver_interface_factory import OsiSymSolverInterfaceFactory
+from les.ext.coin.osi_clp_solver_interface_factory import OsiClpSolverInterfaceFactory
