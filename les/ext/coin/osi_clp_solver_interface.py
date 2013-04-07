@@ -27,7 +27,6 @@ class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
   def __init__(self):
     BILPSolver.__init__(self)
     _osi_clp_solver_interface.OsiClpSolverInterface.__init__(self)
-    self.set_log_level(0) # switch off printout
 
   def solve(self):
     self.initial_solve()
