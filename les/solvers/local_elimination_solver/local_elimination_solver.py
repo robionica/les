@@ -56,7 +56,7 @@ class LocalEliminationSolver(BILPSolver):
   # Logger for this class
   logger = logging.getLogger()
 
-  def __init__(self, master_solver_factory, relaxation_solver_classes=[],
+  def __init__(self, master_solver_factory, relaxation_solver_factories=[],
                data_model=SQLiteDataModel(),
                distributor_factory=ThreadDistributorFactory()):
     BILPSolver.__init__(self)
@@ -68,7 +68,7 @@ class LocalEliminationSolver(BILPSolver):
     self._data_model = data_model
     self._local_solver_settings = local_solver.Settings(data_model,
                                                         master_solver_factory,
-                                                        relaxation_solver_classes)
+                                                        relaxation_solver_factories)
     if distributor_factory:
       if not isinstance(distributor_factory, DistributorFactory):
         raise TypeError("distributor_factory must be derived from"
@@ -102,6 +102,7 @@ class LocalEliminationSolver(BILPSolver):
         solver.solve(subproblem)
     # Process subproblems in a depth-first-search pre-ordering starting from the
     # root
+    self.logger.info("Processing local solutions...")
     for node in nx.dfs_preorder_nodes(self._decomposition_tree,
                                       self._decomposition_tree.get_root()):
       subproblem = self._decomposition_tree.node[node]["subproblem"]

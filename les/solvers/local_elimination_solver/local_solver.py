@@ -19,22 +19,23 @@ import time
 from les.solvers.bilp_solver import BILPSolver
 from les.sparse_vector import SparseVector
 from les.problems.bilp_problem import BILPProblem
+from les.solvers.solver_factory import SolverFactory
 
 class Settings(object):
 
-  def __init__(self, data_model, master_solver_factory, relaxation_solver_classes):
+  def __init__(self, data_model, master_solver_factory, relaxation_solver_factories):
     self._data_model = data_model
     # TODO: check solver builder
     #if not issubclass(master_solver_factory, BILPSolver):
     #  raise TypeError("master_solver must be subclass of BILPSolver: %s"
     #                  % master_solver_class)
     self._master_solver_factory = master_solver_factory
-    if not isinstance(relaxation_solver_classes, (list, tuple)):
+    if not isinstance(relaxation_solver_factories, (list, tuple)):
       raise TypeError()
-    for solver in relaxation_solver_classes:
-      if not issubclass(solver, BILPSolver):
+    for factory in relaxation_solver_factories:
+      if not isinstance(factory, SolverFactory):
         raise TypeError()
-    self._relaxation_solver_classes = relaxation_solver_classes
+    self._relaxation_solver_factories = relaxation_solver_factories
 
   def get_data_model(self):
     return self._data_model
@@ -42,8 +43,8 @@ class Settings(object):
   def get_master_solver_factory(self):
     return self._master_solver_factory
 
-  def get_relaxation_solver_classes(self):
-    return self._relaxation_solver_classes
+  def get_relaxation_solver_factories(self):
+    return self._relaxation_solver_factories
 
 class _RelaxedProblemGenerator(object):
 
@@ -84,7 +85,7 @@ class LocalSolver(object):
 
   def __init__(self, settings):
     self._data_model = settings.get_data_model()
-    self._relaxation_solvers = settings.get_relaxation_solver_classes()
+    self._relaxation_solvers = settings.get_relaxation_solver_factories()
     self._master_solver_factory = settings.get_master_solver_factory()
 
   def solve(self, subproblem):
@@ -104,8 +105,8 @@ class LocalSolver(object):
         self._data_model.put(subproblem, result_col_solution, obj_value)
 
   def _solve_relaxed_problem(self, problem):
-    for solver_class in self._relaxation_solvers:
-      solver = solver_class()
+    for solver_factory in self._relaxation_solvers:
+      solver = solver_factory.build()
       solver.load_problem(problem)
       solver.solve()
       s = sum(solver.get_col_solution())

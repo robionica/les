@@ -25,10 +25,18 @@ import numpy as np
 from les.problems import BILPProblem
 from les.solvers import LocalEliminationSolver
 from les.decomposers import FinkelsteinQBDecomposer
-from les.solvers import LocalEliminationSolver
-from les.solvers.dummy_solver import DummySolver
-from les.solvers.knapsack_solver import FractionalKnapsackSolver
-from les.ext.coin import OsiSymSolverInterfaceFactory, OsiClpSolverInterface
+from les.solvers import \
+    LocalEliminationSolver, \
+    DummySolverFactory, \
+    FractionalKnapsackSolverFactory, \
+    OsiSymSolverInterfaceFactory, OsiClpSolverInterfaceFactory
+
+class _OsiClpSolverInterfaceFactory(OsiClpSolverInterfaceFactory):
+
+  def build(self):
+    si = OsiClpSolverInterfaceFactory.build(self)
+    si.set_log_level(0) # switch off printout
+    return si
 
 def solve(problem):
   # Decompose the problem
@@ -41,9 +49,9 @@ def solve(problem):
   start = time.clock()
   solver = LocalEliminationSolver(
     master_solver_factory=OsiSymSolverInterfaceFactory(params={"verbosity": -2}),
-    relaxation_solver_classes=[DummySolver,
-                               FractionalKnapsackSolver,
-                               OsiClpSolverInterface]
+    relaxation_solver_factories=[DummySolverFactory(),
+                                 FractionalKnapsackSolverFactory(),
+                                 _OsiClpSolverInterfaceFactory()]
   )
   solver.load_problem(problem, decomposer.get_decomposition_tree())
   solver.solve()
