@@ -125,5 +125,9 @@ BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
     .def("set_sym_param", &OsiSymSolverInterfaceWrap::setSymParam)
     .def("set_hint_param", &OsiSymSolverInterfaceWrap::setHintParam1)
     .def("set_hint_param", &OsiSymSolverInterfaceWrap::setHintParam2)
+    // Hot start methods
+    .def("mark_hot_start", &OsiSymSolverInterfaceWrap::markHotStart)
+    .def("unmark_hot_start", &OsiSymSolverInterfaceWrap::unmarkHotStart)
+    .def("solve_from_hot_start", &OsiSymSolverInterfaceWrap::solveFromHotStart)
     ;
 }
