@@ -25,10 +25,9 @@ class Settings(object):
 
   def __init__(self, data_model, master_solver_factory, relaxation_solver_factories):
     self._data_model = data_model
-    # TODO: check solver builder
-    #if not issubclass(master_solver_factory, BILPSolver):
-    #  raise TypeError("master_solver must be subclass of BILPSolver: %s"
-    #                  % master_solver_class)
+    if not isinstance(master_solver_factory, SolverFactory):
+      raise TypeError("master_solver_factory must be derived from SolverFactory: %s"
+                      % master_solver_factory)
     self._master_solver_factory = master_solver_factory
     if not isinstance(relaxation_solver_factories, (list, tuple)):
       raise TypeError()
@@ -73,8 +72,7 @@ class _RelaxedProblemGenerator(object):
     for i in self._subproblem.get_shared_cols():
       for ii, ij in zip(*m[:,i].nonzero()):
         self._genproblem.set_row_upper_bound(ii, \
-        self._genproblem.get_rhs()[ii] - (m[ii, i+ij] * solution[i+ij]))
-        # TODO: check row sense
+            self._genproblem.get_rhs()[ii] - (m[ii, i+ij] * solution[i+ij]))
         if self._genproblem.get_rhs()[ii] < 0:
           return None, None
     return self._genproblem, solution
@@ -87,22 +85,28 @@ class LocalSolver(object):
     self._data_model = settings.get_data_model()
     self._relaxation_solvers = settings.get_relaxation_solver_factories()
     self._master_solver_factory = settings.get_master_solver_factory()
+    self._generator = None
 
   def solve(self, subproblem):
     self.logger.info("Solving %s..." % subproblem)
-    generator = _RelaxedProblemGenerator(subproblem)
+    self._generator = _RelaxedProblemGenerator(subproblem)
     # TODO: this is maximization pattern, add minimization pattern
-    for mask in range((1 << len(subproblem.get_shared_cols())) - 1, -1, -1):
-      # Start to iterate over possible assigns for shared columns
-      start = time.clock()
-      relaxed_problem, result_col_solution = generator.gen(mask)
-      if relaxed_problem:
-        col_solution, obj_value = self._solve_relaxed_problem(relaxed_problem)
-        for c, i in enumerate(subproblem.get_local_cols()):
-          result_col_solution[i] = col_solution[c]
-        for dep_subproblem, dep_cols in subproblem.get_dependencies().items():
-          obj_value += sum([subproblem.get_obj_coefs()[i] * result_col_solution[i] for i in dep_cols])
-        self._data_model.put(subproblem, result_col_solution, obj_value)
+    # NOTE: the first iteration is critial
+    self._do_solve_iteration(subproblem, (1<<len(subproblem.get_shared_cols()))-1)
+    # Start to iterate over all possible assigns for shared columns
+    for mask in range((1 << len(subproblem.get_shared_cols())) - 2, -1, -1):
+      self._do_solve_iteration(subproblem, mask)
+
+  def _do_solve_iteration(self, subproblem, mask):
+    relaxed_problem, result_col_solution = self._generator.gen(mask)
+    if not relaxed_problem:
+      return
+    col_solution, obj_value = self._solve_relaxed_problem(relaxed_problem)
+    for c, i in enumerate(subproblem.get_local_cols()):
+      result_col_solution[i] = col_solution[c]
+    for dep_subproblem, dep_cols in subproblem.get_dependencies().items():
+      obj_value += sum([subproblem.get_obj_coefs()[i] * result_col_solution[i] for i in dep_cols])
+    self._data_model.put(subproblem, result_col_solution, obj_value)
 
   def _solve_relaxed_problem(self, problem):
     for solver_factory in self._relaxation_solvers:

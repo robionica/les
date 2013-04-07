@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from les.solvers.solver_factory import SolverFactory
 from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
 
-class OsiSymSolverInterfaceFactory(object):
+class OsiSymSolverInterfaceFactory(SolverFactory):
   """A producer of :class:`OsiSymSolverInterface`."""
 
   def __init__(self, params={}):
+    SolverFactory.__init__(self)
     if not isinstance(params, dict):
       raise TypeError()
     self._params = params
