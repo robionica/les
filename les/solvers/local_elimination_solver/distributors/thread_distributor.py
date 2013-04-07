@@ -13,15 +13,16 @@
 # limitations under the License.
 
 import logging
+import time
 
 from les import runtime
 from les.runtime import thread_pool
 from les.solvers.local_elimination_solver.distributors.distributor import Distributor
 from les.solvers.local_elimination_solver.local_solver import LocalSolver
 
-logger = logging.getLogger()
-
 class ThreadDistributor(Distributor):
+
+  logger = logging.getLogger()
 
   def __init__(self, local_solver_settings, max_num_threads=0,
                reporter=None):
@@ -44,21 +45,24 @@ class ThreadDistributor(Distributor):
   def get_max_num_threads(self):
     return self._max_num_threads
 
-  @staticmethod
-  def _default_reporter(request, result):
+  @classmethod
+  def _default_reporter(cls, request, elapsed_time):
     subproblem = request.args[0]
-    logger.info("T%d: %s solved" % (request.requestID, subproblem))
+    cls.logger.info("T%d: %s solved in %6.4f sec(s)"
+                     % (request.requestID, subproblem, elapsed_time))
 
   def put(self, subproblem):
     """Put subproblems in order they come."""
     self._subproblems.append(subproblem)
 
   def _callback(self, subproblem):
+    start = time.clock()
     solver = LocalSolver(self.get_local_solver_settings())
     solver.solve(subproblem)
+    return time.clock() - start
 
   def run(self):
-    logger.info("Running %s..." % self)
+    self.logger.info("Running %s..." % self)
     pool = thread_pool.ThreadPool(self._max_num_threads)
     reqs = thread_pool.make_requests(self._callback, self._subproblems,
                                      self._reporter)
