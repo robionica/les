@@ -31,12 +31,11 @@ _MAX_TIMEOUT = 5.0
 _SUBPROBLEM_SCHEMA = """
 CREATE TABLE IF NOT EXISTS %(name)s(
   %(cols)s,
-  value DOUBLE,
+  value DOUBLE default 0.0,
+  signed_cols TEXT,
   PRIMARY KEY (%(key)s)
 );
 """
-
-logger = logging.getLogger()
 
 class SQLiteCursorWrapper(sqlite3.Cursor):
   """Substitutes :class:`sqlite3.Cursor`, with a cursor that logs commands.
@@ -44,6 +43,8 @@ class SQLiteCursorWrapper(sqlite3.Cursor):
   Inherits from :class:`sqlite3.Cursor` class and extends methods such as
   execute, executemany and execute script, so it logs SQL calls.
   """
+
+  logger = logging.getLogger()
 
   def execute(self, sql, *args):
     """Replaces :func:`execute` with a logging variant."""
@@ -54,23 +55,23 @@ class SQLiteCursorWrapper(sqlite3.Cursor):
           parameters.append('<blob>')
         else:
           parameters.append(repr(arg))
-      logger.debug('SQL Execute: %s - \n %s', sql,
+      self.logger.debug('SQL Execute: %s - \n %s', sql,
                    '\n '.join(str(param) for param in parameters))
     else:
-      logger.debug(sql)
+      self.logger.debug(sql)
     return super(SQLiteCursorWrapper, self).execute(sql, *args)
 
   def executemany(self, sql, seq_parameters):
     """Replaces executemany() with a logging variant."""
     seq_parameters_list = list(seq_parameters)
-    logger.debug('SQL ExecuteMany: %s - \n %s', sql,
-                  '\n '.join(str(param) for param in seq_parameters_list))
+    self.logger.debug('SQL ExecuteMany: %s - \n %s', sql,
+                      '\n '.join(str(param) for param in seq_parameters_list))
     return super(SQLiteCursorWrapper, self).executemany(sql,
                                                         seq_parameters_list)
 
   def executescript(self, sql):
     """Replaces :func:`executescript` with a logging variant."""
-    logger.debug('SQL ExecuteScript: %s', sql)
+    self.logger.debug('SQL ExecuteScript: %s', sql)
     return super(SQLiteCursorWrapper, self).executescript(sql)
 
 class SQLiteConnectionWrapper(sqlite3.Connection):
@@ -138,10 +139,10 @@ class SQLiteDataModel(DBDataModel):
     conn.commit()
     conn.close()
 
-  def get_max_obj_value(self, name):
+  def get_solution(self, name):
     conn = self._data_store.get_connection()
-    result = conn.execute("SELECT MAX(value) FROM %s" % name)
-    return result.fetchone()[0]
+    result = conn.execute("SELECT MAX(value), signed_cols FROM %s" % name)
+    return result.fetchone()
 
   def _configure_subproblem(self, problem):
     def join_cols(joiner, cols, frmt="x%d"):
@@ -183,6 +184,8 @@ class SQLiteDataModel(DBDataModel):
         m = dict(zip(cols, row))
         obj_value = m["value"]
         del m["value"]
+        signed_cols = m["signed_cols"]
+        del m["signed_cols"]
         dep_tbls = []
         deps = []
         for sp, xcols in s.get_dependencies().items():
@@ -191,12 +194,24 @@ class SQLiteDataModel(DBDataModel):
           for i in xcols:
             where.append("%s.x%d=%d" % (sp.get_name(), i, m["x%d" % i]))
           deps.append("FROM %s WHERE %s" % (sp.get_name(), " AND ".join(where)))
-        stmt = "UPDATE %s SET value = %f + (%s %s) WHERE %s" \
-            % (s.get_name(), obj_value,
-               " + ".join(["SELECT MAX("+name + ".value)" for name in dep_tbls]),
-               " ".join(deps),
-               " AND ".join(["%s=%d" % (c, v) for c, v in m.items()]),
+        #stmt = "UPDATE %s SET value = %f + (%s %s) WHERE %s" \
+        #    % (s.get_name(), obj_value,
+        #       " + ".join(["SELECT MAX("+name + ".value)" for name in dep_tbls]),
+        #       " ".join(deps),
+        #       #", signed_cols = '%s' || Z0.signed_cols" % signed_cols,
+        #       " AND ".join(["%s=%d" % (c, v) for c, v in m.items()]),
+        #       )
+        stmt = "%s %s" \
+            % (
+               " + ".join(["SELECT MAX("+name + ".value), "+name+".signed_cols" for name in dep_tbls]),
+               " ".join(deps)
                )
+        res = conn.execute(stmt)
+        dep_value, dep_signed_cols = res.fetchone()
+        stmt = "UPDATE %s SET value = %f, signed_cols = '%s' WHERE %s" \
+            % (s.get_name(), obj_value + dep_value,
+               ','.join([signed_cols, dep_signed_cols]),
+               " AND ".join(["%s=%d" % (c, v) for c, v in m.items()]))
         conn.execute(stmt)
     finally:
       self.get_data_store().release_connection(conn)
@@ -204,12 +219,15 @@ class SQLiteDataModel(DBDataModel):
   def put(self, subproblem, col_solution, obj_value):
     cols = []
     vals = []
-    name = subproblem.get_name()
-    for i in subproblem.get_shared_cols() | subproblem.get_local_cols():
+    indices = list(subproblem.get_shared_cols() | subproblem.get_local_cols())
+    for i in indices:
       cols.append("x%d" % i)
       vals.append(int(col_solution[i]))
-    stmt = "INSERT INTO %s(%s, value) VALUES(%s)" \
-        % (name, ", ".join(cols), ", ".join(["?"] * (len(cols) + 1)))
+    stmt = "INSERT INTO %s(%s, value, signed_cols) VALUES(%s)" \
+        % (subproblem.get_name(),
+           ", ".join(cols),
+           ", ".join(["?"] * (len(cols) + 2)))
     conn = self.get_data_store().get_connection()
-    conn.execute(stmt, vals + [float(obj_value)])
+    conn.execute(stmt, vals + [float(obj_value)] +
+                 [','.join([str(indices[i]) for i, j in enumerate(vals) if j])])
     self.get_data_store().release_connection(conn)

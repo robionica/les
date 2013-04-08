@@ -52,6 +52,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
     solver.load_problem(problem, decomposer.get_decomposition_tree())
     solver.solve()
     self.assertEqual(39.0, solver.get_obj_value())
+    self.assertEqual([1., 0., 1., 1., 1., 0., 0., 1., 1.], solver.get_col_solution())
 
   def test_solve2(self):
     cons_matrix = numpy.matrix([[3., 4., 1., 0., 0., 0., 0.],
@@ -71,6 +72,7 @@ class LocalEliminationSolverTest(unittest.TestCase):
     solver.load_problem(problem, decomposer.get_decomposition_tree())
     solver.solve()
     self.assertEqual(18.0, solver.get_obj_value())
+    self.assertEqual([1., 0., 0., 1., 1., 1., 1.], solver.get_col_solution())
 
 if __name__ == "__main__":
   unittest.main()

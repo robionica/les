@@ -61,6 +61,7 @@ class LocalEliminationSolver(BILPSolver):
                distributor_factory=ThreadDistributorFactory()):
     BILPSolver.__init__(self)
     self._obj_value = 0.0
+    self._col_solution = []
     self._distributor = None
     self._decomposition_tree = None
     if not isinstance(data_model, DataModel):
@@ -75,6 +76,9 @@ class LocalEliminationSolver(BILPSolver):
                         " DistributorFactory")
       self._distributor = distributor_factory.build(self._local_solver_settings)
 
+  def get_col_solution(self):
+    return self._col_solution
+
   def get_problem(self):
     """Returns the problem instance that has to be solved by this solver."""
     return self._problem
@@ -86,6 +90,7 @@ class LocalEliminationSolver(BILPSolver):
   def solve(self):
     if not self.get_problem():
       raise Exception("Error, nothing to solve!")
+    self._col_solution = [0.0] * self._problem.get_num_cols()
     self.logger.info("Solving problem %s" % self._problem.get_name())
     # If we have only one subproblem, skip the process and solve it with pure
     # master solver
@@ -109,7 +114,9 @@ class LocalEliminationSolver(BILPSolver):
       cols = subproblem.get_shared_cols() | subproblem.get_local_cols()
       shared_cols = subproblem.get_shared_cols()
       self._data_model.process(subproblem)
-    self._obj_value = self._data_model.get_max_obj_value(subproblem.get_name())
+    self._obj_value, signed_cols = self._data_model.get_solution(subproblem.get_name())
+    for signed_col in signed_cols.split(','):
+      self._col_solution[int(signed_col)] = 1.0
 
   # NOTE: on this moment it's user responsibility to preprocess problem and
   # build decomposition tree.
