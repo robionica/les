@@ -38,6 +38,21 @@ class _OsiClpSolverInterfaceFactory(OsiClpSolverInterfaceFactory):
     si.set_log_level(0) # switch off printout
     return si
 
+class _OsiSymSolverInterfaceFactory(OsiSymSolverInterfaceFactory):
+
+  def __init__(self):
+    OsiSymSolverInterfaceFactory.__init__(self)
+
+  def begin_first_iteration(self):
+    self.si = OsiSymSolverInterfaceFactory.build(self)
+    self.si.set_sym_param("verbosity", -2)
+
+  def end_first_iteration(self):
+    pass
+
+  def build(self):
+    self.si.reset()
+
 def solve(problem):
   # Decompose the problem
   start = time.clock()
@@ -58,6 +73,7 @@ def solve(problem):
   end = time.clock()
   print("Solving time: %6.4f second(s)" % (end - start))
   print("Objective value:", solver.get_obj_value())
+  print("Col solution:", solver.get_col_solution())
 
 def main():
   if len(sys.argv) < 2:
