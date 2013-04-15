@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
+
 from les.ext.coin import _osi_clp_solver_interface
 from les.ext.coin import coin_utils
 from les.solvers.bilp_solver import BILPSolver
@@ -27,32 +29,38 @@ class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
   def __init__(self):
     BILPSolver.__init__(self)
     _osi_clp_solver_interface.OsiClpSolverInterface.__init__(self)
+    self._problem = None
 
   def solve(self):
     self.initial_solve()
 
-  def load_problem(self, problem):
+  def load_problem(self, problem, details={}):
     """Loads problem to the solver."""
     if not isinstance(problem, Problem):
       raise TypeError("Problem must be derived from Problem: %s" % type(problem))
+    if not self._problem:
+      details = {}
     # Setup objective functions
-
-    # XXX: At some point we can not set column type when there is only one
-    # column in the problem. Otherwise SYMPHONY crashes with segmentation fault.
-
-    for i, coef in enumerate(problem.get_obj_coefs()):
-      (p, v) = coef
-      col = coin_utils.CoinPackedVector()
-      # NOTE: fix coef because of C++ signature
-      self.add_col(col, 0., 1., float(v))
+    if details.get("obj_coefs", True):
+      for i, coef in enumerate(problem.get_obj_coefs()):
+        (p, v) = coef
+        col = coin_utils.CoinPackedVector()
+        # NOTE: fix coef because of C++ signature
+        self.add_col(col, 0., 1., float(v))
+      # Set objective function sense
+      self.set_obj_sense(-1)
     # Constraints
-    for p, row in enumerate(problem.get_cons_matrix()):
-      if not row.getnnz():
-        continue
-      r = coin_utils.CoinPackedVector();
-      for i, v in zip(row.indices, row.data):
-        r.insert(int(i), float(v))
-      # NOTE: fix coef because of C++ signature
-      self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
-    # Set objective function sense
-    self.set_obj_sense(-1)
+    if details.get("cons_matrix", True):
+      for p, row in enumerate(problem.get_cons_matrix()):
+        if not row.getnnz():
+          continue
+        r = coin_utils.CoinPackedVector();
+        for i, v in itertools.izip(row.indices, row.data):
+          r.insert(int(i), float(v))
+        # NOTE: fix coef because of C++ signature
+        self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
+    elif details.get("rhs", True):
+      pass
+      for i in xrange(len(problem.get_rhs())):
+        self.set_row_upper(i, float(problem.get_rhs()[i]))
+    self._problem = problem

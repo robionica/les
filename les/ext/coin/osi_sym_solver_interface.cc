@@ -121,6 +121,7 @@ BOOST_PYTHON_MODULE(_osi_sym_solver_interface)
     .def("get_obj_value", &OsiSymSolverInterfaceWrap::getObjValue)
     // Methods to modify the objective, bounds, and solution
     .def("set_obj_sense", &OsiSymSolverInterfaceWrap::setObjSense)
+    .def("set_row_upper", &OsiSymSolverInterfaceWrap::setRowUpper)
     // Parameter set/get methods
     .def("set_sym_param", &OsiSymSolverInterfaceWrap::setSymParam)
     .def("set_hint_param", &OsiSymSolverInterfaceWrap::setHintParam1)

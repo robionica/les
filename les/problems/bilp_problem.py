@@ -50,6 +50,8 @@ class BILPProblem(Problem):
 
   def __init__(self, obj_coefs=[], cons_matrix=None, rhs=[], maximaze=True):
     Problem.__init__(self)
+    if not maximaze:
+      raise NotImplementedError("minimization is not yet supported")
     self._obj_coefs = None
     self.set_obj_coefs(obj_coefs)
     self._cons_matrix = None
@@ -58,12 +60,19 @@ class BILPProblem(Problem):
     self.set_rhs(rhs)
 
   def __str__(self):
-    return "%s[num_rows=%d, num_cols=%d]" % (self.__class__.__name__,
-                                             self.get_num_rows(),
-                                             self.get_num_cols())
+    return "%s[num_rows=%d, num_cols=%d]" \
+        % (self.__class__.__name__, self.get_num_rows(), self.get_num_cols())
 
   @classmethod
   def build(cls, model):
+    """Builds :class:`BILPProblem` instance from already defined model.
+
+    Returns:
+       A :class:`BILPProblem` instance.
+
+    Raises:
+       IOError, TypeError
+    """
     if isinstance(model, MPSReader):
       return cls._build_from_mps(model)
     elif type(model) is types.StringType:
@@ -107,11 +116,19 @@ class BILPProblem(Problem):
     return BILPSubproblem(self, *args, **kwargs)
 
   def get_num_rows(self):
-    """Returns the number of rows."""
+    """Counts the number of rows/constraints in the constraint matrix.
+
+    Returns:
+       The number of rows.
+    """
     return self._cons_matrix.shape[0]
 
   def get_num_cols(self):
-    """Returns the number of columns."""
+    """Counts the number of columns/variables in the constraint matrix.
+
+    Returns:
+       The number of columns.
+    """
     return self._cons_matrix.shape[1]
 
   def _set_cons_matrix(self, m):
@@ -161,7 +178,7 @@ class BILPProblem(Problem):
     if len(solution) != self.get_num_cols():
       raise Exception("%d != %d" % (solution.shape[1], self.get_num_cols()))
     v = self._cons_matrix.dot(solution)
-    for i in range(len(v)):
+    for i in xrange(len(v)):
       # TODO: add sense
       if v[i] > self._rhs[i]:
         return False
@@ -179,6 +196,7 @@ class BILPSubproblem(BILPProblem):
     self._problem = problem
     self._shared_cols = shared_cols
     self._local_cols = set(cons_matrix.nonzero()[1]) - shared_cols
+    self._nonzero_cols = self._shared_cols | self._local_cols
     self._deps = dict()
 
   def __str__(self):
@@ -211,18 +229,22 @@ class BILPSubproblem(BILPProblem):
       for ij, c in zip(u.keys(), u.values()):
         rhs[ij[1] + offset] = c
     # Build the new problem
-    return BILPSubproblem(self._problem,
-                          obj_coefs=obj, cons_matrix=cons_matrix.tocsr(),
-                          rhs=rhs,
-                          shared_cols=self.get_shared_cols() ^ other.get_shared_cols())
+    return BILPSubproblem(
+      self._problem,
+      obj_coefs=obj, cons_matrix=cons_matrix.tocsr(),
+      rhs=rhs,
+      shared_cols=self.get_shared_cols() ^ other.get_shared_cols()
+    )
 
   def get_shared_cols(self):
+    """Returns a set of shared columns."""
     return self._shared_cols
 
   def get_num_shared_cols(self):
     return len(self._shared_cols)
 
   def get_local_cols(self):
+    """Returns a set of local columns."""
     return self._local_cols
 
   def get_num_local_cols(self):
@@ -230,6 +252,9 @@ class BILPSubproblem(BILPProblem):
 
   def get_dependencies(self):
     return self._deps
+
+  def get_nonzero_cols(self):
+    return self._nonzero_cols
 
   def add_dependency(self, subproblem, shared_cols):
     if not isinstance(shared_cols, set):

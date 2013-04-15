@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-#
-# -*- coding: utf-8; -*-
-#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class SolverFactory(object):
-
-  def get_solver_class(self):
-    raise NotImplementedError()
-
-  def build(object):
-    raise NotImplementedError()
+from .parallelizer_factory import ParallelizerFactory
+from .thread_parallelizer import ThreadParallelizer
+from .thread_parallelizer_factory import ThreadParallelizerFactory
+from .dummy_parallelizer import DummyParallelizer
+from .dummy_parallelizer_factory import DummyParallelizerFactory

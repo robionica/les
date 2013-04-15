@@ -14,118 +14,238 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""LocalEliminationSolver represents the general class of local elimination
-algorithms (LEA) for computing information, that have decomposition approach and
-that allow to calculate some global information about a solution of the entire
-problem using local computations.
+""":class:`LocalEliminationSolver` represents the general class of local
+elimination algorithms (LEA) for computing information, that have decomposition
+approach and that allow to calculate some global information about a solution of
+the entire problem using local computations.
 """
 
 import networkx as nx
 import logging
 
 from les.problems.bilp_problem import BILPProblem
-from les.solvers.bilp_solver import BILPSolver
-
 from les.decomposition_tree import DecompositionTree
+from les.solvers.bilp_solver import BILPSolver
 from les.solvers.local_elimination_solver.data_models.data_model import DataModel
 from les.solvers.local_elimination_solver.data_models.sqlite_data_model import SQLiteDataModel
-from les.solvers.local_elimination_solver.distributors.thread_distributor_factory import ThreadDistributorFactory
-from les.solvers.local_elimination_solver.distributors.distributor_factory import DistributorFactory
+from les.solvers.local_elimination_solver.parallelizers import \
+    ThreadParallelizerFactory, ParallelizerFactory
 from les.solvers.local_elimination_solver import local_solver
+from les.solvers.solver_factory import SolverFactory
 
-class Statistics(object):
+class Error(Exception):
+  """Base-class for exceptions in this module."""
+
+class Params(object):
+  """This class represents class:`LocalEliminationSolver` parameters."""
 
   def __init__(self):
-    self._stats = {
-      'calls': {
-        'relaxation_solvers': dict([(cls.__name__, 0) for cls in relaxation_solver_classes]),
-        'master_solver': 0,
-        }
-    }
+    self._data_model_type = SQLiteDataModel
+    self._master_solver_factory = None
+    self._parallelizer_factory = None
+    self._relaxation_solver_factories = []
+
+  @property
+  def relaxation_solver_factories(self):
+    return self._relaxation_solver_factories
+
+  @relaxation_solver_factories.setter
+  def relaxation_solver_factories(self, factories):
+    if not isinstance(factories, (list, tuple)):
+      raise TypeError()
+    for factory in factories:
+      if not isinstance(factory, SolverFactory):
+        raise TypeError()
+    self._relaxation_solver_factories = factories
+
+  @property
+  def parallelizer_factory(self):
+    return self._parallelizer_factory
+
+  @parallelizer_factory.setter
+  def parallelizer_factory(self, factory):
+    if not isinstance(factory, ParallelizerFactory):
+      raise TypeError("factory must be derived from ParallelizerFactory")
+    self._parallelizer_factory = factory
+
+  @property
+  def master_solver_factory(self):
+    return self._master_solver_factory
+
+  @master_solver_factory.setter
+  def master_solver_factory(self, solver_factory):
+    if not isinstance(solver_factory, SolverFactory):
+      raise TypeError("solver_factory must be derived from SolverFactory: %s"
+                      % solver_factory)
+    self._master_solver_factory = solver_factory
+
+  @property
+  def data_model_type(self):
+    return self._data_model_type
+
+  @data_model_type.setter
+  def data_model_type(self, data_model_type):
+    """Set :class:`DataModel` class to use.
+
+    Returns:
+      :class:`DataModel` subclass.
+    """
+    if not issubclass(data_model_type, DataModel):
+      raise TypeError()
+    self._data_model_type = data_model
 
 class LocalEliminationSolver(BILPSolver):
   """This class represents local elimination solver (LES), which implements
   local elimination algorithm (LEA). The solver solves discrete optimization
-  problems (DOP) defined by DILP class.
+  problems (DOP) defined by :class:`BILPProblem` class.
 
-  Set `distributor` to `None` to disable distributors. In this case solver will
-  solve subproblems one by one. By default ThreadDistributor() instance will be
-  used.
+  Args:
+     master_solver_factory: A :class:`SolverFactory` to use as master solver
+       factory.
+     relaxation_solver_factories: A list of :class:`SolverFactory` instances
+       that will be used as relaxation solver factories.
+     parallelizer_factory: :class:`Parallelizer` instance that provides
+       parallel support. By default :class:`ThreadParallelizerFactory` will be
+       used.
+     data_model: A :class:`DataModel` instance that will help solver to keep
+       local solutions.
   """
+
+  Params = Params
 
   # Logger for this class
   logger = logging.getLogger()
 
-  def __init__(self, master_solver_factory, relaxation_solver_factories=[],
-               data_model=SQLiteDataModel(),
-               distributor_factory=ThreadDistributorFactory()):
+  DEFAULT_PARALLELIZER_FACTORY_CLASS = ThreadParallelizerFactory
+
+  def __init__(self, master_solver_factory=None, data_model=None,
+               parallelizer_factory=None):
     BILPSolver.__init__(self)
     self._obj_value = 0.0
     self._col_solution = []
-    self._distributor = None
     self._decomposition_tree = None
+    self._params = Params()
+    self._data_model = None
+    if data_model:
+      self.set_data_model(data_model)
+    if master_solver_factory:
+      self._params.master_solver_factory = master_solver_factory
+    self._params.parallelizer_factory = parallelizer_factory \
+        or self.DEFAULT_PARALLELIZER_FACTORY_CLASS()
+
+  def set_data_model(self, data_model):
     if not isinstance(data_model, DataModel):
       raise TypeError()
-    self._data_model = data_model
-    self._local_solver_settings = local_solver.Settings(data_model,
-                                                        master_solver_factory,
-                                                        relaxation_solver_factories)
-    if distributor_factory:
-      if not isinstance(distributor_factory, DistributorFactory):
-        raise TypeError("distributor_factory must be derived from"
-                        " DistributorFactory")
-      self._distributor = distributor_factory.build(self._local_solver_settings)
+    self._params.data_model_type = type(data_model)
+
+  def get_data_model(self):
+    """Returns data model.
+
+    Returns:
+       A :class:`DataModel` derived instance."""
+    return self._data_model
+
+  @property
+  def params(self):
+    return self._params
+
+  def set_params(self, **kwargs):
+    for key, value in kwargs.items():
+      if not hasattr(self._params, key):
+        raise Exception()
+      self._params.__setattr__(key, value)
 
   def get_col_solution(self):
+    """Returns a list of primal variable values.
+
+    Returns:
+       A list of variable values.
+    """
     return self._col_solution
 
   def get_problem(self):
-    """Returns the problem instance that has to be solved by this solver."""
+    """Returns problem that has to be solved by this solver.
+
+    Returns:
+       A :class:`BILPProblem` based problem instance.
+    """
     return self._problem
 
-  def get_data_model(self):
-    """Returns :class:`DataModel` based instance."""
-    return self._data_model
-
   def solve(self):
+    """Starts solving of an active problem model.
+
+    .. note::
+
+    If we have only one subproblem, the problem will be solved with pure master
+    solver.
+
+    Raises:
+       Error
+    """
     if not self.get_problem():
-      raise Exception("Error, nothing to solve!")
+      raise Error("Nothing to be solved, problem model is empty.")
     self._col_solution = [0.0] * self._problem.get_num_cols()
+    if not self.get_data_model():
+      cls = self.params.data_model_type
+      self._data_model = cls()
+    self._parallelizer = self.params.parallelizer_factory.build()
+    local_solver_factory = self._parallelizer.get_local_solver_factory()
+    local_solver_factory.set_data_model(self._data_model)
+    local_solver_factory.set_params(self.params)
+
+    subproblems = self._decomposition_tree.get_subproblems()
+
     self.logger.info("Solving problem %s" % self._problem.get_name())
-    # If we have only one subproblem, skip the process and solve it with pure
-    # master solver
-    if self._decomposition_tree.get_num_nodes() == 1:
-      raise NotImplementedError()
-    self._data_model.configure(self._decomposition_tree.get_subproblems())
-    if self._distributor:
-      for subproblem in self._decomposition_tree.get_subproblems():
-        self._distributor.put(subproblem)
-      self._distributor.run()
+    if len(subproblems) == 1:
+      solver = self._params.master_solver_factory.build()
+      solver.load_problem(self._problem)
+      solver.solve()
+      self._obj_value = solver.get_obj_value()
+      self._col_solution = solver.get_col_solution()
     else:
-      for subproblem in self._decomposition_tree.get_subproblems():
-        solver = local_solver.LocalSolver(self._local_solver_settings)
-        solver.solve(subproblem)
-    # Process subproblems in a depth-first-search pre-ordering starting from the
-    # root
+      self.logger.info("Estimated number of problems to be solved: %d"
+         % sum([1 << problem.get_num_shared_cols() for problem in subproblems]))
+      self._data_model.configure(subproblems)
+      # Setup and run parallelizer
+      map(self._parallelizer.put, subproblems)
+      self._parallelizer.run()
+      self._process_local_solutions()
+
+  def _process_local_solutions(self):
+    """Process subproblems in a depth-first-search pre-ordering starting from
+    the root.
+    """
     self.logger.info("Processing local solutions...")
     for node in nx.dfs_preorder_nodes(self._decomposition_tree,
                                       self._decomposition_tree.get_root()):
       subproblem = self._decomposition_tree.node[node]["subproblem"]
-      cols = subproblem.get_shared_cols() | subproblem.get_local_cols()
-      shared_cols = subproblem.get_shared_cols()
       self._data_model.process(subproblem)
     self._obj_value, signed_cols = self._data_model.get_solution(subproblem.get_name())
-    for signed_col in signed_cols.split(','):
-      self._col_solution[int(signed_col)] = 1.0
+    try:
+      map(lambda signed_col: self._col_solution.__setitem__(int(signed_col), 1.0),
+          signed_cols.split(','))
+    except ValueError, e:
+      print ">%s<" % signed_cols
+      print e
+      exit(0)
 
-  # NOTE: on this moment it's user responsibility to preprocess problem and
-  # build decomposition tree.
   def load_problem(self, problem, decomposition_tree, max_num_shared_cols=10):
     """Loads problem and its decomposition model represented by decomposition
-    tree.
+    tree. Process `decomposition_tree` and merge nodes according to
+    `max_num_shared_cols` value if necessary.
 
-    Process decomposition tree and merge nodes according to max_num_shared_cols
-    value.
+    .. note::
+
+    On this moment it's user responsibility to preprocess problem and build
+    decomposition tree.
+
+    Args:
+       problem: A problem to be solved.
+       decomposition_tree: A :class:`DecompositionTree` instance that
+          represents `problem` structure.
+
+    Raises:
+       TypeError
     """
     if not isinstance(problem, BILPProblem):
       raise TypeError()
@@ -152,5 +272,9 @@ class LocalEliminationSolver(BILPSolver):
     self._problem = problem
 
   def get_obj_value(self):
-    """Returns objective function value."""
+    """The objective function value of the current solution.
+
+    Returns:
+       An objective function value.
+    """
     return self._obj_value

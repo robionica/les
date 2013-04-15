@@ -24,5 +24,8 @@ class DummySolverFactory(SolverFactory):
   def __init__(self):
     SolverFactory.__init__(self)
 
+  def get_solver_class(self):
+    return DummySolver
+
   def build(self):
     return DummySolver()

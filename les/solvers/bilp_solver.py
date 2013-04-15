@@ -17,17 +17,23 @@
 from les.solvers.solver import Solver
 
 class BILPSolver(Solver):
-  """Base solver class for 0-1 integer linear programming or binary integer linear
-  programming problems represented by :class:`BILPProblem` class.
+  """Base solver class for 0-1 integer linear programming or binary integer
+  linear programming problems represented by :class:`BILPProblem` class.
   """
 
   def __init__(self):
     Solver.__init__(self)
 
   def get_col_solution(self):
-    """Returns list of columns values."""
+    """
+    Returns:
+      A list of primal variable values.
+    """
     raise NotImplementedError()
 
   def get_obj_value(self):
-    """Returns objective function value."""
+    """
+    Returns:
+      An objective function value.
+    """
     raise NotImplementedError()

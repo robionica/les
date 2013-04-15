@@ -16,10 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
+
 from les.ext.coin import _osi_sym_solver_interface
 from les.ext.coin import coin_utils
 from les.problems.problem import Problem
 from les.solvers.bilp_solver import BILPSolver
+
+MINIMIZATION = +1
+MAXIMIZATION = -1
 
 class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
                             BILPSolver):
@@ -28,39 +33,51 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
   def __init__(self):
     BILPSolver.__init__(self)
     _osi_sym_solver_interface.OsiSymSolverInterface.__init__(self)
+    self._problem = None
 
   def solve(self):
+    """"Invokes solver's built-in enumeration algorithm - branch and bound."""
     self.branch_and_bound()
 
-  def load_problem(self, problem):
-    """Loads problem to the solver."""
+  def load_problem(self, problem, details={}):
+    """Loads problem to the solver.
+
+    TODO: use OsiSymSolverInterface.loadProblem().
+    """
     if not isinstance(problem, Problem):
       raise TypeError("Problem must be derived from Problem: %s" % type(problem))
+    if not self._problem:
+      details = {}
     # Setup objective functions
-
-    # XXX: At some point we can not set column type when there is only one
-    # column in the problem. Otherwise SYMPHONY crashes with segmentation fault.
-
-    if problem.get_num_cols() > 1:
-      for i, coef in enumerate(problem.get_obj_coefs()):
-        (p, v) = coef
+    if details.get("obj_coefs", True):
+      # XXX: At some point we can not set column type when there is only one
+      # column in the problem. Otherwise SYMPHONY crashes with segmentation
+      # fault.
+      if problem.get_num_cols() > 1:
+        for i, coef in enumerate(problem.get_obj_coefs()):
+          (p, v) = coef
+          col = coin_utils.CoinPackedVector()
+          # NOTE: fix coef because of C++ signature
+          self.add_col(col, 0., 1., float(v))
+          # TODO: set column type
+          self.set_integer(i)
+      else:
         col = coin_utils.CoinPackedVector()
+        self.add_col(col, 0., 1., float(problem.get_obj_coefs().values()[0]))
+        self.set_integer(1)
+      # Set objective function sense
+      self.set_obj_sense(MAXIMIZATION)
+    # Setup constraints
+    if details.get("cons_matrix", True):
+      for p, row in enumerate(problem.get_cons_matrix()):
+        if not row.getnnz():
+          continue
+        r = coin_utils.CoinPackedVector();
+        for i, v in itertools.izip(row.indices, row.data):
+          r.insert(int(i), float(v))
         # NOTE: fix coef because of C++ signature
-        self.add_col(col, 0., 1., float(v))
-        # TODO: set column type
-        self.set_integer(i)
-    else:
-      col = coin_utils.CoinPackedVector()
-      self.add_col(col, 0., 1., float(problem.get_obj_coefs().values()[0]))
-      self.set_integer(1)
-    # Constraints
-    for p, row in enumerate(problem.get_cons_matrix()):
-      if not row.getnnz():
-        continue
-      r = coin_utils.CoinPackedVector();
-      for i, v in zip(row.indices, row.data):
-        r.insert(int(i), float(v))
-      # NOTE: fix coef because of C++ signature
-      self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
-    # Set objective function sense
-    self.set_obj_sense(-1)
+        self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
+    elif details.get("rhs", True):
+      for i in xrange(len(problem.get_rhs())):
+        self.set_row_upper(i, float(problem.get_rhs()[i]))
+    self._problem = problem

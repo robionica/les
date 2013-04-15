@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-#
-# -*- coding: utf-8; -*-
-#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class SolverFactory(object):
+from .parallelizer_factory import ParallelizerFactory
+from .thread_parallelizer import ThreadParallelizer
 
-  def get_solver_class(self):
-    raise NotImplementedError()
+class ThreadParallelizerFactory(ParallelizerFactory):
 
-  def build(object):
-    raise NotImplementedError()
+  def __init__(self, max_num_threads=0, reporter=None):
+    ParallelizerFactory.__init__(self)
+    self._max_num_threads = max_num_threads
+    self._reporter = reporter
+
+  def build(self):
+    return ThreadParallelizer(max_num_threads=self._max_num_threads,
+                              reporter=self._reporter)

@@ -37,7 +37,7 @@ def _get_indices(m, i):
   start = m.indptr[i]
   size = m.indptr[i + 1] - start
   result = []
-  for j in range(start, start + size):
+  for j in xrange(start, start + size):
     result.append(m.indices[j])
   return result
 
@@ -80,7 +80,7 @@ class FinkelsteinQBDecomposer(Decomposer):
     # TODO: check connectivity order
     prev_problem = self._build_subproblem(self._u[0], s[0], self._m[0], s[1])
     tree = DecompositionTree(self.get_problem(), root=prev_problem)
-    for i in range(1, len(self._u)):
+    for i in xrange(1, len(self._u)):
       problem = self._build_subproblem(self._u[i], s[i], self._m[i], s[i + 1])
       tree.add_node(problem)
       tree.add_edge(prev_problem, problem, s[i])

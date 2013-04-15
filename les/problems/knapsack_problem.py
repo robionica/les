@@ -22,37 +22,52 @@ from :math:`G`, so that the total value of items in the bag is maximized.
 
 import numpy
 
+from les.problems.problem import Problem
 from les.problems.bilp_problem import BILPProblem
 
-class KnapsackProblem(BILPProblem):
+class KnapsackProblem(Problem):
   """Constructor, where values is array of values, weights is array of weights,
   n is number of items in the bag, max_weight is maximum weight that we can
   carry in the bag.
   """
 
-  def __init__(self, values, weights, max_weight):
-    if not isinstance(values, (list, tuple)):
-      raise TypeError("values can be a list or tuple: %s" % type(values))
-    if not isinstance(weights, (list, tuple)):
-      raise TypeError("weights can be a list or tuple")
-    if not isinstance(max_weight, (int, long, numpy.float32)):
-      raise TypeError("max_weight can be an in or long: %s" % type(max_weight))
-    cons_matrix = numpy.matrix([weights])
-    BILPProblem.__init__(self, obj_coefs=values, cons_matrix=cons_matrix,
-                         rhs=[max_weight])
-    self._weights = weights
-    self._values = values
-    self._max_weight = max_weight
+  def __init__(self, model=None):
+    Problem.__init__(self)
+    self._weights = []
+    self._values = []
+    self._max_weight = 0
+    self._original_problem = None # the parent problem if defined
+    if model:
+      self.load_model(model)
 
-  @classmethod
-  def build(cls, data):
-    if isinstance(data, BILPProblem):
+  def load_model(self, model):
+    if type(model) in (list, tuple) and len(model) == 3:
+      self._set_values(model[0])
+      self._set_weights(model[1])
+      self._set_max_weight(model[2])
+    elif isinstance(model, BILPProblem):
       # Sum all the constraints over the first one
-      weights = data.get_cons_matrix().sum(0).tolist()[0]
-      max_weight = data.get_rhs().sum()
-      return cls(data.get_obj_coefs().tocsr().data.tolist(), weights, max_weight)
+      self._set_values(model.get_obj_coefs().tocsr().data.tolist())
+      self._set_weights(model.get_cons_matrix().sum(0).tolist()[0])
+      self._set_max_weight(model.get_rhs().sum())
+      self._original_problem = model
     else:
       raise TypeError()
+
+  def _set_values(self, values):
+    if not isinstance(values, (list, tuple)):
+      raise TypeError("values can be a list or tuple: %s" % type(values))
+    self._values = values
+
+  def _set_weights(self, weights):
+    if not isinstance(weights, (list, tuple)):
+      raise TypeError("weights can be a list or tuple")
+    self._weights = weights
+
+  def _set_max_weight(self, max_weight):
+    if not isinstance(max_weight, (int, long, numpy.float32)):
+      raise TypeError("max_weight can be an in or long: %s" % type(max_weight))
+    self._max_weight = max_weight
 
   def get_values(self):
     return self._values

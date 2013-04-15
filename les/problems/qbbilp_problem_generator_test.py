@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class DistributorFactory(object):
-  """A producer of :class:`Distributor` based instances."""
+import unittest
 
-  def build(self, local_solver_settings):
-    raise NotImplementedError()
+from les.problems.qbbilp_problem_generator import QBBILPProblemGenerator
+
+class QBBILPProblemGeneratorTest(unittest.TestCase):
+
+  def test_gen(self):
+    generator = QBBILPProblemGenerator()
+    problem = generator.gen(200, 400)
+    self.assertEqual(200, problem.get_num_rows())
+    self.assertEqual(400, problem.get_num_cols())

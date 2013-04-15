@@ -25,7 +25,8 @@ class Solver(object):
 
   def get_problem_type(self):
     """Returns the problem type."""
-    raise NotImplementedError()
+    problem = self.get_problem()
+    return problem and type(problem) or None
 
   def solve(self):
     raise NotImplementedError()

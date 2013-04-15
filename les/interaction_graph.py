@@ -30,7 +30,7 @@ def _extract_indices(m, i):
   start = m.indptr[i]
   size = m.indptr[i + 1] - start
   result = []
-  for j in range(start, start + size):
+  for j in xrange(start, start + size):
     result.append(m.indices[j])
   return result
 
@@ -49,8 +49,8 @@ class InteractionGraph(networkx.Graph):
     # TODO: improve this
     for p in xrange(problem.get_num_rows()):
       J = _extract_indices(problem.get_cons_matrix(), p)
-      for i in range(0, len(J)):
-        for j in range(i, len(J)):
+      for i in xrange(0, len(J)):
+        for j in xrange(i, len(J)):
           self.add_edge(J[i], J[j])
     self._problem = problem
 

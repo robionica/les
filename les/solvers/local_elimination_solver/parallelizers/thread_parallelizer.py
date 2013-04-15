@@ -17,25 +17,28 @@ import time
 
 from les import runtime
 from les.runtime import thread_pool
-from les.solvers.local_elimination_solver.distributors.distributor import Distributor
-from les.solvers.local_elimination_solver.local_solver import LocalSolver
+from les.solvers.local_elimination_solver.parallelizers.parallelizer import Parallelizer
+from les.solvers.local_elimination_solver.local_solver import LocalSolverFactory
 
-class ThreadDistributor(Distributor):
+class ThreadParallelizer(Parallelizer):
 
   logger = logging.getLogger()
 
-  def __init__(self, local_solver_settings, max_num_threads=0,
-               reporter=None):
-    Distributor.__init__(self, local_solver_settings)
+  def __init__(self, max_num_threads=0, reporter=None):
+    Parallelizer.__init__(self)
     self._max_num_threads = 0
-    self._reporter = reporter or self._default_reporter
+    self._reporter = reporter or self.default_reporter
     self.set_max_num_threads(max_num_threads or runtime.get_num_cpus())
     self._subproblems = []
+    self._local_solver_factory = LocalSolverFactory()
 
   def __str__(self):
-    return "%s[max_num_threads=%d, num_tasks=%d]" % (self.__class__.__name__,
-                                                     self.get_max_num_threads(),
-                                                     len(self._subproblems))
+    return "%s[max_num_threads=%d, num_tasks=%d]" \
+        % (self.__class__.__name__, self.get_max_num_threads(),
+           len(self._subproblems))
+
+  def get_local_solver_factory(self):
+    return self._local_solver_factory
 
   def set_max_num_threads(self, n):
     if not isinstance(n, (int, long)):
@@ -46,7 +49,7 @@ class ThreadDistributor(Distributor):
     return self._max_num_threads
 
   @classmethod
-  def _default_reporter(cls, request, elapsed_time):
+  def default_reporter(cls, request, elapsed_time):
     subproblem = request.args[0]
     cls.logger.info("T%d: %s solved in %6.4f sec(s)"
                      % (request.requestID, subproblem, elapsed_time))
@@ -57,7 +60,7 @@ class ThreadDistributor(Distributor):
 
   def _callback(self, subproblem):
     start = time.clock()
-    solver = LocalSolver(self.get_local_solver_settings())
+    solver = self._local_solver_factory.build()
     solver.solve(subproblem)
     return time.clock() - start
 
@@ -66,6 +69,5 @@ class ThreadDistributor(Distributor):
     pool = thread_pool.ThreadPool(self._max_num_threads)
     reqs = thread_pool.make_requests(self._callback, self._subproblems,
                                      self._reporter)
-    for req in reqs:
-      pool.put_request(req)
+    map(pool.put_request, reqs)
     pool.wait()

@@ -12,4 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .thread_distributor import ThreadDistributor
+from .parallelizer_factory import ParallelizerFactory
+from .dummy_parallelizer import DummyParallelizer
+
+class DummyParallelizerFactory(ParallelizerFactory):
+
+  def __init__(self):
+    ParallelizerFactory.__init__(self)
+
+  def build(self):
+    return DummyParallelizer()

@@ -29,7 +29,8 @@ from les.solvers.local_elimination_solver.data_models.db_data_model import DBDat
 _MAX_TIMEOUT = 5.0
 
 _SUBPROBLEM_SCHEMA = """
-CREATE TABLE IF NOT EXISTS %(name)s(
+DROP TABLE IF EXISTS %(name)s;
+CREATE TABLE %(name)s(
   %(cols)s,
   value DOUBLE default 0.0,
   signed_cols TEXT,
@@ -146,17 +147,17 @@ class SQLiteDataModel(DBDataModel):
 
   def _configure_subproblem(self, problem):
     def join_cols(joiner, cols, frmt="x%d"):
-      return joiner.join(["x%d" % i for i in cols])
+      return joiner.join([frmt % i for i in cols])
     # Create table
     sql_script = _SUBPROBLEM_SCHEMA % {
       'name': problem.get_name(),
-      'cols': join_cols(", ", problem.get_shared_cols() | problem.get_local_cols(),
-                        "x%d INTEGER DEFAULT NULL"),
-      'key': join_cols(",", problem.get_shared_cols())
+      'cols': ', '.join(map(lambda i: "x%d INTEGER DEFAULT NULL" % i,
+                            problem.get_nonzero_cols())),
+      'key': join_cols(", ", problem.get_shared_cols())
     }
     # Create indices
     for another_subproblem, cols in problem.get_dependencies().items():
-      sql_script += "CREATE INDEX IF NOT EXISTS %s_index ON %s(%s);" \
+      sql_script += "CREATE INDEX IF NOT EXISTS %s_index ON %s(%s);\n" \
           % (join_cols("_", cols), problem.get_name(), join_cols(", ", cols))
     try:
       conn = self.get_data_store().get_connection()
@@ -173,61 +174,59 @@ class SQLiteDataModel(DBDataModel):
       self._configure_subproblem(subproblem)
     self._subproblems = subproblems
 
-  def process(self, s):
-    if not s.get_dependencies():
+  def process(self, problem):
+    if not problem.get_dependencies():
       return
     conn = self.get_data_store().get_connection()
     try:
-      cursor = conn.execute("SELECT * FROM %s" % s.get_name())
+      cursor = conn.execute("SELECT * FROM %s" % problem.get_name())
       cols = list(map(lambda x: x[0], cursor.description))
       for row in cursor:
         m = dict(zip(cols, row))
         obj_value = m["value"]
         del m["value"]
-        signed_cols = m["signed_cols"]
+        signed_cols = m["signed_cols"] or None
         del m["signed_cols"]
         dep_tbls = []
         deps = []
-        for sp, xcols in s.get_dependencies().items():
+        for dep_problem, dep_cols in problem.get_dependencies().items():
           where = []
-          dep_tbls.append(sp.get_name())
-          for i in xcols:
-            where.append("%s.x%d=%d" % (sp.get_name(), i, m["x%d" % i]))
-          deps.append("FROM %s WHERE %s" % (sp.get_name(), " AND ".join(where)))
-        #stmt = "UPDATE %s SET value = %f + (%s %s) WHERE %s" \
-        #    % (s.get_name(), obj_value,
-        #       " + ".join(["SELECT MAX("+name + ".value)" for name in dep_tbls]),
-        #       " ".join(deps),
-        #       #", signed_cols = '%s' || Z0.signed_cols" % signed_cols,
-        #       " AND ".join(["%s=%d" % (c, v) for c, v in m.items()]),
-        #       )
+          dep_tbls.append(dep_problem.get_name())
+          for i in dep_cols:
+            where.append("%s.x%d=%d" % (dep_problem.get_name(), i, m["x%d" % i]))
+          deps.append("FROM %s WHERE %s" % (dep_problem.get_name(), " AND ".join(where)))
         stmt = "%s %s" \
             % (
                " + ".join(["SELECT MAX("+name + ".value), "+name+".signed_cols" for name in dep_tbls]),
                " ".join(deps)
                )
         res = conn.execute(stmt)
+        # NOTE: sometimes there is no dependencies. I guess this happens when
+        # some solutions are not satisfing constrains. We need to check this
+        # more carefully.
         dep_value, dep_signed_cols = res.fetchone()
+        if dep_value:
+          obj_value += dep_value
+        signed_cols = ','.join(filter(None, [signed_cols, dep_signed_cols]))
         stmt = "UPDATE %s SET value = %f, signed_cols = '%s' WHERE %s" \
-            % (s.get_name(), obj_value + dep_value,
-               ','.join([signed_cols, dep_signed_cols]),
+            % (problem.get_name(), obj_value, signed_cols,
                " AND ".join(["%s=%d" % (c, v) for c, v in m.items()]))
         conn.execute(stmt)
     finally:
       self.get_data_store().release_connection(conn)
 
-  def put(self, subproblem, col_solution, obj_value):
+  def put(self, problem, col_solution, obj_value):
     cols = []
     vals = []
-    indices = list(subproblem.get_shared_cols() | subproblem.get_local_cols())
-    for i in indices:
+    signed_cols = []
+    for i in list(problem.get_nonzero_cols()):
       cols.append("x%d" % i)
-      vals.append(int(col_solution[i]))
+      v = int(col_solution[i])
+      vals.append(v)
+      if v:
+        signed_cols.append(str(i))
     stmt = "INSERT INTO %s(%s, value, signed_cols) VALUES(%s)" \
-        % (subproblem.get_name(),
-           ", ".join(cols),
-           ", ".join(["?"] * (len(cols) + 2)))
+        % (problem.get_name(), ", ".join(cols), ", ".join(["?"] * (len(cols)+2)))
     conn = self.get_data_store().get_connection()
-    conn.execute(stmt, vals + [float(obj_value)] +
-                 [','.join([str(indices[i]) for i, j in enumerate(vals) if j])])
+    conn.execute(stmt, vals + [float(obj_value)] + [','.join(signed_cols)])
     self.get_data_store().release_connection(conn)

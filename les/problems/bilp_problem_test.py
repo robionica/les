@@ -35,5 +35,14 @@ class BILPProblemTest(unittest.TestCase):
     self.assertEqual(7, problem.get_num_cols())
     self.assertEqual(4, problem.get_num_rows())
 
-if __name__ == "__main__":
+  def test_check_col_solution(self):
+    test_filename = os.path.join(TEST_DATA_DIR, "test.mps")
+    reader = MPSReader()
+    with open(test_filename, "r") as stream:
+      reader.parse(stream)
+    problem = BILPProblem.build(reader)
+    self.assertFalse(problem.check_col_solution([1., 1., 1., 1., 1., 1., 1.]))
+    self.assertTrue(problem.check_col_solution([1., 0., 0., 1., 1., 1., 1.]))
+
+if __name__ == '__main__':
   unittest.main()

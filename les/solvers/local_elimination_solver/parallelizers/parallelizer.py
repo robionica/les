@@ -12,17 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .distributor_factory import DistributorFactory
-from .thread_distributor import ThreadDistributor
+class Parallelizer(object):
+  """This is base class for all parallelizer, which allows local elimination
+  solver to solve subproblems in parallel.
+  """
 
-class ThreadDistributorFactory(DistributorFactory):
+  def put(self, problem):
+    raise NotImplementedError()
 
-  def __init__(self, max_num_threads=0, reporter=None):
-    DistributorFactory.__init__(self)
-    self._max_num_threads = max_num_threads
-    self._reporter = reporter
-
-  def build(self, local_solver_settings):
-    return ThreadDistributor(local_solver_settings,
-                             max_num_threads=self._max_num_threads,
-                             reporter=self._reporter)
+  def run(self):
+    raise NotImplementedError()

@@ -23,13 +23,15 @@ class KnapsackSolverBase(BILPSolver):
     BILPSolver.__init__(self)
     self._problem = None
 
-  def load_problem(self, problem):
-    """Loads :class:`KnapsackProblem` derived problem. Converts the the problem
-    if neccessary.
+  def load_problem(self, problem, details={}):
+    """Loads problem to be solved. Converts the problem if neccessary.
+
+    Args:
+       problem: A :class:`KnapsackProblem` derived problem
     """
     # Try to convert problem to KnapsackProblem if required. Raises TypeError.
     if not isinstance(problem, KnapsackProblem):
-      problem = KnapsackProblem.build(problem)
+      problem = KnapsackProblem(problem)
     self._problem = problem
 
 class Knapsack01Solver(KnapsackSolverBase):
@@ -44,11 +46,11 @@ class Knapsack01Solver(KnapsackSolverBase):
     v = self._problem.get_values()
     w = self._problem.get_weights()
     c = []                 # create an empty 2D array
-    for i in range(n + 1): # c[i][j] = value of the optimal solution using
+    for i in xrange(n + 1): # c[i][j] = value of the optimal solution using
       temp = [0] * (W + 1) # items 1 through i and maximum weight j
       c.append(temp)
-    for i in range(1, n + 1):
-      for j in range(1, W + 1):
+    for i in xrange(1, n + 1):
+      for j in xrange(1, W + 1):
         if w[i] <= j: # if item i will fit within weight j
           # add item i if value is better
           if v[i] + c[i - 1][j - w[i]] > c[i - 1][j]:
@@ -82,13 +84,11 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
     KnapsackSolverBase.__init__(self)
 
   def solve(self):
-    self._is_fractional = False
-    n = self._problem.get_num_cols()
-    v = self._problem.get_obj_coefs()
-    m = self._problem.get_cons_matrix()
-    rows, cols = m.nonzero()
+    n = self._problem.get_num_items()
+    v = self._problem.get_values()
+    w = self._problem.get_weights()
     # Sort in descending order
-    order = sorted(cols, key=lambda i: float(v[i]) / m[0, i], reverse=True);
+    order = sorted(range(n), key=lambda i: float(v[i]) / w[i], reverse=True);
     weight = 0.0 # current weight of the solution
     value = 0.0 # current value of the solution
     index = 0 # order[index] is the index in v and w of the item we're considering
@@ -96,19 +96,18 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
     knapsack = [0.0] * n
     while (weight < W) and (index < n):
       # if we can fit the entire order[index]-th item
-      if weight + m[0, order[index]] <= W:
+      if weight + w[order[index]] <= W:
         # ... add it and update weight and value
         knapsack[order[index]] = 1.0
-        weight = weight + m[0, order[index]]
+        weight = weight + w[order[index]]
         value = value + v[order[index]]
       else:
         # ... otherwise, calculate the fraction we can fit ...
-        fraction = (W - weight) / m[0, order[index]]
+        fraction = (W - weight) / w[order[index]]
         # ... and add this fraction
         knapsack[order[index]] = fraction
         weight = W
         value = value + v[order[index]] * fraction
-        self._is_fractional = True
       index = index + 1
     self._obj_value = value
     self._col_solution = knapsack

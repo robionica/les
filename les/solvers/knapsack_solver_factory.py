@@ -24,5 +24,8 @@ class FractionalKnapsackSolverFactory(SolverFactory):
   def __init__(self):
     SolverFactory.__init__(self)
 
+  def get_solver_class(self):
+    return FractionalKnapsackSolver
+
   def build(self):
     return FractionalKnapsackSolver()

@@ -33,8 +33,15 @@ class DummySolver(BILPSolver):
   def get_problem(self):
     return self._problem
 
-  def load_problem(self, problem):
-    """Loads :class:`BILPProblem` derived problem instance."""
+  def load_problem(self, problem, details={}):
+    """Loads problem model to the solver.
+
+    Args:
+       problem: A :class:`BILPProblem` derived problem instance.
+
+    Raises:
+       TypeError
+    """
     if not isinstance(problem, BILPProblem):
       raise TypeError()
     self._problem = problem

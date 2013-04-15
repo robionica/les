@@ -24,6 +24,9 @@ class OsiSymSolverInterfaceFactory(SolverFactory):
       raise TypeError()
     self._params = params
 
+  def get_solver_class(self):
+    return OsiSymSolverInterface
+
   def build(self):
     """Returns new :class:`OsiSymSolverInterface` instance."""
     si = OsiSymSolverInterface()

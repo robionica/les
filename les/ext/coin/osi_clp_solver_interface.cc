@@ -15,6 +15,7 @@
 // limitations under the License.
 
 #include <coin/CoinPackedVector.hpp>
+#include <coin/OsiSolverInterface.hpp>
 #include <coin/OsiClpSolverInterface.hpp>
 
 #include <boost/python.hpp>
@@ -49,7 +50,8 @@ public:
 
 BOOST_PYTHON_MODULE(_osi_clp_solver_interface)
 {
-  class_<OsiClpSolverInterfaceWrap, boost::noncopyable>("OsiClpSolverInterface")
+  class_<OsiClpSolverInterfaceWrap, bases<OsiSolverInterface>,
+         boost::noncopyable>("OsiClpSolverInterface")
     // Solve methods
     .def("branch_and_bound", &OsiClpSolverInterfaceWrap::branchAndBound)
     .def("initial_solve", &OsiClpSolverInterfaceWrap::initialSolve)
@@ -68,6 +70,7 @@ BOOST_PYTHON_MODULE(_osi_clp_solver_interface)
     .def("get_obj_value", &OsiClpSolverInterfaceWrap::getObjValue)
     // Methods to modify the objective, bounds, and solution
     .def("set_obj_sense", &OsiClpSolverInterfaceWrap::setObjSense)
+    .def("set_row_upper", &OsiClpSolverInterfaceWrap::setRowUpper)
     // Message handling (extra for Clp messages)
     .def("set_log_level", &OsiClpSolverInterfaceWrap::setLogLevel)
     ;

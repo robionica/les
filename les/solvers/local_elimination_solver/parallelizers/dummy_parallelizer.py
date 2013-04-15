@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class Distributor(object):
-  """This is base class for all distributors, which allows local elimination
-  solver to solve subproblems in parallel.
-  """
+from les.solvers.local_elimination_solver.parallelizers.parallelizer import Parallelizer
+from les.solvers.local_elimination_solver.local_solver import LocalSolverFactory
 
-  def __init__(self, local_solver_settings):
-    self._local_solver_settings = local_solver_settings
+class DummyParallelizer(Parallelizer):
 
-  def get_local_solver_settings(self):
-    return self._local_solver_settings
+  def __init__(self):
+    Parallelizer.__init__(self)
+    self._problems = []
 
-  def put(self, subproblem):
-    raise NotImplementedError()
+  def put(self, problem):
+    self._problems.append(problem)
 
   def run(self):
-    raise NotImplementedError()
+    local_solver_factory = LocalSolverFactory()
+    for subproblem in self._decomposition_tree.get_subproblems():
+      solver = local_solver_factory.build()
+      solver.solve(subproblem)

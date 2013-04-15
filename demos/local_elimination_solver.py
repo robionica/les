@@ -62,11 +62,14 @@ def solve(problem):
   print("Decomposition time: %6.4f second(s)" % (end - start))
   # Solving...
   start = time.clock()
-  solver = LocalEliminationSolver(
+  solver = LocalEliminationSolver()
+  solver.set_params(
     master_solver_factory=OsiSymSolverInterfaceFactory(params={"verbosity": -2}),
-    relaxation_solver_factories=[DummySolverFactory(),
-                                 FractionalKnapsackSolverFactory(),
-                                 _OsiClpSolverInterfaceFactory()]
+    relaxation_solver_factories=[
+      DummySolverFactory(),
+      FractionalKnapsackSolverFactory(),
+      _OsiClpSolverInterfaceFactory()
+    ]
   )
   solver.load_problem(problem, decomposer.get_decomposition_tree())
   solver.solve()
