@@ -56,12 +56,23 @@ class BILPProblem(Problem):
     self.set_obj_coefs(obj_coefs)
     self._cons_matrix = None
     self._set_cons_matrix(cons_matrix)
+    self._maximize = True
     self._rhs = None
     self.set_rhs(rhs)
 
   def __str__(self):
     return "%s[num_rows=%d, num_cols=%d]" \
         % (self.__class__.__name__, self.get_num_rows(), self.get_num_cols())
+
+  @property
+  def maximize(self):
+    return self._maximize
+
+  @maximize.setter
+  def maximize(self, true_or_false):
+    if not true_or_false in (True, False):
+      raise TypeError()
+    self._maximize = true_or_false
 
   @classmethod
   def build(cls, model):
@@ -116,7 +127,8 @@ class BILPProblem(Problem):
     return BILPSubproblem(self, *args, **kwargs)
 
   def get_num_rows(self):
-    """Counts the number of rows/constraints in the constraint matrix.
+    """Counts the number of rows/constraints in the constraint matrix. All the
+    columns are binary.
 
     Returns:
        The number of rows.
@@ -134,6 +146,8 @@ class BILPProblem(Problem):
   def _set_cons_matrix(self, m):
     if isinstance(m, np.matrix):
       self._cons_matrix = sparse.csr_matrix(m)
+    elif isinstance(m, list):
+      self._cons_matrix = sparse.csr_matrix(np.matrix(m))
     else:
       self._cons_matrix = m
 
@@ -190,8 +204,8 @@ class BILPSubproblem(BILPProblem):
   """Subproblem name will be set automatically by solver."""
 
   def __init__(self, problem, obj_coefs=[], cons_matrix=None, rhs=[],
-               maximaze=True, shared_cols=[]):
-    BILPProblem.__init__(self, obj_coefs, cons_matrix, rhs, maximaze)
+               maximize=True, shared_cols=[]):
+    BILPProblem.__init__(self, obj_coefs, cons_matrix, rhs, maximize)
     self._name = None
     self._problem = problem
     self._shared_cols = shared_cols

@@ -16,16 +16,16 @@
 
 """Dummy solver."""
 
-from les.solvers.bilp_solver import BILPSolver
+from les.solvers.bilp_solver_base import BILPSolverBase
 from les.problems.bilp_problem import BILPProblem
 
-class DummySolver(BILPSolver):
+class DummySolver(BILPSolverBase):
   """This class represents dummy solver, which solves :class:`BILPProblem`
   derived problems.
   """
 
   def __init__(self):
-    BILPSolver.__init__(self)
+    BILPSolverBase.__init__(self)
     self._problem = None
     self._col_solution = []
     self._obj_value = 0.0

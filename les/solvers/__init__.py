@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import les.config
 from les.solvers.local_elimination_solver import LocalEliminationSolver
 from les.solvers.dummy_solver import DummySolver
 from les.solvers.dummy_solver_factory import DummySolverFactory
 from les.solvers.knapsack_solver import FractionalKnapsackSolver
 from les.solvers.knapsack_solver_factory import FractionalKnapsackSolverFactory
-from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
-from les.ext.coin.osi_clp_solver_interface import OsiClpSolverInterface
-from les.ext.coin.osi_sym_solver_interface_factory import OsiSymSolverInterfaceFactory
-from les.ext.coin.osi_clp_solver_interface_factory import OsiClpSolverInterfaceFactory
+if les.config.HAS_SYMPHONY_SUPPORT:
+  from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
+  from les.ext.coin.osi_clp_solver_interface import OsiClpSolverInterface
+  from les.ext.coin.osi_sym_solver_interface_factory import OsiSymSolverInterfaceFactory
+  from les.ext.coin.osi_clp_solver_interface_factory import OsiClpSolverInterfaceFactory
+if les.config.HAS_GLPK_SUPPORT:
+  from les.solvers.glp_solver import GLPSolver
+  from les.solvers.glp_solver_factory import GLPSolverFactory

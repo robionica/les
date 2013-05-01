@@ -16,6 +16,8 @@
 
 import logging
 
+from les.config_autogen import *
+
 log_handler = logging.StreamHandler()
 log_handler.setFormatter(logging.Formatter("[%(levelname).1s] %(message)s"))
 logging.getLogger().addHandler(log_handler)

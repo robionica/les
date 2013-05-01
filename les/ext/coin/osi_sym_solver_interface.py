@@ -21,17 +21,17 @@ import itertools
 from les.ext.coin import _osi_sym_solver_interface
 from les.ext.coin import coin_utils
 from les.problems.problem import Problem
-from les.solvers.bilp_solver import BILPSolver
+from les.solvers.bilp_solver_base import BILPSolverBase
 
 MINIMIZATION = +1
 MAXIMIZATION = -1
 
 class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
-                            BILPSolver):
+                            BILPSolverBase):
   """This class represents OSI Solver Interface for SYMPHONY."""
 
   def __init__(self):
-    BILPSolver.__init__(self)
+    BILPSolverBase.__init__(self)
     _osi_sym_solver_interface.OsiSymSolverInterface.__init__(self)
     self._problem = None
 

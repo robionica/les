@@ -20,14 +20,14 @@ import itertools
 
 from les.ext.coin import _osi_clp_solver_interface
 from les.ext.coin import coin_utils
-from les.solvers.bilp_solver import BILPSolver
+from les.solvers.bilp_solver_base import BILPSolverBase
 from les.problems.problem import Problem
 
 class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
-                            BILPSolver):
+                            BILPSolverBase):
 
   def __init__(self):
-    BILPSolver.__init__(self)
+    BILPSolverBase.__init__(self)
     _osi_clp_solver_interface.OsiClpSolverInterface.__init__(self)
     self._problem = None
 

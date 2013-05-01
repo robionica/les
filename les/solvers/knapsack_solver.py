@@ -14,13 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.solvers.bilp_solver import BILPSolver
+from les.solvers.bilp_solver_base import BILPSolverBase
 from les.problems.knapsack_problem import KnapsackProblem
 
-class KnapsackSolverBase(BILPSolver):
+class KnapsackSolverBase(BILPSolverBase):
 
   def __init__(self):
-    BILPSolver.__init__(self)
+    BILPSolverBase.__init__(self)
     self._problem = None
 
   def load_problem(self, problem, details={}):

@@ -17,7 +17,6 @@ import numpy as np
 import time
 import itertools
 
-from les.solvers.bilp_solver import BILPSolver
 from les.sparse_vector import SparseVector
 from les.problems.bilp_problem import BILPProblem
 from les.solvers.solver_factory import SolverFactory

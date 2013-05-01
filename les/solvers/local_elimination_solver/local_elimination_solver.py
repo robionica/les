@@ -25,7 +25,7 @@ import logging
 
 from les.problems.bilp_problem import BILPProblem
 from les.decomposition_tree import DecompositionTree
-from les.solvers.bilp_solver import BILPSolver
+from les.solvers.bilp_solver_base import BILPSolverBase
 from les.solvers.local_elimination_solver.data_models.data_model import DataModel
 from les.solvers.local_elimination_solver.data_models.sqlite_data_model import SQLiteDataModel
 from les.solvers.local_elimination_solver.parallelizers import \
@@ -94,7 +94,7 @@ class Params(object):
       raise TypeError()
     self._data_model_type = data_model
 
-class LocalEliminationSolver(BILPSolver):
+class LocalEliminationSolver(BILPSolverBase):
   """This class represents local elimination solver (LES), which implements
   local elimination algorithm (LEA). The solver solves discrete optimization
   problems (DOP) defined by :class:`BILPProblem` class.
@@ -120,7 +120,7 @@ class LocalEliminationSolver(BILPSolver):
 
   def __init__(self, master_solver_factory=None, data_model=None,
                parallelizer_factory=None):
-    BILPSolver.__init__(self)
+    BILPSolverBase.__init__(self)
     self._obj_value = 0.0
     self._col_solution = []
     self._decomposition_tree = None
@@ -142,7 +142,8 @@ class LocalEliminationSolver(BILPSolver):
     """Returns data model.
 
     Returns:
-       A :class:`DataModel` derived instance."""
+       A :class:`DataModel` derived instance.
+    """
     return self._data_model
 
   @property
@@ -176,8 +177,8 @@ class LocalEliminationSolver(BILPSolver):
 
     .. note::
 
-    If we have only one subproblem, the problem will be solved with pure master
-    solver.
+    If we have only one subproblem which is the actual problem, it will be
+    solved with pure master solver.
 
     Raises:
        Error

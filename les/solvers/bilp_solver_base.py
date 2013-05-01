@@ -16,7 +16,7 @@
 
 from les.solvers.solver import Solver
 
-class BILPSolver(Solver):
+class BILPSolverBase(Solver):
   """Base solver class for 0-1 integer linear programming or binary integer
   linear programming problems represented by :class:`BILPProblem` class.
   """

@@ -21,6 +21,12 @@ from setuptools import setup, find_packages, Extension
 import sys
 import types
 
+# Flags that "can be" changed from command line
+REQUIRE_SYMPHONY_SUPPORT = True
+REQUIRE_METIS_SUPPORT = False
+REQUIRE_GLPK_SUPPORT = True
+
+# List of dependencies
 install_requires = [
   "networkx",
   "scipy",
@@ -28,11 +34,6 @@ install_requires = [
 ]
 
 extensions = []
-
-SYMPHONY_HOME_DIR = os.environ.get("SYMPHONY_HOME_DIR")
-# Do we have METIS or we have to provide the support for it...
-if os.environ.get("METIS_DLL"):
-  install_requires.append("metis")
 
 def setup_symphony(home_dir):
   """Setup SYMPHONY solver."""
@@ -42,7 +43,6 @@ def setup_symphony(home_dir):
     raise IOError("Directory doesnot exist: %s" % home_dir)
   include_dir = os.path.join(home_dir, "include")
   lib_dir = os.path.join(home_dir, "lib")
-  # Extensions
   extensions.append(
     Extension(
       "les.ext.coin.coin_utils",
@@ -86,11 +86,25 @@ def setup_symphony(home_dir):
     )
   )
 
+def gen_user_config():
+  with open(os.path.join('les', 'config_autogen.py'), 'w') as fh:
+    fh.write("HAS_SYMPHONY_SUPPORT = %s\n" % (REQUIRE_SYMPHONY_SUPPORT and 'True' or 'False',))
+    fh.write("HAS_METIS_SUPPORT = %s\n" % (REQUIRE_METIS_SUPPORT and 'True' or 'False',))
+    fh.write("HAS_GLPK_SUPPORT = %s\n" % (REQUIRE_GLPK_SUPPORT and 'True' or 'False',))
+
 def main():
-  if SYMPHONY_HOME_DIR:
-    setup_symphony(SYMPHONY_HOME_DIR)
-  else:
-    print("WARNING: SYMPHONY home dir wasn't set", file=sys.stderr)
+  if REQUIRE_METIS_SUPPORT and os.environ.get("METIS_DLL"):
+    install_requires.append("metis")
+  if REQUIRE_SYMPHONY_SUPPORT:
+    if os.environ.get("SYMPHONY_HOME_DIR"):
+      setup_symphony(os.environ.get("SYMPHONY_HOME_DIR"))
+    else:
+      print('Please set SYMPHONY home dir, so we could install it.', file=sys.stderr)
+      print('Exit...')
+      exit(1)
+  if REQUIRE_GLPK_SUPPORT:
+    install_requires.append('glpk')
+  gen_user_config()
   setup(
     name="les",
     description="Local Elimination Solver",
@@ -102,9 +116,10 @@ def main():
     license="Apache",
     classifiers=[
       "License :: OSI Approved :: Apache Software License",
+      "Topic :: Scientific/Engineering :: Mathematics"
       ],
     install_requires=install_requires
   )
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   main()
