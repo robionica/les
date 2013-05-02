@@ -50,12 +50,9 @@ in doubt, run:
    system. Continue at your own risk.
 
 4. Install extra software and setup environment:
-
-    - [SYMPHONY](https://projects.coin-or.org/SYMPHONY)
-    - [GLPK](http://www.gnu.org/software/glpk/)
-    - METIS
-
-   Please install at least one master solver,
+   [SYMPHONY](https://projects.coin-or.org/SYMPHONY),
+   [GLPK](http://www.gnu.org/software/glpk/), METIS. Please install at least one
+   master solver,
    e.g. [SYMPHONY](https://github.com/d2rk/les/blob/master/docs/install_symphony.md#install-symphony).
 
 5. Run this command from the command prompt:
