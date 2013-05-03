@@ -33,10 +33,11 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.refcounting',
               'sphinx.ext.mathjax',
-              'autogen']
+              #'autogen'
+             ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['templates']
+templates_path = ['tools/sphinxext']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -107,7 +108,7 @@ html_theme = 'default'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {'collapsiblesidebar': True}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -131,7 +132,7 @@ html_theme = 'default'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['tools/sphinx/static']
+html_static_path = ['tools/sphinxext/static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -139,7 +140,7 @@ html_static_path = ['tools/sphinx/static']
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}

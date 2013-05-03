@@ -13,4 +13,4 @@ API Reference
 .. toctree::
    :maxdepth: 2
 
-   api/les.rst
+   api/index
