@@ -28,7 +28,7 @@ class GLPSolverTest(unittest.TestCase):
     self._solver = glp_solver.GLPSolver()
 
   def test_solve1(self):
-    problem = BILPProblem(
+    problem = BILPProblem.build_from_scratch(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
        [1., 2., 3., 2., 0., 0., 0., 0., 0.],

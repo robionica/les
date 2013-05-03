@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy
 import unittest
 
 from les.problems import BILPProblem
@@ -33,14 +32,16 @@ class _OsiSymSolverInterfaceFactory(OsiSymSolverInterfaceFactory):
 class LocalEliminationSolverTest(unittest.TestCase):
 
   def test_solve1(self):
-    cons_matrix = numpy.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
-                                [1., 2., 3., 2., 0., 0., 0., 0., 0.],
-                                [0., 0., 1., 4., 3., 4., 2., 0., 0.],
-                                [0., 0., 2., 1., 1., 2., 5., 0., 0.],
-                                [0., 0., 0., 0., 0., 0., 2., 1., 2.],
-                                [0., 0., 0., 0., 0., 0., 3., 4., 1.]])
-    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6], cons_matrix,
-                          [7, 6, 9, 7, 3, 5])
+    problem = BILPProblem.build_from_scratch(
+      [8, 2, 5, 5, 8, 3, 9, 7, 6],
+      [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
+       [1., 2., 3., 2., 0., 0., 0., 0., 0.],
+       [0., 0., 1., 4., 3., 4., 2., 0., 0.],
+       [0., 0., 2., 1., 1., 2., 5., 0., 0.],
+       [0., 0., 0., 0., 0., 0., 2., 1., 2.],
+       [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
+      [7, 6, 9, 7, 3, 5]
+    )
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
     solver = LocalEliminationSolver()
@@ -51,11 +52,14 @@ class LocalEliminationSolverTest(unittest.TestCase):
     self.assertEqual([1., 0., 1., 1., 1., 0., 0., 1., 1.], solver.get_col_solution())
 
   def test_solve2(self):
-    cons_matrix = numpy.matrix([[3., 4., 1., 0., 0., 0., 0.],
-                                [0., 2., 3., 3., 0., 0., 0.],
-                                [0., 2., 0., 0., 3., 0., 0.],
-                                [0., 0., 2., 0., 0., 3., 2.]])
-    problem = BILPProblem([2, 3, 1, 5, 4, 6, 1], cons_matrix, [6, 5, 4, 5])
+    problem = BILPProblem.build_from_scratch(
+      [2, 3, 1, 5, 4, 6, 1],
+      [[3., 4., 1., 0., 0., 0., 0.],
+       [0., 2., 3., 3., 0., 0., 0.],
+       [0., 2., 0., 0., 3., 0., 0.],
+       [0., 0., 2., 0., 0., 3., 2.]],
+      [6, 5, 4, 5]
+    )
     decomposer = FinkelsteinQBDecomposer()
     decomposer.decompose(problem)
     tree = decomposer.get_decomposition_tree()
@@ -68,5 +72,5 @@ class LocalEliminationSolverTest(unittest.TestCase):
     self.assertEqual(18.0, solver.get_obj_value())
     self.assertEqual([1., 0., 0., 1., 1., 1., 1.], solver.get_col_solution())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   unittest.main()

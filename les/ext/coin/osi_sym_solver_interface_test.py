@@ -16,7 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
 import unittest
 
 from les.problems.bilp_problem import BILPProblem
@@ -29,15 +28,15 @@ class OsiSymSolverInterfaceTest(unittest.TestCase):
     self.si.set_sym_param("verbosity", -2)
 
   def test_solve1(self):
-    cons_matrix = np.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
-                             [1., 2., 3., 2., 0., 0., 0., 0., 0.],
-                             [0., 0., 1., 4., 3., 4., 2., 0., 0.],
-                             [0., 0., 2., 1., 1., 2., 5., 0., 0.],
-                             [0., 0., 0., 0., 0., 0., 2., 1., 2.],
-                             [0., 0., 0., 0., 0., 0., 3., 4., 1.],
-                             ])
-    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6], cons_matrix,
-                          [7, 6, 9, 7, 3, 5])
+    problem = BILPProblem.build_from_scratch(
+      [8, 2, 5, 5, 8, 3, 9, 7, 6],
+      [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
+       [1., 2., 3., 2., 0., 0., 0., 0., 0.],
+       [0., 0., 1., 4., 3., 4., 2., 0., 0.],
+       [0., 0., 2., 1., 1., 2., 5., 0., 0.],
+       [0., 0., 0., 0., 0., 0., 2., 1., 2.],
+       [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
+      [7, 6, 9, 7, 3, 5])
     self.si.load_problem(problem)
     self.si.solve()
     self.assertEqual(39.0, self.si.get_obj_value())
@@ -46,7 +45,7 @@ class OsiSymSolverInterfaceTest(unittest.TestCase):
       self.assertEqual(col_solution[i], self.si.get_col_solution()[i])
 
   def test_solve2(self):
-    problem = BILPProblem([2.0], np.matrix([[3.0]]), [1.0])
+    problem = BILPProblem.build_from_scratch([2.0], [[3.0]], [1.0])
     self.si.load_problem(problem)
     self.si.solve()
 

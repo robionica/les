@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy
 import unittest
 
 from les.problems import BILPProblem
@@ -23,8 +22,10 @@ from les.solvers.dummy_solver import DummySolver
 class DummySolverTest(unittest.TestCase):
 
   def test_solve1(self):
-    cons_matrix = numpy.matrix([[4., 3., 0., 0.], [0., 0., 1., 7.]])
-    problem = BILPProblem([8, 2, 5, 5], cons_matrix, [7, 8])
+    problem = BILPProblem.build_from_scratch(
+      [8, 2, 5, 5],
+      [[4., 3., 0., 0.], [0., 0., 1., 7.]],
+      [7, 8])
     solver = DummySolver()
     solver.load_problem(problem)
     solver.solve()
@@ -32,8 +33,10 @@ class DummySolverTest(unittest.TestCase):
     self.assertEqual([1., 1., 1., 1.], solver.get_col_solution())
 
   def test_solve2(self):
-    cons_matrix = numpy.matrix([[4.,3.,0.,0.], [0.,0.,1.,9.], [0.,2.,1.,9.]])
-    problem = BILPProblem([8, 2, 5, 5], cons_matrix, [7, 8, 5])
+    problem = BILPProblem.build_from_scratch(
+      [8, 2, 5, 5],
+      [[4.,3.,0.,0.], [0.,0.,1.,9.], [0.,2.,1.,9.]],
+      [7, 8, 5])
     solver = DummySolver()
     solver.load_problem(problem)
     solver.solve()
