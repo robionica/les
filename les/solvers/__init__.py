@@ -26,3 +26,6 @@ if les.config.HAS_SYMPHONY_SUPPORT:
 if les.config.HAS_GLPK_SUPPORT:
   from les.solvers.glp_solver import GLPSolver
   from les.solvers.glp_solver_factory import GLPSolverFactory
+# SCIP
+from les.solvers.scip_solver import SCIPSolver
+from les.solvers.scip_solver_factory import SCIPSolverFactory
