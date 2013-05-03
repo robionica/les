@@ -21,7 +21,7 @@ import itertools
 from les.ext.coin import _osi_clp_solver_interface
 from les.ext.coin import coin_utils
 from les.solvers.bilp_solver_base import BILPSolverBase
-from les.problems.problem import Problem
+from les.problems.problem_base import ProblemBase
 
 class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
                             BILPSolverBase):
@@ -36,8 +36,8 @@ class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
 
   def load_problem(self, problem, details={}):
     """Loads problem to the solver."""
-    if not isinstance(problem, Problem):
-      raise TypeError("Problem must be derived from Problem: %s" % type(problem))
+    if not isinstance(problem, ProblemBase):
+      raise TypeError("Problem must be derived from ProblemBase: %s" % type(problem))
     if not self._problem:
       details = {}
     # Setup objective functions
@@ -46,7 +46,7 @@ class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
         (p, v) = coef
         col = coin_utils.CoinPackedVector()
         # NOTE: fix coef because of C++ signature
-        self.add_col(col, 0., 1., float(v))
+        self.add_col(col, 0., 1., v.astype(float))
       # Set objective function sense
       self.set_obj_sense(-1)
     # Constraints
@@ -56,11 +56,11 @@ class OsiClpSolverInterface(_osi_clp_solver_interface.OsiClpSolverInterface,
           continue
         r = coin_utils.CoinPackedVector();
         for i, v in itertools.izip(row.indices, row.data):
-          r.insert(int(i), float(v))
+          r.insert(int(i), v.astype(float))
         # NOTE: fix coef because of C++ signature
-        self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
+        self.add_row(r, "L", problem.get_rhs()[p].astype(float), 1.)
     elif details.get("rhs", True):
       pass
       for i in xrange(len(problem.get_rhs())):
-        self.set_row_upper(i, float(problem.get_rhs()[i]))
+        self.set_row_upper(i, problem.get_rhs()[i].astype(float))
     self._problem = problem

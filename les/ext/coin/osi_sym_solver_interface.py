@@ -16,11 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy
 import itertools
 
 from les.ext.coin import _osi_sym_solver_interface
 from les.ext.coin import coin_utils
-from les.problems.problem import Problem
+from les.problems.problem_base import ProblemBase
 from les.solvers.bilp_solver_base import BILPSolverBase
 
 MINIMIZATION = +1
@@ -44,8 +45,8 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
 
     TODO: use OsiSymSolverInterface.loadProblem().
     """
-    if not isinstance(problem, Problem):
-      raise TypeError("Problem must be derived from Problem: %s" % type(problem))
+    if not isinstance(problem, ProblemBase):
+      raise TypeError("Problem must be derived from ProblemBase: %s" % type(problem))
     if not self._problem:
       details = {}
     # Setup objective functions
@@ -58,12 +59,12 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
           (p, v) = coef
           col = coin_utils.CoinPackedVector()
           # NOTE: fix coef because of C++ signature
-          self.add_col(col, 0., 1., float(v))
+          self.add_col(col, 0., 1., v.astype(float))
           # TODO: set column type
           self.set_integer(i)
       else:
         col = coin_utils.CoinPackedVector()
-        self.add_col(col, 0., 1., float(problem.get_obj_coefs().values()[0]))
+        self.add_col(col, 0., 1., problem.get_obj_coefs().values()[0].astype(float))
         self.set_integer(1)
       # Set objective function sense
       self.set_obj_sense(MAXIMIZATION)
@@ -74,10 +75,10 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
           continue
         r = coin_utils.CoinPackedVector();
         for i, v in itertools.izip(row.indices, row.data):
-          r.insert(int(i), float(v))
+          r.insert(int(i), v.astype(float))
         # NOTE: fix coef because of C++ signature
-        self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
+        self.add_row(r, "L", numpy.float16(problem.get_rhs()[p]).astype(float), 1.)
     elif details.get("rhs", True):
       for i in xrange(len(problem.get_rhs())):
-        self.set_row_upper(i, float(problem.get_rhs()[i]))
+        self.set_row_upper(i, problem.get_rhs()[i].astype(float))
     self._problem = problem
