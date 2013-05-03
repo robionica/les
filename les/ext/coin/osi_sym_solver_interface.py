@@ -16,7 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy
 import itertools
 
 from les.ext.coin import _osi_sym_solver_interface
@@ -77,7 +76,7 @@ class OsiSymSolverInterface(_osi_sym_solver_interface.OsiSymSolverInterface,
         for i, v in itertools.izip(row.indices, row.data):
           r.insert(int(i), v.astype(float))
         # NOTE: fix coef because of C++ signature
-        self.add_row(r, "L", numpy.float16(problem.get_rhs()[p]).astype(float), 1.)
+        self.add_row(r, "L", float(problem.get_rhs()[p]), 1.)
     elif details.get("rhs", True):
       for i in xrange(len(problem.get_rhs())):
         self.set_row_upper(i, problem.get_rhs()[i].astype(float))
