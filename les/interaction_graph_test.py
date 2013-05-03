@@ -16,7 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy
 import unittest
 
 from les.interaction_graph import InteractionGraph
@@ -25,14 +24,14 @@ from les.problems.bilp_problem import BILPProblem
 class InteractionGraphTest(unittest.TestCase):
 
   def test_constructor(self):
-    cons_matrix = numpy.matrix([[2., 3., 4., 1., 0., 0., 0., 0., 0.],
-                                [1., 2., 3., 2., 0., 0., 0., 0., 0.],
-                                [0., 0., 1., 4., 3., 4., 2., 0., 0.],
-                                [0., 0., 2., 1., 1., 2., 5., 0., 0.],
-                                [0., 0., 0., 0., 0., 0., 2., 1., 2.],
-                                [0., 0., 0., 0., 0., 0., 3., 4., 1.],
-                                ])
-    problem = BILPProblem([8, 2, 5, 5, 8, 3, 9, 7, 6], cons_matrix,
-                          [7, 6, 9, 7, 3, 5])
+    problem = BILPProblem.build_from_scratch(
+      [8, 2, 5, 5, 8, 3, 9, 7, 6],
+      [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
+       [1., 2., 3., 2., 0., 0., 0., 0., 0.],
+       [0., 0., 1., 4., 3., 4., 2., 0., 0.],
+       [0., 0., 2., 1., 1., 2., 5., 0., 0.],
+       [0., 0., 0., 0., 0., 0., 2., 1., 2.],
+       [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
+      [7, 6, 9, 7, 3, 5])
     g = InteractionGraph(problem)
     self.assertEqual(9, len(g.nodes()))
