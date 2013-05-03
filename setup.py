@@ -104,6 +104,7 @@ def main():
       exit(1)
   if REQUIRE_GLPK_SUPPORT:
     install_requires.append('glpk')
+  install_requires.append('python-zibopt')
   gen_user_config()
   setup(
     name="les",
