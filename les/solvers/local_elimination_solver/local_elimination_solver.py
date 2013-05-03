@@ -37,7 +37,7 @@ class Error(Exception):
   """Base-class for exceptions in this module."""
 
 class Params(object):
-  """This class represents class:`LocalEliminationSolver` parameters."""
+  """This class represents :class:`LocalEliminationSolver` parameters."""
 
   def __init__(self):
     self._data_model_type = SQLiteDataModel
@@ -99,15 +99,14 @@ class LocalEliminationSolver(BILPSolverBase):
   local elimination algorithm (LEA). The solver solves discrete optimization
   problems (DOP) defined by :class:`BILPProblem` class.
 
-  Args:
-     master_solver_factory: A :class:`SolverFactory` to use as master solver
+  :param master_solver_factory: A :class:`SolverFactory` to use as master solver
        factory.
-     relaxation_solver_factories: A list of :class:`SolverFactory` instances
+  :param relaxation_solver_factories: A list of :class:`SolverFactory` instances
        that will be used as relaxation solver factories.
-     parallelizer_factory: :class:`Parallelizer` instance that provides
+  :param parallelizer_factory: :class:`Parallelizer` instance that provides
        parallel support. By default :class:`ThreadParallelizerFactory` will be
        used.
-     data_model: A :class:`DataModel` instance that will help solver to keep
+  :param data_model: A :class:`DataModel` instance that will help solver to keep
        local solutions.
   """
 
@@ -141,8 +140,7 @@ class LocalEliminationSolver(BILPSolverBase):
   def get_data_model(self):
     """Returns data model.
 
-    Returns:
-       A :class:`DataModel` derived instance.
+    :returns: A :class:`DataModel` derived instance.
     """
     return self._data_model
 
@@ -159,16 +157,14 @@ class LocalEliminationSolver(BILPSolverBase):
   def get_col_solution(self):
     """Returns a list of primal variable values.
 
-    Returns:
-       A list of variable values.
+    :returns: A list of variable values.
     """
     return self._col_solution
 
   def get_problem(self):
     """Returns problem that has to be solved by this solver.
 
-    Returns:
-       A :class:`BILPProblem` based problem instance.
+    :returns: A :class:`~les.problems.bilp_problem BILPProblem` based problem instance.
     """
     return self._problem
 
@@ -177,11 +173,10 @@ class LocalEliminationSolver(BILPSolverBase):
 
     .. note::
 
-    If we have only one subproblem which is the actual problem, it will be
-    solved with pure master solver.
+       If we have only one subproblem which is the actual problem, it will be
+       solved with pure master solver.
 
-    Raises:
-       Error
+    :rises: :class:`Error`
     """
     if not self.get_problem():
       raise Error("Nothing to be solved, problem model is empty.")
@@ -237,16 +232,14 @@ class LocalEliminationSolver(BILPSolverBase):
 
     .. note::
 
-    On this moment it's user responsibility to preprocess problem and build
-    decomposition tree.
+       On this moment it's user responsibility to preprocess problem and build
+       decomposition tree.
 
-    Args:
-       problem: A problem to be solved.
-       decomposition_tree: A :class:`DecompositionTree` instance that
-          represents `problem` structure.
+    :param problem: A problem to be solved.
+    :param decomposition_tree: A :class:`les.decomposition_tree.DecompositionTree`
+          instance that represents `problem` structure.
 
-    Raises:
-       TypeError
+    :raises: TypeError
     """
     if not isinstance(problem, BILPProblem):
       raise TypeError()
@@ -275,7 +268,6 @@ class LocalEliminationSolver(BILPSolverBase):
   def get_obj_value(self):
     """The objective function value of the current solution.
 
-    Returns:
-       An objective function value.
+    :returns: An objective function value.
     """
     return self._obj_value
