@@ -16,29 +16,42 @@
 
 import types
 
-class Problem(object):
-  """Base problem class for all available problems."""
+class ProblemBase(object):
+  """Base problem class for all available problem models.
+
+  :param name: Optional string that represents problem name.
+  """
+
   DEFAULT_NAME = "UNKNOWN"
 
   subproblem_name_format = "Z%d"
 
-  def __init__(self):
+  def __init__(self, name=None):
     self._name = None
+    if name:
+      self.set_name(name)
 
   def set_name(self, name):
-    """Sets problem name."""
+    """Sets problem name.
+
+    :param name: A string that represents problem name.
+
+    :raises: TypeError
+    """
     if not type(name) is types.StringType:
       raise TypeError()
     self._name = name
 
   def get_name(self):
-    """Returns the problem name. Return DEFAULT_NAME if name wasn't defined."""
+    """Returns the problem name. Return `DEFAULT_NAME` if name wasn't defined.
+    """
     return self._name or self.__class__.DEFAULT_NAME
 
   def build_subproblem(self, *args, **kwargs):
     """Builds and returns subproblem for the current problem instance."""
     raise NotImplementedError()
 
-class Subproblem(Problem):
+class SubproblemBase(ProblemBase):
+  """Base subproblem class for all available subproblem models."""
 
   pass

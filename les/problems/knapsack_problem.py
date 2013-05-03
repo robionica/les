@@ -22,17 +22,17 @@ from :math:`G`, so that the total value of items in the bag is maximized.
 
 import numpy
 
-from les.problems.problem import Problem
+from les.problems.problem_base import ProblemBase
 from les.problems.bilp_problem import BILPProblem
 
-class KnapsackProblem(Problem):
+class KnapsackProblem(ProblemBase):
   """Constructor, where values is array of values, weights is array of weights,
   n is number of items in the bag, max_weight is maximum weight that we can
   carry in the bag.
   """
 
   def __init__(self, model=None):
-    Problem.__init__(self)
+    ProblemBase.__init__(self)
     self._weights = []
     self._values = []
     self._max_weight = 0
@@ -70,12 +70,15 @@ class KnapsackProblem(Problem):
     self._max_weight = max_weight
 
   def get_values(self):
+    """Returns a list of values."""
     return self._values
 
   def get_weights(self):
+    """Returns a list of weights."""
     return self._weights
 
   def get_num_items(self):
+    """Returns number of items in the bag."""
     return len(self._values)
 
   def get_max_weight(self):

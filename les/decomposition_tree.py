@@ -17,7 +17,7 @@
 import logging
 import networkx as nx
 
-from les.problems.problem import Problem, Subproblem
+from les.problems.problem_base import ProblemBase, SubproblemBase
 
 class DecompositionTree(nx.DiGraph):
 
@@ -26,8 +26,8 @@ class DecompositionTree(nx.DiGraph):
 
   def __init__(self, problem, root):
     nx.DiGraph.__init__(self)
-    if not isinstance(problem, Problem):
-      raise TypeError("problem must be derived from Problem")
+    if not isinstance(problem, ProblemBase):
+      raise TypeError("problem must be derived from ProblemBase")
     self._problem = problem
     self.add_node(root)
     self._root = root
@@ -47,7 +47,7 @@ class DecompositionTree(nx.DiGraph):
     return self._root.get_name()
 
   def merge_nodes(self, node1, node2):
-    """Merges node1 and node2 to node1 and removes node2. Creates new
+    """Merges `node1` and `node2` to `node1` and removes `node2`. Creates new
     subproblem.
     """
     subproblem = self.node[node1]["subproblem"] + self.node[node2]["subproblem"]
@@ -78,8 +78,8 @@ class DecompositionTree(nx.DiGraph):
     return len(self.node)
 
   def add_node(self, node):
-    if not isinstance(node, Problem):
-      raise TypeError("node must be derived from Problem: %s" % node)
+    if not isinstance(node, ProblemBase):
+      raise TypeError("node must be derived from ProblemBase: %s" % node)
     name_format = self._problem.subproblem_name_format
     node.set_name(name_format % len(self))
     super(DecompositionTree, self).add_node(node.get_name(), subproblem=node)

@@ -24,7 +24,7 @@ Interaction graph of variables is also called constraint graph.
 import networkx
 import itertools
 
-from les.problems.problem import Problem
+from les.problems.problem_base import ProblemBase
 
 def _extract_indices(m, i):
   start = m.indptr[i]
@@ -44,7 +44,7 @@ class InteractionGraph(networkx.Graph):
       self.read_problem(problem)
 
   def read_problem(self, problem):
-    if not isinstance(problem, Problem):
+    if not isinstance(problem, ProblemBase):
       raise TypeError()
     # TODO: improve this
     for p in xrange(problem.get_num_rows()):

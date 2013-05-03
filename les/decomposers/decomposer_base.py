@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.problems.problem import Problem
+from les.problems.problem_base import ProblemBase
 
 class DecomposerBase(object):
   """Base class for a general decomposer. Decomposer provides decomposition
@@ -30,7 +30,7 @@ class DecomposerBase(object):
     return self._problem
 
   def _set_problem(self, problem):
-    if not isinstance(problem, Problem):
+    if not isinstance(problem, ProblemBase):
       raise TypeError()
     self._problem = problem
 
