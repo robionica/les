@@ -14,7 +14,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#
+"""
+The Finkelstein's quasi-block decomposition algorithm is represented by
+:class:`FinkelsteinQBDecomposer` class.
+
+The following snippet shows how to create a simple
+:class:`~les.problems.bilp_problem.BILPProblem` instance with quasi-block
+structure and decompose it with help of Finkelstein's algorithm::
+
+  problem = BILPProblem.build_from_scratch(
+    # objective function
+    [8, 2, 5, 5, 8, 3, 9, 7, 6],
+    # constraint matrix
+    [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
+     [1., 2., 3., 2., 0., 0., 0., 0., 0.],
+     [0., 0., 1., 4., 3., 4., 2., 0., 0.],
+     [0., 0., 2., 1., 1., 2., 5., 0., 0.],
+     [0., 0., 0., 0., 0., 0., 2., 1., 2.],
+     [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
+    # right-hand side bounds
+    [7, 6, 9, 7, 3, 5]
+  )
+  decomposer = FinkelsteinQBDecomposer()
+  decomposer.decompose(problem)
+
+Once the problem has been decomposed, its
+:class:`~les.decomposition_tree.DecompositionTree` can be obtained with help of
+:func:`get_decomposition_tree` method.
+
+"""
 # +---------+------+
 # |         |      |
 # +---------+------+------------+---+
@@ -28,7 +56,7 @@
 
 import numpy as np
 
-from les.decomposers.decomposer import Decomposer
+from les.decomposers.decomposer_base import DecomposerBase
 from les.decomposition_tree import DecompositionTree
 from les.problems.bilp_problem import BILPProblem
 from les.sparse_vector import SparseVector
@@ -41,7 +69,7 @@ def _get_indices(m, i):
     result.append(m.indices[j])
   return result
 
-class FinkelsteinQBDecomposer(Decomposer):
+class FinkelsteinQBDecomposer(DecomposerBase):
   """This class represents Finkelstein QB decomposer for ILP problems."""
 
   def __init__(self):
@@ -91,6 +119,14 @@ class FinkelsteinQBDecomposer(Decomposer):
                 merge_empty_blocks=True):
     """Decomposes problem into subproblems starting by initial cols. By default
     starts from column 0. Default max separator size is 11.
+
+    :param problem: A :class:`~les.problems.bilp_problem.BILPProblem` based
+      problem instance.
+    :param initial_cols: A list of integers.
+    :param max_separator_size: An integer that represents max available
+      separator size.
+    :param merge_empty_blocks: ``True`` or ``False``, whether or not we need to
+      merge empty blocks.
     """
     if max_separator_size:
       raise NotImplementedError()
@@ -132,4 +168,8 @@ class FinkelsteinQBDecomposer(Decomposer):
     self._build_decomposition_tree()
 
   def get_decomposition_tree(self):
+    """Returns decomposition tree.
+
+    :returns: A :class:`~les.decomposition_tree.DecompositionTree` instance or ``None``.
+    """
     return self._decomposition_tree

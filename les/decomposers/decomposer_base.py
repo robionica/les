@@ -16,8 +16,8 @@
 
 from les.problems.problem import Problem
 
-class Decomposer(object):
-  """Template class for a general decomposer. Decomposer provides decomposition
+class DecomposerBase(object):
+  """Base class for a general decomposer. Decomposer provides decomposition
   technique, so that: each subproblem can be solved independently, the solution
   to the subproblems can be combined to solve the original problem.
   """
@@ -26,6 +26,7 @@ class Decomposer(object):
     self._problem = None
 
   def get_problem(self):
+    """Returns problem being decomposed by this decomposer."""
     return self._problem
 
   def _set_problem(self, problem):
@@ -35,9 +36,12 @@ class Decomposer(object):
 
   def decompose(self, problem):
     """Decomposes problem and build decomposition tree. See also
-    get_decomposition_tree method.
+    :func:`get_decomposition_tree` method.
     """
     raise NotImplementedError()
 
   def get_decomposition_tree(self):
+    """Returns result decomposition tree, once the problem has been
+    decomposed.
+    """
     raise NotImplementedError()
