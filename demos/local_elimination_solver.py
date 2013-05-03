@@ -23,7 +23,6 @@ import time
 import numpy as np
 
 from les.problems import BILPProblem
-from les.solvers import LocalEliminationSolver
 from les.decomposers import FinkelsteinQBDecomposer
 from les.solvers import \
     LocalEliminationSolver, \
