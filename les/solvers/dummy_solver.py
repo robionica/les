@@ -36,11 +36,9 @@ class DummySolver(BILPSolverBase):
   def load_problem(self, problem, details={}):
     """Loads problem model to the solver.
 
-    Args:
-       problem: A :class:`BILPProblem` derived problem instance.
+    :param problem: A :class:`BILPProblem` derived problem instance.
 
-    Raises:
-       TypeError
+    :raises: TypeError
     """
     if not isinstance(problem, BILPProblem):
       raise TypeError()

@@ -14,26 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.solvers.solver import Solver
+from les.solvers.solver_base import SolverBase
 
-class BILPSolverBase(Solver):
+class BILPSolverBase(SolverBase):
   """Base solver class for 0-1 integer linear programming or binary integer
-  linear programming problems represented by :class:`BILPProblem` class.
+  linear programming problems represented by
+  :class:`~les.problems.bilp_problem.BILPProblem` class.
   """
 
   def __init__(self):
-    Solver.__init__(self)
+    SolverBase.__init__(self)
 
   def get_col_solution(self):
-    """
-    Returns:
-      A list of primal variable values.
+    """Return primal solution.
+
+    :returns: A list of primal variable values.
     """
     raise NotImplementedError()
 
   def get_obj_value(self):
-    """
-    Returns:
-      An objective function value.
+    """Returns objective value.
+
+    :returns: An objective function value.
     """
     raise NotImplementedError()

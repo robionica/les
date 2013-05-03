@@ -14,13 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class Solver(object):
-  """Base solver class."""
+class SolverBase(object):
+  """Solvers base class.
+
+  This class is the base of all solver classes.
+  """
 
   def load_problem(self, problem):
+    """Loads problem to the solver.
+
+    :param problem: A :class:`Problem` instance.
+    """
     raise NotImplementedError()
 
   def get_problem(self):
+    """Returns problem solved by this solver.
+
+    :returns: A :class:`Problem` instance.
+    """
     raise NotImplementedError()
 
   def get_problem_type(self):
@@ -29,4 +40,5 @@ class Solver(object):
     return problem and type(problem) or None
 
   def solve(self):
+    """Starts problem solving."""
     raise NotImplementedError()
