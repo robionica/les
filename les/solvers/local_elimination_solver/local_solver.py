@@ -49,7 +49,8 @@ class _Generator(object):
     for i in subproblem.get_local_cols():
       obj[i] = subproblem.get_obj_coefs()[i]
     # Build gen problem
-    self._genproblem = BILPProblem(obj, cons_matrix, subproblem.get_rhs().copy())
+    self._genproblem = BILPProblem.build_from_scratch(obj, cons_matrix,
+                                                      subproblem.get_rhs().copy())
 
   def _gen_initial_solution(self, mask):
     solution = SparseVector((1, self._subproblem.get_num_cols()), dtype=np.float16)
