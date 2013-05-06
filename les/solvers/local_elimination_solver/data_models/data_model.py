@@ -15,4 +15,4 @@
 # limitations under the License.
 
 class DataModel(object):
-  pass
+  """Base class for all data models."""

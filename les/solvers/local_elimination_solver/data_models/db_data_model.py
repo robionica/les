@@ -38,6 +38,7 @@ class DataStore(object):
     raise NotImplementedError()
 
 class DBDataModel(DataModel):
+  """Database based data models."""
 
   def __init__(self, data_store):
     if not isinstance(data_store, DataStore):

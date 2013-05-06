@@ -14,10 +14,10 @@
 
 import logging
 import numpy as np
-import time
 import itertools
+from scipy import weave
 
-from les.sparse_vector import SparseVector
+from les.ext.scipy import sparse
 from les.problems.bilp_problem import BILPProblem
 from les.solvers.solver_factory import SolverFactory
 
@@ -43,33 +43,32 @@ class _Generator(object):
 
   def __init__(self, subproblem):
     self._subproblem = subproblem
-    cons_matrix = subproblem.get_cons_matrix()[:,list(subproblem.get_local_cols())]
+    lhs = subproblem.get_lhs()[:,list(subproblem.get_local_variables())]
     # Objective function
-    obj = SparseVector((1, subproblem.get_num_cols()), dtype=np.float16)
-    for i in subproblem.get_local_cols():
-      obj[i] = subproblem.get_obj_coefs()[i]
+    obj = sparse.dok_vector((1, subproblem.get_num_variables()), dtype=np.float16)
+    for i in subproblem.get_local_variables():
+      obj[i] = subproblem.get_objective()[i]
     # Build gen problem
-    self._genproblem = BILPProblem.build_from_scratch(obj, cons_matrix,
-                                                      subproblem.get_rhs().copy())
-
-  def _gen_initial_solution(self, mask):
-    solution = SparseVector((1, self._subproblem.get_num_cols()), dtype=np.float16)
-    for c, i in enumerate(self._subproblem.get_shared_cols()):
-      solution[i] = (mask >> c) & 1
-    return solution
+    self._genproblem = BILPProblem.build_from_scratch(
+      obj,
+      lhs,
+      [],
+      subproblem.get_rhs().copy()
+    )
 
   def gen(self, mask):
-    if not isinstance(mask, (int, long)):
+    if not type(mask) in (int, long):
       raise TypeError("mask: %s" % type(mask))
-    solution = self._gen_initial_solution(mask)
-    self._genproblem.set_rhs(self._subproblem.get_rhs().copy())
-    m = self._subproblem.get_cons_matrix()
-    for i in self._subproblem.get_shared_cols():
-      for ii, ij in itertools.izip(*m[:,i].nonzero()):
-        self._genproblem.set_row_upper_bound(ii, \
-            self._genproblem.get_rhs()[ii] - (m[ii, i+ij] * solution[i+ij]))
-        if self._genproblem.get_rhs()[ii] < 0:
+    solution = sparse.dok_vector((1, self._subproblem.get_num_variables()), dtype=np.float16)
+    rhs = self._subproblem.get_rhs().copy()
+    lhs = self._subproblem.get_lhs()
+    for c, i in enumerate(self._subproblem.get_shared_variables()):
+      solution[i] = (mask >> c) & 1
+      for ii, ij in itertools.izip(*lhs[:,i].nonzero()):
+        rhs[0, ii] -= lhs[ii, i] * solution[i]
+        if rhs[0, ii] < 0:
           return None, None
+    self._genproblem._set_rhs(rhs)
     return self._genproblem, solution
 
 class LocalSolver(object):
@@ -99,6 +98,7 @@ class LocalSolver(object):
       self._stats[factory.get_solver_class().__name__] = 0
     self.logger.info("Solving %s..." % problem)
     self._generator = _Generator(problem)
+    self._record = 0.0
     # Initialize solvers
     self._master_solver = self._params.master_solver_factory.build()
     self._relaxation_solvers = []
@@ -107,32 +107,32 @@ class LocalSolver(object):
     # TODO: this is maximization pattern, add minimization pattern
     # Start to iterate over all possible assigns for shared columns
     map(lambda mask: self._do_solve_iteration(problem, mask),
-        xrange((1 << len(problem.get_shared_cols())) - 1, -1, -1))
+        xrange((1 << len(problem.get_shared_variables())) - 1, -1, -1))
 
   def _do_solve_iteration(self, problem, mask):
     relaxed_problem, result_col_solution = self._generator.gen(mask)
     if not relaxed_problem:
       return
     col_solution, obj_value = self._solve_relaxed_problem(relaxed_problem)
-    for c, i in enumerate(problem.get_local_cols()):
+
+    for c, i in enumerate(problem.get_local_variables()):
       result_col_solution[i] = col_solution[c]
     # Fix objective value
     for dep_problem, dep_cols in problem.get_dependencies().items():
-      obj_value += sum([problem.get_obj_coefs()[i] * result_col_solution[i] for i in dep_cols])
+      obj_value += np.sum([problem.get_objective()[i] * result_col_solution[i] for i in dep_cols])
     self._data_model.put(problem, result_col_solution, obj_value)
 
   def _solve_relaxed_problem(self, problem):
     for solver in self._relaxation_solvers:
       solver.load_problem(problem, {'obj_coefs': False, 'cons_matrix': False})
       solver.solve()
-      s = sum(solver.get_col_solution())
+      s = np.sum(solver.get_col_solution())
       if s > 0 and not s % 1.0 \
             and problem.check_col_solution(solver.get_col_solution()):
         self._stats[solver.__class__.__name__] += 1
         return solver.get_col_solution(), solver.get_obj_value()
     # Use master solver
-    self._master_solver.load_problem(problem,
-                                     {'obj_coefs': False, 'cons_matrix': False})
+    self._master_solver.load_problem(problem, {'obj_coefs': False, 'cons_matrix': False})
     self._master_solver.solve()
     self._stats[self._master_solver.__class__.__name__] += 1
     # TODO: fix abs()

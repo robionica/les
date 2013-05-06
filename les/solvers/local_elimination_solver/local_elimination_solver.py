@@ -20,6 +20,7 @@ approach and that allow to calculate some global information about a solution of
 the entire problem using local computations.
 """
 
+import time
 import networkx as nx
 import logging
 
@@ -164,7 +165,8 @@ class LocalEliminationSolver(BILPSolverBase):
   def get_problem(self):
     """Returns problem that has to be solved by this solver.
 
-    :returns: A :class:`~les.problems.bilp_problem BILPProblem` based problem instance.
+    :returns: A :class:`~les.problems.bilp_problem.BILPProblem` based problem
+      instance.
     """
     return self._problem
 
@@ -180,7 +182,7 @@ class LocalEliminationSolver(BILPSolverBase):
     """
     if not self.get_problem():
       raise Error("Nothing to be solved, problem model is empty.")
-    self._col_solution = [0.0] * self._problem.get_num_cols()
+    self._col_solution = [0.0] * self._problem.get_num_variables()
     if not self.get_data_model():
       cls = self.params.data_model_type
       self._data_model = cls()
@@ -199,13 +201,20 @@ class LocalEliminationSolver(BILPSolverBase):
       self._obj_value = solver.get_obj_value()
       self._col_solution = solver.get_col_solution()
     else:
-      self.logger.info("Estimated number of problems to be solved: %d"
-         % sum([1 << problem.get_num_shared_cols() for problem in subproblems]))
+      self.logger.debug("Estimated number of problems to be solved: %d"
+         % sum([1 << problem.get_num_shared_variables() for problem in subproblems]))
+      start = time.clock()
       self._data_model.configure(subproblems)
+      end = time.clock()
+      self.logger.debug("Configure data model time = %6.4f sec(s)" % (end - start,))
       # Setup and run parallelizer
       map(self._parallelizer.put, subproblems)
+      #self._parallelizer.put(subproblems[0])
       self._parallelizer.run()
+      start = time.clock()
       self._process_local_solutions()
+      end = time.clock()
+      self.logger.debug("Process local solution time = %6.4f sec(s)" % (end - start,))
 
   def _process_local_solutions(self):
     """Process subproblems in a depth-first-search pre-ordering starting from
@@ -254,7 +263,7 @@ class LocalEliminationSolver(BILPSolverBase):
         # Instead of computing the total number of shared cols from edges we can
         # simply take this number directly from the problem
         subproblem = node[1].get("subproblem")
-        if subproblem.get_num_shared_cols() <= max_num_shared_cols:
+        if subproblem.get_num_shared_variables() <= max_num_shared_cols:
           continue
         edges = sorted(self._decomposition_tree.in_edges(node[0], data=True)
                      + self._decomposition_tree.out_edges(node[0], data=True),

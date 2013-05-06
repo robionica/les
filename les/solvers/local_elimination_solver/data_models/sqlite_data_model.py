@@ -129,6 +129,8 @@ class SQLiteDataStore(DataStore):
 class SQLiteDataModel(DBDataModel):
   """This class represents data model based on SQLite database. Helps to store
   problem data in an SQLite database.
+
+  :param verbose: Be verbose?
   """
 
   def __init__(self, db_name=None, verbose=False):
@@ -152,8 +154,8 @@ class SQLiteDataModel(DBDataModel):
     sql_script = _SUBPROBLEM_SCHEMA % {
       'name': problem.get_name(),
       'cols': ', '.join(map(lambda i: "x%d INTEGER DEFAULT NULL" % i,
-                            problem.get_nonzero_cols())),
-      'key': join_cols(", ", problem.get_shared_cols())
+                            problem.get_nonzero_variables())),
+      'key': join_cols(", ", problem.get_shared_variables())
     }
     # Create indices
     for another_subproblem, cols in problem.get_dependencies().items():
@@ -219,7 +221,7 @@ class SQLiteDataModel(DBDataModel):
     cols = []
     vals = []
     signed_cols = []
-    for i in list(problem.get_nonzero_cols()):
+    for i in list(problem.get_nonzero_variables()):
       cols.append("x%d" % i)
       v = int(col_solution[i])
       vals.append(v)

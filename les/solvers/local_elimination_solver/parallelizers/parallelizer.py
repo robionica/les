@@ -12,10 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from les.solvers.local_elimination_solver.local_solver import LocalSolverFactory
+
 class Parallelizer(object):
   """This is base class for all parallelizer, which allows local elimination
   solver to solve subproblems in parallel.
   """
+
+  def __init__(self, local_solver_factory=None):
+    self._local_solver_factory = local_solver_factory or LocalSolverFactory()
+
+  def get_local_solver_factory(self):
+    return self._local_solver_factory
 
   def put(self, problem):
     raise NotImplementedError()

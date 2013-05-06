@@ -25,7 +25,6 @@ class DummyParallelizer(Parallelizer):
     self._problems.append(problem)
 
   def run(self):
-    local_solver_factory = LocalSolverFactory()
-    for subproblem in self._decomposition_tree.get_subproblems():
-      solver = local_solver_factory.build()
-      solver.solve(subproblem)
+    for problem in self._problems:
+      solver = self.get_local_solver_factory().build()
+      solver.solve(problem)

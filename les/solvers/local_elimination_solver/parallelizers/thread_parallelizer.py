@@ -18,7 +18,6 @@ import time
 from les import runtime
 from les.runtime import thread_pool
 from les.solvers.local_elimination_solver.parallelizers.parallelizer import Parallelizer
-from les.solvers.local_elimination_solver.local_solver import LocalSolverFactory
 
 class ThreadParallelizer(Parallelizer):
 
@@ -30,15 +29,11 @@ class ThreadParallelizer(Parallelizer):
     self._reporter = reporter or self.default_reporter
     self.set_max_num_threads(max_num_threads or runtime.get_num_cpus())
     self._subproblems = []
-    self._local_solver_factory = LocalSolverFactory()
 
   def __str__(self):
     return "%s[max_num_threads=%d, num_tasks=%d]" \
         % (self.__class__.__name__, self.get_max_num_threads(),
            len(self._subproblems))
-
-  def get_local_solver_factory(self):
-    return self._local_solver_factory
 
   def set_max_num_threads(self, n):
     if not isinstance(n, (int, long)):
