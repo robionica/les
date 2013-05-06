@@ -17,11 +17,11 @@ The following code snippet shows a simple case how you can use local elimination
 solver to solve a given `problem`::
 
   from les.decomposers import FinkelsteinQBDecomposer
-  from les.solvers import LocalEliminationSolver, \\
-                          DummySolverFactory, \\
-                          FractionalKnapsackSolverFactory, \\
-                          OsiSymSolverInterfaceFactory, \\
-                          OsiClpSolverInterfaceFactory
+  from les.solvers import LocalEliminationSolver, \
+                          DummySolverFactory, \
+                          FractionalKnapsackSolverFactory, \
+                          OsiSymSolverFactory, \
+                          OsiClpSolverFactory
 
   # Decompose the problem
   decomposer = FinkelsteinQBDecomposer()
@@ -41,7 +41,11 @@ solver to solve a given `problem`::
   # Solve the problem
   solver.solve()
 
+**Subsections**
+
 .. toctree::
    :maxdepth: 1
 
+   data_models/index
    les
+   parallelizers/index

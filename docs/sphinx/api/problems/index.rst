@@ -1,6 +1,6 @@
-********
-Problems
-********
+**************
+Problem Models
+**************
 
 This package contains all available problems.
 
@@ -8,5 +8,5 @@ This package contains all available problems.
    :maxdepth: 1
 
    bilp_problem
-   problem
+   problem_base
    knapsack_problem
