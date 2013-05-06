@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-
 from les.problems import BILPProblem
 from les.solvers.dummy_solver import DummySolver
+from les.utils import unittest
 
 class DummySolverTest(unittest.TestCase):
 
@@ -25,23 +24,26 @@ class DummySolverTest(unittest.TestCase):
     problem = BILPProblem.build_from_scratch(
       [8, 2, 5, 5],
       [[4., 3., 0., 0.], [0., 0., 1., 7.]],
+      ['L', 'L'],
       [7, 8])
     solver = DummySolver()
     solver.load_problem(problem)
     solver.solve()
-    self.assertEqual(20.0, solver.get_obj_value())
-    self.assertEqual([1., 1., 1., 1.], solver.get_col_solution())
+    self.assert_equal(20.0, solver.get_obj_value())
+    self.assert_equal([1., 1., 1., 1.], solver.get_col_solution())
 
   def test_solve2(self):
-    problem = BILPProblem.build_from_scratch(
+    problem = BILPProblem('P', (
       [8, 2, 5, 5],
       [[4.,3.,0.,0.], [0.,0.,1.,9.], [0.,2.,1.,9.]],
-      [7, 8, 5])
+      ['L', 'L', 'L'],
+      [7, 8, 5]
+    ))
     solver = DummySolver()
     solver.load_problem(problem)
     solver.solve()
-    self.assertEqual(0.0, solver.get_obj_value())
-    self.assertEqual([0., 0., 0., 0.], solver.get_col_solution())
+    self.assert_equal(0.0, solver.get_obj_value())
+    self.assert_equal([0., 0., 0., 0.], solver.get_col_solution())
 
 if __name__ == '__main__':
   unittest.main()

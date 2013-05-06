@@ -54,16 +54,16 @@ class GLPSolver(glpk.LPX, BILPSolverBase):
   def load_problem(self, problem):
     """Loads a given problem to the solver."""
     self.obj.maximize = problem.maximize
-    self.rows.add(problem.get_num_rows())
-    self.cols.add(problem.get_num_cols())
+    self.rows.add(problem.get_num_constraints())
+    self.cols.add(problem.get_num_variables())
     # Add objective function
-    for i, coef in enumerate(problem.get_obj_coefs()):
+    for i, coef in enumerate(problem.get_objective()):
       (p, v) = coef
       self.obj[i] = float(v)
       self.cols[i].bounds = 0., 1.
       self.cols[i].kind = bool
     # Add constraints
-    for p, row in enumerate(problem.get_cons_matrix()):
+    for p, row in enumerate(problem.get_lhs()):
       if not row.getnnz():
         continue
       self.rows[p].bounds = 0., problem.get_rhs()[p]
@@ -79,7 +79,7 @@ class GLPSolver(glpk.LPX, BILPSolverBase):
 
   def get_col_solution(self):
     solution = []
-    for i in range(self.get_problem().get_num_cols()):
+    for i in range(self.get_problem().get_num_variables()):
       solution.append(self.cols[i].primal)
     return solution
 

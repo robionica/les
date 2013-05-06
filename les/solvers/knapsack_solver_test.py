@@ -23,23 +23,19 @@ from les.solvers import knapsack_solver
 class Knapsack01SolverTest(unittest.TestCase):
 
   def test_solve(self):
-    v = [8, 11, 6, 4]
-    w = [5,  7, 4, 3]
-    W = 14
     solution = [0.0, 1.0, 1.0, 1.0]
     value = 21.0
-    problem = knapsack_solver.KnapsackProblem((v, w, W))
+    problem = knapsack_solver.KnapsackProblem(model=([8, 11, 6, 4], [5, 7, 4, 3], 14))
     solver = knapsack_solver.Knapsack01Solver()
     solver.load_problem(problem)
     solver.solve()
     self.assertEqual(value, solver.get_obj_value())
-    for i in range(len(v)):
-      self.assertEqual(solution[i], solver.get_col_solution()[i])
+    self.assertEqual(solution, solver.get_col_solution())
 
 class FractionalKnapsackSolverTest(unittest.TestCase):
 
   def test_solve1(self):
-    problem = knapsack_solver.KnapsackProblem(([8, 11, 6, 4], [5,  7, 4, 3], 14))
+    problem = knapsack_solver.KnapsackProblem(model=([8, 11, 6, 4], [5,  7, 4, 3], 14))
     solver = knapsack_solver.FractionalKnapsackSolver()
     solver.load_problem(problem)
     solver.solve()
@@ -47,8 +43,7 @@ class FractionalKnapsackSolverTest(unittest.TestCase):
     self.assertEqual([1.0, 1.0, 0.5, 0.0], solver.get_col_solution())
 
   def test_solve2(self):
-    problem = knapsack_solver.KnapsackProblem(([50, 140, 60, 60], [5, 20, 10, 12],
-                                              30))
+    problem = knapsack_solver.KnapsackProblem(model=([50, 140, 60, 60], [5, 20, 10, 12], 30))
     solver = knapsack_solver.FractionalKnapsackSolver()
     solver.load_problem(problem)
     solver.solve()

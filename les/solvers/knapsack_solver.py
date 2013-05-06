@@ -14,10 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""This module contains variety of knapsack solvers: :class:`Knapsack01Solver`,
+:class:`FractionalKnapsackSolver`.
+
+The following code snippet shows a simple to define and solve knapsack problem::
+
+  from les.solvers import FractionalKnapsackSolver
+  from les.problems import KnapsackProblem
+
+  problem = KnapsackProblem('PROBLEM', ([8, 11, 6, 4], [5,  7, 4, 3], 14))
+  solver = FractionalKnapsackSolver()
+  solver.load_problem(problem)
+  solver.solve()
+"""
+
 from les.solvers.bilp_solver_base import BILPSolverBase
 from les.problems.knapsack_problem import KnapsackProblem
 
 class KnapsackSolverBase(BILPSolverBase):
+  """Base solver class for knapsack derived solvers."""
 
   def __init__(self):
     BILPSolverBase.__init__(self)
@@ -26,12 +41,12 @@ class KnapsackSolverBase(BILPSolverBase):
   def load_problem(self, problem, details={}):
     """Loads problem to be solved. Converts the problem if neccessary.
 
-    Args:
-       problem: A :class:`KnapsackProblem` derived problem
+    :param problem: A :class:`~les.problems.knapsack_problem.KnapsackProblem`
+      derived problem or affiliated problem models.
     """
     # Try to convert problem to KnapsackProblem if required. Raises TypeError.
     if not isinstance(problem, KnapsackProblem):
-      problem = KnapsackProblem(problem)
+      problem = KnapsackProblem(model=problem)
     self._problem = problem
 
 class Knapsack01Solver(KnapsackSolverBase):
@@ -41,6 +56,7 @@ class Knapsack01Solver(KnapsackSolverBase):
     KnapsackSolverBase.__init__(self)
 
   def solve(self):
+    """Starts to solve knapsack problem."""
     W = self._problem.get_max_weight()
     n = self._problem.get_num_items() - 1
     v = self._problem.get_values()
@@ -84,6 +100,7 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
     KnapsackSolverBase.__init__(self)
 
   def solve(self):
+    """Starts to solve knapsack problem."""
     n = self._problem.get_num_items()
     v = self._problem.get_values()
     w = self._problem.get_weights()
@@ -116,4 +133,5 @@ class FractionalKnapsackSolver(KnapsackSolverBase):
     return self._col_solution
 
   def get_obj_value(self):
+    """Returns objective function value."""
     return self._obj_value

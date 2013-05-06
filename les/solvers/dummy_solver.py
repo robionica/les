@@ -38,7 +38,7 @@ class DummySolver(BILPSolverBase):
 
     :param problem: A :class:`BILPProblem` derived problem instance.
 
-    :raises: TypeError
+    :raises: :exc:`TypeError`
     """
     if not isinstance(problem, BILPProblem):
       raise TypeError()
@@ -54,9 +54,9 @@ class DummySolver(BILPSolverBase):
     """Solves loaded problem, determines columns and obj values."""
     if not self._problem:
       raise Exception()
-    self._col_solution = [1.] * self._problem.get_num_cols()
+    self._col_solution = [1.0] * self._problem.get_num_variables()
     if self._problem.check_col_solution(self._col_solution):
-      self._obj_value = self._problem.get_obj_coefs().sum()
+      self._obj_value = self._problem.get_objective().sum()
       return
-    self._col_solution = [0.0] * self._problem.get_num_cols()
+    self._col_solution = [0.0] * self._problem.get_num_variables()
     self._obj_value = 0.0
