@@ -30,7 +30,7 @@ REQUIRE_GLPK_SUPPORT = True
 install_requires = [
   "networkx",
   "scipy",
-  "numpy"
+  "numpy",
 ]
 
 extensions = []
@@ -54,7 +54,7 @@ def setup_symphony(home_dir):
   )
   extensions.append(
     Extension(
-      "les.ext.coin._osi_sym_solver_interface",
+      "les.ext.coin.osi_sym_solver_interface",
       ["les/ext/coin/osi_sym_solver_interface.cc"],
       define_macros=[("BOOST_PYTHON_NO_PY_SIGNATURES", 1)],
       libraries=["boost_python",
@@ -65,7 +65,7 @@ def setup_symphony(home_dir):
   )
   extensions.append(
     Extension(
-      "les.ext.coin._osi_clp_solver_interface",
+      "les.ext.coin.osi_clp_solver_interface",
       ["les/ext/coin/osi_clp_solver_interface.cc"],
       define_macros=[("BOOST_PYTHON_NO_PY_SIGNATURES", 1)],
       libraries=["boost_python",
@@ -76,7 +76,7 @@ def setup_symphony(home_dir):
   )
   extensions.append(
     Extension(
-      "les.ext.coin._osi_presolve",
+      "les.ext.coin.osi_presolve",
       ["les/ext/coin/osi_presolve.cc"],
       define_macros=[("BOOST_PYTHON_NO_PY_SIGNATURES", 1)],
       libraries=["boost_python",
