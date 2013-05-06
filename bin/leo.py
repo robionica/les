@@ -24,30 +24,24 @@ import numpy as np
 
 from les.problems import BILPProblem
 from les.decomposers import FinkelsteinQBDecomposer
+from les.solvers.local_elimination_solver.parallelizers import DummyParallelizerFactory
 from les.solvers import \
     LocalEliminationSolver, \
     DummySolverFactory, \
     FractionalKnapsackSolverFactory, \
-    OsiSymSolverInterfaceFactory, OsiClpSolverInterfaceFactory
+    OsiSymSolverFactory, OsiClpSolverFactory, SCIPSolverFactory
 
-class _OsiClpSolverInterfaceFactory(OsiClpSolverInterfaceFactory):
+class _OsiClpSolverFactory(OsiClpSolverFactory):
 
   def build(self):
-    si = OsiClpSolverInterfaceFactory.build(self)
+    si = OsiClpSolverFactory.build(self)
     si.set_log_level(0) # switch off printout
     return si
 
-class _OsiSymSolverInterfaceFactory(OsiSymSolverInterfaceFactory):
+class _OsiSymSolverFactory(OsiSymSolverFactory):
 
   def __init__(self):
-    OsiSymSolverInterfaceFactory.__init__(self)
-
-  def begin_first_iteration(self):
-    self.si = OsiSymSolverInterfaceFactory.build(self)
-    self.si.set_sym_param("verbosity", -2)
-
-  def end_first_iteration(self):
-    pass
+    OsiSymSolverFactory.__init__(self)
 
   def build(self):
     self.si.reset()
@@ -63,19 +57,20 @@ def solve(problem):
   start = time.clock()
   solver = LocalEliminationSolver()
   solver.set_params(
-    master_solver_factory=OsiSymSolverInterfaceFactory(params={"verbosity": -2}),
+    master_solver_factory=OsiSymSolverFactory(params={"verbosity": -2}),
     relaxation_solver_factories=[
       DummySolverFactory(),
       FractionalKnapsackSolverFactory(),
-      _OsiClpSolverInterfaceFactory()
-    ]
+      _OsiClpSolverFactory()
+    ],
+    parallelizer_factory=DummyParallelizerFactory(),
   )
   solver.load_problem(problem, decomposer.get_decomposition_tree())
   solver.solve()
   end = time.clock()
   print("Solving time: %6.4f second(s)" % (end - start))
   print("Objective value:", solver.get_obj_value())
-  print("Col solution:", solver.get_col_solution())
+  print("Variables solution:", solver.get_col_solution())
 
 def main():
   if len(sys.argv) < 2:
@@ -84,7 +79,6 @@ def main():
     print("Please provide input problem.", file=sys.stderr)
     exit(0)
   try:
-    # Build the problem
     start = time.clock()
     problem = BILPProblem.build(sys.argv[1])
     end = time.clock()
@@ -93,5 +87,5 @@ def main():
   except KeyboardInterrupt, e:
     print("Interrupting...", file=sys.stderr)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   main()
