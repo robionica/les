@@ -14,12 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Decomposition trees are created with help of decomposers."""
+
 import logging
 import networkx as nx
 
 from les.problems.problem_base import ProblemBase, SubproblemBase
 
 class DecompositionTree(nx.DiGraph):
+  """This class represents decomposition tree.
+
+  :param problem: A :class:`ProblemBase` derived instance.
+  :param root: A root node.
+  """
 
   # Logger for this class
   logger = logging.getLogger()
@@ -38,12 +45,15 @@ class DecompositionTree(nx.DiGraph):
                                                self.get_num_edges())
 
   def get_num_nodes(self):
+    """Returns number of nodes in the tree."""
     return len(self.get_nodes())
 
   def get_num_edges(self):
+    """Returns number of edges in the tree."""
     return len(self.get_edges())
 
   def get_root(self):
+    """Returns root node."""
     return self._root.get_name()
 
   def merge_nodes(self, node1, node2):
@@ -68,16 +78,22 @@ class DecompositionTree(nx.DiGraph):
       self._root = subproblem
 
   def copy(self):
-    """Returns shallow copy."""
+    """Returns shallow copy.
+
+    :returns: A :class:`DecompositionTree` instance.
+    """
     tree = DecompositionTree(self._problem, self._root)
     tree.add_nodes_from(self.nodes(data=True))
     tree.add_edges_from(self.edges(data=True))
     return tree
 
-  def get_num_nodes(self):
-    return len(self.node)
-
   def add_node(self, node):
+    """Adds new node to the tree where the node is represented by a problem.
+
+    :param node: A :class:`ProblemBase` derived instance.
+
+    :raises: :exc:`TypeError`
+    """
     if not isinstance(node, ProblemBase):
       raise TypeError("node must be derived from ProblemBase: %s" % node)
     name_format = self._problem.subproblem_name_format
