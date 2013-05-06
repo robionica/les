@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-from scipy.sparse import csr_matrix, lil_matrix, dok_matrix
+from scipy.sparse import dok_matrix
 
-class SparseVector(dok_matrix):
+__all__ = ['dok_vector', 'dok_matrix']
+
+class dok_vector(dok_matrix):
+  """This class represents proxy vector for :class:`dok_matrix`."""
 
   def __init__(self, *args, **kwargs):
     dok_matrix.__init__(self, *args, **kwargs)
@@ -26,6 +28,7 @@ class SparseVector(dok_matrix):
       yield (i, self[i])
 
   def nonzero(self):
+    """Returns a list of nonzero elements."""
     return dok_matrix.nonzero(self)[1]
 
   def __setitem__(self, i, v):
