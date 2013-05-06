@@ -16,10 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-
 from les.interaction_graph import InteractionGraph
 from les.problems.bilp_problem import BILPProblem
+from les.utils import unittest
 
 class InteractionGraphTest(unittest.TestCase):
 
@@ -32,6 +31,7 @@ class InteractionGraphTest(unittest.TestCase):
        [0., 0., 2., 1., 1., 2., 5., 0., 0.],
        [0., 0., 0., 0., 0., 0., 2., 1., 2.],
        [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
+      ['L'] * 6,
       [7, 6, 9, 7, 3, 5])
     g = InteractionGraph(problem)
-    self.assertEqual(9, len(g.nodes()))
+    self.assert_equal(9, len(g.nodes()))

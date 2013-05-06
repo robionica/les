@@ -47,8 +47,8 @@ class InteractionGraph(networkx.Graph):
     if not isinstance(problem, ProblemBase):
       raise TypeError()
     # TODO: improve this
-    for p in xrange(problem.get_num_rows()):
-      J = _extract_indices(problem.get_cons_matrix(), p)
+    for p in xrange(problem.get_num_constraints()):
+      J = _extract_indices(problem.get_lhs(), p)
       for i in xrange(0, len(J)):
         for j in xrange(i, len(J)):
           self.add_edge(J[i], J[j])

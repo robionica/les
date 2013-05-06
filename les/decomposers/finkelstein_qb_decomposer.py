@@ -59,7 +59,7 @@ import numpy as np
 from les.decomposers.decomposer_base import DecomposerBase
 from les.decomposition_tree import DecompositionTree
 from les.problems.bilp_problem import BILPProblem
-from les.sparse_vector import SparseVector
+from les.ext.scipy import sparse
 
 def _get_indices(m, i):
   start = m.indptr[i]
@@ -88,17 +88,17 @@ class FinkelsteinQBDecomposer(DecomposerBase):
     cols = left_cols | middle_cols | right_cols
     problem = self.get_problem()
     # Put rows one under one
-    cons_matrix = problem.get_cons_matrix()[list(rows)]
+    cons_matrix = problem.get_lhs()[list(rows)]
     # Build sparse vector of obj function coefs
     # TODO: copy dtype
-    obj_coefs = SparseVector((1, problem.get_num_cols()), dtype=np.float16)
+    obj_coefs = sparse.dok_vector((1, problem.get_num_variables()), dtype=np.float16)
     for i in cols:
-      obj_coefs[i] = problem.get_obj_coefs()[i]
+      obj_coefs[i] = problem.get_objective()[i]
     # Build sparse vector of upper bounds
     rhs = [problem.get_rhs()[i] for i in rows]
     # Build subproblem
-    sp = problem.build_subproblem(obj_coefs=obj_coefs, cons_matrix=cons_matrix,
-                                  rhs=rhs, shared_cols=left_cols | right_cols)
+    sp = problem.build_subproblem(obj_coefs=obj_coefs, lhs=cons_matrix, rhs=rhs,
+                                  shared_variables=left_cols | right_cols)
     return sp
 
   def _build_decomposition_tree(self):
@@ -134,7 +134,7 @@ class FinkelsteinQBDecomposer(DecomposerBase):
     self._u = []
     self._s = []
     self._m = []
-    row_matrix = problem.get_cons_matrix()
+    row_matrix = problem.get_lhs()
     col_matrix = row_matrix.tocsc()
     all_cols = set(initial_cols)
     prev_cols = set()

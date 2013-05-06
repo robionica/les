@@ -68,7 +68,9 @@ class QBBILPProblemGenerator(object):
     return BILPProblem.build_from_scratch(
       [random.randint(1, num_cols) for i in xrange(num_cols)],
       self._matrix.tocsr(),
-      self._rhs)
+      [],
+      self._rhs
+    )
 
   def _fill_block(self, b):
     num_cols = b.num_cols + b.right_sep_size

@@ -14,14 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-
 from les.problems.qbbilp_problem_generator import QBBILPProblemGenerator
+from les.utils import unittest
 
 class QBBILPProblemGeneratorTest(unittest.TestCase):
 
   def test_gen(self):
     generator = QBBILPProblemGenerator()
     problem = generator.gen(200, 400)
-    self.assertEqual(200, problem.get_num_rows())
-    self.assertEqual(400, problem.get_num_cols())
+    self.assert_equal(200, problem.get_num_constraints())
+    self.assert_equal(400, problem.get_num_variables())
