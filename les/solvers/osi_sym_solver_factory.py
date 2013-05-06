@@ -13,17 +13,23 @@
 # limitations under the License.
 
 from les.solvers.solver_factory import SolverFactory
-from les.ext.coin.osi_clp_solver_interface import OsiClpSolverInterface
+from les.solvers.osi_sym_solver import OsiSymSolver
 
-class OsiClpSolverInterfaceFactory(SolverFactory):
-  """A producer of :class:`OsiClpSolverInterface`."""
+class OsiSymSolverFactory(SolverFactory):
+  """A producer of :class:`OsiSymSolver`."""
 
-  def __init__(self):
+  def __init__(self, params={}):
     SolverFactory.__init__(self)
+    if not isinstance(params, dict):
+      raise TypeError()
+    self._params = params
 
   def get_solver_class(self):
-    return OsiClpSolverInterface
+    return OsiSymSolver
 
   def build(self):
-    """Returns new :class:`OsiClpSolverInterface` instance."""
-    return OsiClpSolverInterface()
+    """Returns new :class:`OsiSymSolver` instance."""
+    si = OsiSymSolver()
+    for key, value in self._params.items():
+      si.set_sym_param(key, value)
+    return si

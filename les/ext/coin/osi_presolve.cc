@@ -17,7 +17,7 @@ public:
   }
 };
 
-BOOST_PYTHON_MODULE(_osi_presolve)
+BOOST_PYTHON_MODULE(osi_presolve)
 {
   class_<OsiPresolveWrap, boost::noncopyable>("OsiPresolve")
     .def("presolved_model", &OsiPresolveWrap::presolvedModel,

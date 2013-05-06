@@ -11,8 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from les.ext.coin.osi_sym_solver_interface import OsiSymSolverInterface
-from les.ext.coin.osi_sym_solver_interface_factory import OsiSymSolverInterfaceFactory
-from les.ext.coin.osi_clp_solver_interface import OsiClpSolverInterface
-from les.ext.coin.osi_clp_solver_interface_factory import OsiClpSolverInterfaceFactory

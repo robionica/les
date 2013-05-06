@@ -48,7 +48,7 @@ public:
   }
 };
 
-BOOST_PYTHON_MODULE(_osi_clp_solver_interface)
+BOOST_PYTHON_MODULE(osi_clp_solver_interface)
 {
   class_<OsiClpSolverInterfaceWrap, bases<OsiSolverInterface>,
          boost::noncopyable>("OsiClpSolverInterface")
