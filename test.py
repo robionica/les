@@ -16,14 +16,13 @@
 
 import logging
 import os
-import unittest
+
+from les.utils import unittest
 
 DEFAULT_VERBOSITY_LEVEL = 2
 TEST_FILE_SUFFIX = "*_test.py"
 TOP_DIR = os.path.dirname(os.path.realpath(__file__))
 SRC_DIR = os.path.join(TOP_DIR, "les")
-
-logging.disable(logging.CRITICAL)
 
 def make_testsuite():
   """Returns test suite."""
@@ -33,5 +32,5 @@ def run_tests():
   suite = unittest.TestLoader().discover(TOP_DIR, TEST_FILE_SUFFIX)
   unittest.TextTestRunner(verbosity=DEFAULT_VERBOSITY_LEVEL).run(suite)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   run_tests()
