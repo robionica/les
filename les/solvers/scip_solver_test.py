@@ -14,17 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-
 from les.problems.bilp_problem import BILPProblem
 from les.solvers.scip_solver import SCIPSolver
+from les.utils import unittest
 
 class SCIPSolverTest(unittest.TestCase):
 
-  def setUp(self):
+  def test_solve1(self):
     self._solver = SCIPSolver()
-
-  def tet_solve1(self):
     problem = BILPProblem.build_from_scratch(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
@@ -33,13 +30,14 @@ class SCIPSolverTest(unittest.TestCase):
        [0., 0., 2., 1., 1., 2., 5., 0., 0.],
        [0., 0., 0., 0., 0., 0., 2., 1., 2.],
        [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
+      ['L'] * 6,
       [7, 6, 9, 7, 3, 5])
     self._solver.load_problem(problem)
     self._solver.solve()
-    self.assertEqual(39.0, self._solver.get_obj_value())
+    self.assert_equal(39.0, self._solver.get_obj_value())
     col_solution = [1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
     for i in range(len(col_solution)):
-      self.assertEqual(col_solution[i], self._solver.get_col_solution()[i])
+      self.assert_equal(col_solution[i], self._solver.get_col_solution()[i])
 
 if __name__ == '__main__':
   unittest.main()

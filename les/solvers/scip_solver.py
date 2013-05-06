@@ -27,23 +27,24 @@ class SCIPSolver(BILPSolverBase):
   def __init__(self):
     BILPSolverBase.__init__(self)
     # scip.solver doesn't allow us to subclass it
-    self._solver = scip.solver()
+    self._solver = None
     self._objective = None
     self._solution = None
     self._cols = []
 
-  def load_problem(self, problem):
+  def load_problem(self, problem, details={}):
     """Loads a given problem to the solver."""
+    self._solver = scip.solver()
     self._objective = None
-    self._cols = [None] * problem.get_num_cols()
-    for i, coef in enumerate(problem.get_obj_coefs()):
+    self._cols = [None] * problem.get_num_variables()
+    for i, coef in enumerate(problem.get_objective()):
       (p, v) = coef
-      self._cols[i] = self._solver.variable(vartype = scip.BINARY)
+      self._cols[i] = self._solver.variable(vartype=scip.BINARY)
       if not self._objective:
         self._objective = float(v) * self._cols[i]
       else:
         self._objective += float(v) * self._cols[i]
-    for p, row in enumerate(problem.get_cons_matrix()):
+    for p, row in enumerate(problem.get_lhs()):
       if not row.getnnz():
         continue
       cons = float(row.data[0]) * self._cols[row.indices[0]]
