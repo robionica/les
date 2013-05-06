@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import os
-import unittest
 
 from les.readers.mps_reader import MPSReader
+from les.utils import unittest
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "mps_reader_test_data")
 
@@ -26,12 +26,12 @@ class MPSReaderTest(unittest.TestCase):
     reader = MPSReader()
     with open(test1_filename, "r") as stream:
       reader.parse(stream)
-    self.assertEqual("TESTPROB", reader.get_name())
-    self.assertEqual([[0.0, 5.0, 10.0, 7.0]], reader.get_rhs())
-    self.assertEqual([(0, 0, 1.0), (1, 0, 1.0), (2, 0, 1.0), (0, 1, 4.0),
+    self.assert_equal("TESTPROB", reader.get_name())
+    self.assert_equal([[0.0, 5.0, 10.0, 7.0]], reader.get_rhs())
+    self.assert_equal([(0, 0, 1.0), (1, 0, 1.0), (2, 0, 1.0), (0, 1, 4.0),
                       (1, 1, 1.0), (3, 1, -1.0), (0, 2, 9.0), (2, 2, 1.0),
-                      (3, 2, 1.0)], reader.get_con_coefs())
-    self.assertEqual(['N', 'L', 'G', 'E'], reader.get_rows_senses())
+                      (3, 2, 1.0)], reader.get_lhs())
+    self.assert_equal(['N', 'L', 'G', 'E'], reader.get_row_senses())
 
 if __name__ == "__main__":
   unittest.main()

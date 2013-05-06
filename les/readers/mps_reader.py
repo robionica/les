@@ -28,7 +28,15 @@ import bz2
 import gzip
 import types
 
+from les.config import logger
 from les.readers.reader import Reader
+
+_HDR_NAME = re.compile(r"^NAME\s+(\w+)\s*$")
+_HDR_ROWS = re.compile(r"^ROWS\s*$")
+_HDR_COLUMNS = re.compile(r"^COLUMNS\s*\n$")
+_HDR_RHS = re.compile(r"^RHS\s*$")
+_HDR_BOUNDS = re.compile(r"^BOUNDS\s*$")
+_HDR_ENDDATA = re.compile(r"^ENDDATA\s*$")
 
 _MTS_FORMAT_REGEX = re.compile(r"""
 ^NAME\s+(\w+)\s*\n
@@ -54,17 +62,24 @@ class MPSReader(Reader):
     Reader.__init__(self)
     self._name = None
     self._row_register = {}
-    self._rows_senses = []
+    self._row_senses = []
     self._col_register = {}
-    self._con_coefs = []
+    self._lhs = []
     self._rhs_register = {}
     self._rhs = []
 
-  def parse(self, stream):
-    if isinstance(stream, (types.FileType, bz2.BZ2File, gzip.GzipFile)):
-      data = stream.read()
+  def parse(self, filename_or_stream):
+    """Parses a file or stream.
+
+    :param filename_or_stream: A string that represents filename or data or
+      stream object.
+    """
+    if isinstance(filename_or_stream, str):
+      raise NotImplementedError()
+    if isinstance(filename_or_stream, (types.FileType, bz2.BZ2File, gzip.GzipFile)):
+      data = filename_or_stream.read()
     elif isinstance(stream, types.StringType):
-      data = stream
+      data = filename_or_stream
     else:
       raise TypeError()
     result = re.match(_MTS_FORMAT_REGEX, data)
@@ -83,16 +98,20 @@ class MPSReader(Reader):
     callback(lines)
 
   def get_rhs(self):
+    """Returns a list that represents right-hand side."""
     return self._rhs
 
   def get_name(self):
+    """Returns problem name."""
     return self._name
 
-  def get_con_coefs(self):
-    return self._con_coefs
+  def get_lhs(self):
+    """Returns a list that represents left-hand side."""
+    return self._lhs
 
-  def get_rows_senses(self):
-    return self._rows_senses
+  def get_row_senses(self):
+    """Returns a list of row senses."""
+    return self._row_senses
 
   def _parse_bounds_section(self, lines):
     pass
@@ -115,21 +134,21 @@ class MPSReader(Reader):
 
   def _parse_cols_section(self, lines):
     self._col_register = {}
-    self._con_coefs = []
+    self._lhs = []
     for line in lines:
       result = re.match(_COLS_ENTRY_REGEX, line)
       if not result:
         break
       col_name, row_name, v = result.group(1), result.group(2), result.group(3)
       j = self._col_register.setdefault(col_name, len(self._col_register))
-      self._con_coefs.append((self._row_register[row_name], j, float(v)))
+      self._lhs.append((self._row_register[row_name], j, float(v)))
       if result.group(4):
         row_name, v = result.group(5), result.group(6)
-        self._con_coefs.append((self._row_register[row_name], j, float(v)))
+        self._lhs.append((self._row_register[row_name], j, float(v)))
 
   def _parse_rows_section(self, lines):
     self._row_register = {}
-    self._rows_senses = []
+    self._row_senses = []
     for line in lines:
       result = re.match(_ROWS_ENTRY_REGEX, line)
       if result:
@@ -137,6 +156,6 @@ class MPSReader(Reader):
         if name in self._row_register:
           raise Exception("%s was already registered" % name)
         self._row_register[name] = len(self._row_register)
-        self._rows_senses.append(sense)
+        self._row_senses.append(sense)
       else:
         break
