@@ -421,7 +421,8 @@ class MPModel(object_base.ObjectBase):
     '''Optimize the model by using given optimization parameters.'''
     from les import frontend_solver
     solver = frontend_solver.FrontendSolver()
-    solver.solve(model=self, params=optimization_params)
+    solver.load_model(self)
+    solver.solve(params=optimization_params)
 
   def is_binary(self):
     '''Returns whether the model is binary integer linear programming
