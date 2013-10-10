@@ -27,16 +27,22 @@ _RESULT_STATUS_MAP = {
   pywraplp.Solver.INFEASIBLE : mp_solution.MPSolution.INFEASIBLE,
 }
 
+class Error(Exception):
+  pass
+
 class GoogleORLinearSolver(mp_solver_base.MPSolverBase):
 
-  def __init__(self, solver):
-    if not isinstance(solver, pywraplp.Solver):
-      raise TypeError
-    self._solver = solver
+  def __init__(self):
+    self._solver = None
     self._solution = None
     self._vars = []
     self._model = None
     self._model_params = None
+
+  def _set_solver(self, solver):
+    if not isinstance(solver, pywraplp.Solver):
+      raise TypeError
+    self._solver = solver
 
   def load_model(self, model):
     '''Loads a given model to the solver.
@@ -52,6 +58,8 @@ class GoogleORLinearSolver(mp_solver_base.MPSolverBase):
   def load_model_params(self, params):
     if not isinstance(params, mp_model.MPModelParameters):
       raise TypeError()
+    if not self._solver:
+      raise Error()
     self._model_params = params
     # Build variables and objective functions
     self._vars = [None] * params.get_num_columns()
