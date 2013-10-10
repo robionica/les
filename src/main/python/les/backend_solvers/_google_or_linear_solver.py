@@ -33,12 +33,10 @@ class GoogleORLinearSolver(mp_solver_base.MPSolverBase):
     if not isinstance(solver, pywraplp.Solver):
       raise TypeError
     self._solver = solver
-    self._objective = None
     self._solution = None
     self._vars = []
     self._model = None
     self._model_params = None
-    self._cons = list()
 
   def load_model(self, model):
     '''Loads a given model to the solver.
@@ -65,7 +63,6 @@ class GoogleORLinearSolver(mp_solver_base.MPSolverBase):
       self._solver.SetMaximization()
     else:
       raise NotImplementedError()
-    self._cons = []
     infinity = self._solver.Infinity()
     for i, row in enumerate(params.get_rows_coefficients()):
       if not row.getnnz():
