@@ -31,6 +31,8 @@ class Generator(generator_base.GeneratorBase):
   def __init__(self, model, shared_vars, local_vars):
     if not isinstance(model, mp_model.MPModel):
       raise TypeError()
+    if not model.is_binary():
+      raise TypeError('Generator works only with BILP problems.')
     if not isinstance(shared_vars, tuple):
       raise TypeError('shared_vars should be a tuple: %s' % shared_vars)
     if not isinstance(local_vars, tuple):
