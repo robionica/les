@@ -48,8 +48,10 @@ class DummyExecutorTest(unittest.TestCase):
     )
     task = executor_base.Task(params, DEFAULT_BACKEND_SOLVER_ID)
     result = self.executor.execute(task)
-    self.assert_is_not_none(result.get_solution())
-    self.assert_equal(39.0, result.get_solution().get_objective_value())
+    self.assert_is_not_none(result)
+    solution = result.get_solution()
+    self.assert_is_not_none(solution)
+    self.assert_equal(39.0, solution.get_objective_value())
 
 if __name__ == '__main__':
   unittest.main()
