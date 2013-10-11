@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import with_statement
+
 from les import mp_model
 from les import _generator
 from les.utils import unittest
@@ -28,6 +30,8 @@ class GeneratorTest(unittest.TestCase):
       ['L'] * 2,
       [7, 6]
     )
+    with self.assert_raises(_generator.Error):
+      _generator.Generator(model, (u'x3', u'x5'), (u'x0', u'x2'))
     g = _generator.Generator(model, (u'x3', u'x4'), (u'x1', u'x2'))
     model_solution_pairs = list(g)
     self.assert_equal(4, len(model_solution_pairs))

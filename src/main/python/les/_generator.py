@@ -46,10 +46,15 @@ class Generator(generator_base.GeneratorBase):
     # TODO(d2rk): do we need to keep shared variables and local variables?
     self._shared_vars = shared_vars
     self._local_vars = local_vars
-    self._shared_vars_indices = [model.get_variable_by_name(name).get_index()
-                                 for name in shared_vars]
-    self._local_vars_indices = [model.get_variable_by_name(name).get_index()
-                                for name in local_vars]
+    self._shared_vars_indices = []
+    self._local_vars_indices = []
+    try:
+      for name in shared_vars:
+        self._shared_vars_indices.append(model.get_variable_by_name(name).get_index())
+      for name in local_vars:
+        self._local_vars_indices.append(model.get_variable_by_name(name).get_index())
+    except AttributeError:
+      raise Error("Model doesn't containt this variable: %s" % name)
     self._model = model
     self._model_params = params = mp_model_parameters.build(model)
     self._n = 1 << len(shared_vars)
