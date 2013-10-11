@@ -35,6 +35,7 @@ class TestCase(TestCase):
   assert_is_none = TestCase.assertIsNone
   assert_is_not_none = TestCase.assertIsNotNone
   assert_list_equal = TestCase.assertListEqual
+  assert_raises = TestCase.assertRaises
   assert_sequence_equal = TestCase.assertSequenceEqual
   assert_true = TestCase.assertTrue
 
