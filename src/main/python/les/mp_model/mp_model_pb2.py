@@ -11,9 +11,38 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='les/mp_model/mp_model.proto',
   package='les.mp_model',
-  serialized_pb='\n\x1bles/mp_model/mp_model.proto\x12\x0cles.mp_model\"+\n\x06MPTerm\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0b\x63oefficient\x18\x02 \x02(\x01\"J\n\nMPVariable\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x16\n\x0blower_bound\x18\x02 \x02(\x01:\x01\x30\x12\x16\n\x0bupper_bound\x18\x03 \x02(\x01:\x01\x31\"k\n\x0cMPConstraint\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0blower_bound\x18\x02 \x02(\x01\x12\x13\n\x0bupper_bound\x18\x03 \x02(\x01\x12#\n\x05terms\x18\x04 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"N\n\x0bMPObjective\x12\x1a\n\x0cmaximization\x18\x01 \x02(\x08:\x04true\x12#\n\x05terms\x18\x02 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"v\n\x07MPModel\x12\x0c\n\x04name\x18\x01 \x02(\t\x12,\n\tobjective\x18\x02 \x02(\x0b\x32\x19.les.mp_model.MPObjective\x12/\n\x0b\x63onstraints\x18\x03 \x02(\x0b\x32\x1a.les.mp_model.MPConstraint')
+  serialized_pb='\n\x1bles/mp_model/mp_model.proto\x12\x0cles.mp_model\"+\n\x06MPTerm\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0b\x63oefficient\x18\x02 \x02(\x01\"J\n\nMPVariable\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x16\n\x0blower_bound\x18\x02 \x02(\x01:\x01\x30\x12\x16\n\x0bupper_bound\x18\x03 \x02(\x01:\x01\x31\".\n\x0fMPVariableValue\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\"k\n\x0cMPConstraint\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0blower_bound\x18\x02 \x02(\x01\x12\x13\n\x0bupper_bound\x18\x03 \x02(\x01\x12#\n\x05terms\x18\x04 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"N\n\x0bMPObjective\x12\x1a\n\x0cmaximization\x18\x01 \x02(\x08:\x04true\x12#\n\x05terms\x18\x02 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"v\n\x07MPModel\x12\x0c\n\x04name\x18\x01 \x02(\t\x12,\n\tobjective\x18\x02 \x02(\x0b\x32\x19.les.mp_model.MPObjective\x12/\n\x0b\x63onstraints\x18\x03 \x02(\x0b\x32\x1a.les.mp_model.MPConstraint\"\xd3\x01\n\nMPSolution\x12/\n\x06status\x18\x01 \x02(\x0e\x32\x1f.les.mp_model.MPSolution.Status\x12\x17\n\x0fobjective_value\x18\x02 \x01(\x01\x12\x36\n\x0fvariable_values\x18\x03 \x03(\x0b\x32\x1d.les.mp_model.MPVariableValue\"C\n\x06Status\x12\x0b\n\x07OPTIMAL\x10\x00\x12\x0c\n\x08\x46\x45\x41SIBLE\x10\x01\x12\x0e\n\nINFEASIBLE\x10\x02\x12\x0e\n\nNOT_SOLVED\x10\x03')
 
 
+
+_MPSOLUTION_STATUS = descriptor.EnumDescriptor(
+  name='Status',
+  full_name='les.mp_model.MPSolution.Status',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='OPTIMAL', index=0, number=0,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='FEASIBLE', index=1, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='INFEASIBLE', index=2, number=2,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='NOT_SOLVED', index=3, number=3,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=668,
+  serialized_end=735,
+)
 
 
 _MPTERM = descriptor.Descriptor(
@@ -93,6 +122,41 @@ _MPVARIABLE = descriptor.Descriptor(
 )
 
 
+_MPVARIABLEVALUE = descriptor.Descriptor(
+  name='MPVariableValue',
+  full_name='les.mp_model.MPVariableValue',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='name', full_name='les.mp_model.MPVariableValue.name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='value', full_name='les.mp_model.MPVariableValue.value', index=1,
+      number=2, type=1, cpp_type=5, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=166,
+  serialized_end=212,
+)
+
+
 _MPCONSTRAINT = descriptor.Descriptor(
   name='MPConstraint',
   full_name='les.mp_model.MPConstraint',
@@ -137,8 +201,8 @@ _MPCONSTRAINT = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=166,
-  serialized_end=273,
+  serialized_start=214,
+  serialized_end=321,
 )
 
 
@@ -172,8 +236,8 @@ _MPOBJECTIVE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=275,
-  serialized_end=353,
+  serialized_start=323,
+  serialized_end=401,
 )
 
 
@@ -214,19 +278,67 @@ _MPMODEL = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=355,
-  serialized_end=473,
+  serialized_start=403,
+  serialized_end=521,
+)
+
+
+_MPSOLUTION = descriptor.Descriptor(
+  name='MPSolution',
+  full_name='les.mp_model.MPSolution',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='status', full_name='les.mp_model.MPSolution.status', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='objective_value', full_name='les.mp_model.MPSolution.objective_value', index=1,
+      number=2, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='variable_values', full_name='les.mp_model.MPSolution.variable_values', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _MPSOLUTION_STATUS,
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=524,
+  serialized_end=735,
 )
 
 _MPCONSTRAINT.fields_by_name['terms'].message_type = _MPTERM
 _MPOBJECTIVE.fields_by_name['terms'].message_type = _MPTERM
 _MPMODEL.fields_by_name['objective'].message_type = _MPOBJECTIVE
 _MPMODEL.fields_by_name['constraints'].message_type = _MPCONSTRAINT
+_MPSOLUTION.fields_by_name['status'].enum_type = _MPSOLUTION_STATUS
+_MPSOLUTION.fields_by_name['variable_values'].message_type = _MPVARIABLEVALUE
+_MPSOLUTION_STATUS.containing_type = _MPSOLUTION;
 DESCRIPTOR.message_types_by_name['MPTerm'] = _MPTERM
 DESCRIPTOR.message_types_by_name['MPVariable'] = _MPVARIABLE
+DESCRIPTOR.message_types_by_name['MPVariableValue'] = _MPVARIABLEVALUE
 DESCRIPTOR.message_types_by_name['MPConstraint'] = _MPCONSTRAINT
 DESCRIPTOR.message_types_by_name['MPObjective'] = _MPOBJECTIVE
 DESCRIPTOR.message_types_by_name['MPModel'] = _MPMODEL
+DESCRIPTOR.message_types_by_name['MPSolution'] = _MPSOLUTION
 
 class MPTerm(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
@@ -239,6 +351,12 @@ class MPVariable(message.Message):
   DESCRIPTOR = _MPVARIABLE
   
   # @@protoc_insertion_point(class_scope:les.mp_model.MPVariable)
+
+class MPVariableValue(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _MPVARIABLEVALUE
+  
+  # @@protoc_insertion_point(class_scope:les.mp_model.MPVariableValue)
 
 class MPConstraint(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
@@ -257,5 +375,11 @@ class MPModel(message.Message):
   DESCRIPTOR = _MPMODEL
   
   # @@protoc_insertion_point(class_scope:les.mp_model.MPModel)
+
+class MPSolution(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _MPSOLUTION
+  
+  # @@protoc_insertion_point(class_scope:les.mp_model.MPSolution)
 
 # @@protoc_insertion_point(module_scope)
