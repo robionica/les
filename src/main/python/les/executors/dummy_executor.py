@@ -14,7 +14,6 @@
 
 from les import backend_solvers
 from les.executors import executor_base
-from les.executors.executor_base import Result
 from les.utils import logging
 
 class Error(Exception):
@@ -53,4 +52,4 @@ class DummyExecutor(executor_base.ExecutorBase):
       # TODO: send back a report.
       logging.exception('Cannot execute given task: cannot solve the model.')
       return None
-    return Result(task.get_id(), solver.get_solution())
+    return executor_base.Result(task.get_id(), solver.get_solution())
