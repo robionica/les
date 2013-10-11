@@ -18,9 +18,12 @@ from les import object_base
 from les.utils import logging
 from les.utils import generator_base
 from les.executors import executor_base
-from les.graphs.decomposition_tree import DecompositionTree
+from les.graphs import decomposition_tree as dtree
 from les.solution_tables import solution_table_base
 from les import _generator
+
+class Error(Exception):
+  pass
 
 class _Job(object):
 
@@ -80,9 +83,10 @@ class Pipeline(object_base.ObjectBase):
   models. It assigns a job for each new model (submodel) that has to be
   solved. Within a job a task will be assigned for each new relaxed model.
 
-  :param tree: A :class:`DecompositionTree` instance.
+  :param tree: A :class:`~les.graphs.decomposition_tree.DecompositionTree`
+    instance.
   :param solution_table: A
-    :class:`les.solution_tables.solution_table.SolutionTableBase` instance.
+    :class:`les.solution_tables.solution_table_base.SolutionTableBase` instance.
   '''
 
   def __init__(self, optimization_parameters, decomposition_tree,
@@ -97,19 +101,19 @@ class Pipeline(object_base.ObjectBase):
     self._solutions = {}
     self._set_decomposition_tree(decomposition_tree)
     self._set_solution_table(solution_table)
-    for leave in decomposition_tree.get_leaves():
-      self._add_job(_Job(decomposition_tree.node[leave]))
     self.next_job()
 
   def __iter__(self):
     return _PipelineIterator(self)
 
   def _set_decomposition_tree(self, tree):
-    if not isinstance(tree, DecompositionTree):
+    if not isinstance(tree, dtree.DecompositionTree):
       raise TypeError()
     if not tree.get_leaves():
-      raise Exception('Empty tree.')
+      raise Error('Empty tree.')
     self._decomposition_tree = tree
+    for leave in tree.get_leaves():
+      self._add_job(_Job(tree.node[leave]))
 
   def _set_solution_table(self, solution_table):
     if not isinstance(solution_table, solution_table_base.SolutionTableBase):
@@ -130,10 +134,10 @@ class Pipeline(object_base.ObjectBase):
     return job
 
   def next_job(self):
-    """Moves to the next job and returns it. The next job can be selected in
+    '''Moves to the next job and returns it. The next job can be selected in
     case the currently active job exists and it is empty (no active tasks), and
     there is at least one pending job.
-    """
+    '''
     if self._active_job and not len(self._active_tasks):
       model = self._active_job.get_generator().get_model()
       for v in self._decomposition_tree.predecessors(model.get_name()):
@@ -148,7 +152,7 @@ class Pipeline(object_base.ObjectBase):
     return self._active_job
 
   def next_task(self):
-    """Returns next task that has to be executed."""
+    '''Returns next task that has to be executed.'''
     if self._active_job.is_empty():
       self.next_job()
     if self.is_blocked() or self.is_empty():
