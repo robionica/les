@@ -238,7 +238,7 @@ class MPModelParameters(object):
     return self._cols_names[i]
 
   def get_name(self):
-    return self._name
+    return self._name or self.DEFAULT_NAME
 
   def set_name(self, name):
     self._name = name
