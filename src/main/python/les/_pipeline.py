@@ -177,10 +177,8 @@ class Pipeline(object_base.ObjectBase):
       logging.warning("Task does't exist: %d" % result.get_task_id())
       return
     logging.debug('Process %s', result)
-    # TODO(d2rk): move the following logic.
     job = self._jobs[task.get_job_id()]
-    solution = self._solutions[task.get_id()]
-    # TODO: fix abs()
+    solution = self._solutions.pop(task.get_id())
     if result.get_solution().is_optimal():
       solution.set_objective_value(result.get_solution().get_objective_value())
       solution.update_variables_values(result.get_solution())
