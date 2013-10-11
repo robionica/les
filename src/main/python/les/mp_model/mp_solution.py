@@ -18,16 +18,17 @@ import collections
 import numpy
 
 from les.base import sparse_vector
+from les.mp_model import mp_model_pb2
 
 class MPSolution(object):
   '''This class represents model solution: objective value, variables
   values.
   '''
 
-  OPTIMAL = 0
-  FEASIBLE = 1
-  INFEASIBLE = 2
-  NOT_SOLVED = 3
+  OPTIMAL = mp_model_pb2.MPSolution.OPTIMAL
+  FEASIBLE = mp_model_pb2.MPSolution.FEASIBLE
+  INFEASIBLE = mp_model_pb2.MPSolution.INFEASIBLE
+  NOT_SOLVED = mp_model_pb2.MPSolution.NOT_SOLVED
 
   def __init__(self):
     self._obj_value = None
