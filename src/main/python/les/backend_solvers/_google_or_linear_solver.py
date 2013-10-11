@@ -25,7 +25,7 @@ _RESULT_STATUS_MAP = {
   pywraplp.Solver.OPTIMAL    : mp_solution.MPSolution.OPTIMAL,
   pywraplp.Solver.FEASIBLE   : mp_solution.MPSolution.FEASIBLE,
   pywraplp.Solver.INFEASIBLE : mp_solution.MPSolution.INFEASIBLE,
-  pywraplp.Solver.NOT_SOLVED : mp_model_pb2.MPSolution.NOT_SOLVED,
+  pywraplp.Solver.NOT_SOLVED : mp_solution.MPSolution.NOT_SOLVED,
 }
 
 class Error(Exception):
