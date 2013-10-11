@@ -50,7 +50,9 @@ class MPSolution(object):
     return self._status == self.OPTIMAL
 
   def get_num_variables(self):
-    return self._vars_values and self._vars_values.get_size() or 0
+    if not self._vars_values is None:
+      return self._vars_values.get_size()
+    return 0
 
   def get_objective_value(self):
     return self._obj_value
@@ -60,7 +62,9 @@ class MPSolution(object):
 
     :returns: A list of strings.
     '''
-    return self._vars_names and self._vars_names.keys() or []
+    if not self._vars_names is None:
+      return self._vars_names.keys()
+    return []
 
   def get_variables_values(self):
     return self._vars_values
