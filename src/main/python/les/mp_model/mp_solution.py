@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+'''Constains MP model solution or cadidate solution class (see
+http://en.wikipedia.org/wiki/Candidate_solution).
+'''
+
 from __future__ import absolute_import
 
 import collections
@@ -32,7 +36,8 @@ class MPSolution(object):
 
   def __init__(self):
     self._obj_value = None
-    self._vars_vals_mapping = None
+    self._vars_names = None
+    self._vars_values = None
     self._status = self.NOT_SOLVED
 
   def set_status(self, status):
@@ -45,13 +50,17 @@ class MPSolution(object):
     return self._status == self.OPTIMAL
 
   def get_num_variables(self):
-    return self._vars_values.get_size()
+    return self._vars_values and self._vars_values.get_size() or 0
 
   def get_objective_value(self):
     return self._obj_value
 
   def get_variables_names(self):
-    return self._vars_names.keys()
+    '''Returns a list of variables names.
+
+    :returns: A list of strings.
+    '''
+    return self._vars_names and self._vars_names.keys() or []
 
   def get_variables_values(self):
     return self._vars_values
