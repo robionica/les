@@ -17,8 +17,7 @@ import collections
 from les import object_base
 from les.utils import logging
 from les.utils import generator_base
-from les.executors.executor_base import Task
-from les.executors.executor_base import Result
+from les.executors import executor_base
 from les.graphs.decomposition_tree import DecompositionTree
 from les.solution_tables import solution_table_base
 from les import _generator
@@ -52,7 +51,7 @@ class _Job(object):
 
   def next_task(self):
     model_params, solution = self._generator.next()
-    task = Task(model_params)
+    task = executor_base.Task(model_params)
     task.set_job_id(self.get_id())
     return task, solution
 
@@ -166,7 +165,7 @@ class Pipeline(object_base.ObjectBase):
     del self._active_tasks[task.get_id()]
 
   def process_result(self, result):
-    if not isinstance(result, Result):
+    if not isinstance(result, executor_base.Result):
       raise TypeError()
     try:
       task = self._active_tasks[result.get_task_id()]
