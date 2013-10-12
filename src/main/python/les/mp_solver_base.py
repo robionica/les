@@ -21,7 +21,6 @@ class MPSolverBase(object):
     '''Loads model to the solver.
 
     :param model: A :class:`~les.mp_model.mp_model.MPModel` instance.
-    instance.
     '''
     raise NotImplementedError()
 
