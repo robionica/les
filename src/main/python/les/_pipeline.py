@@ -20,7 +20,7 @@ from les.utils import generator_base
 from les.executors import executor_base
 from les.graphs import decomposition_tree as dtree
 from les.solution_tables import solution_table_base
-from les import _generator
+from les import generator
 
 class Error(Exception):
   pass
@@ -29,7 +29,7 @@ class _Job(object):
 
   def __init__(self, node):
     self._node = node
-    self._generator = _generator.Generator(
+    self._generator = generator.Generator(
       node.get_model(),
       shared_vars=tuple(node.get_shared_variables()),
       local_vars=tuple(node.get_local_variables())
