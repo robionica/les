@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les import linear_problem
+from les import mp_model
 from les.cli.commands import command_base
 
 class Print(command_base.CommandBase):
-  
+  '''This class represent print command that prints given model.'''
+
   @classmethod
   def setup_argparser(self, argparser):
     pass
-  
+
   def run(self):
-    problem = linear_problem.build(self._args.file)
+    problem = mp_model.build(self._args.file)
     problem.pprint()
