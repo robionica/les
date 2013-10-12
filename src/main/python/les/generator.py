@@ -12,6 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+'''Generator generates relaxed models based on the given model.
+
+The following example shows how to build and print all relaxed models of ``m``,
+that has ``shared_vars`` as shared variables and ``local_vars`` as local
+variables::
+
+  g = Generator(m, shared_vars, local_vars)
+  for rm in g:
+    print rm
+
+.. note::
+
+   :class:`Generator` works only with BILP models.
+'''
+
 from __future__ import absolute_import
 
 from les import mp_model
@@ -22,8 +37,15 @@ class Error(Exception):
   pass
 
 class Generator(generator_base.GeneratorBase):
-  '''The generator allows to generate relaxed models based on the given
-  model.
+  '''This class represents generator allows to generate relaxed models based on
+  the given BILP model.
+
+  :param model: A :class:`~les.mp_model.mp_model.MPModel` instance.
+  :param shared_vars: A list of strings, where each string represents a name of
+    a shared variable.
+  :param local_vars: A list of strings, where each string represents a name of
+    a local variable.
+  :raises: :exc:`TypeError`, :exc:`Error`.
   '''
 
   relaxed_model_name_format = '{model_name}_R{counter}'
@@ -79,7 +101,10 @@ class Generator(generator_base.GeneratorBase):
     return '%s[size=%d]' % (self.__class__.__name__, self._n)
 
   def get_model(self):
-    '''Returns model instance being the source of generation.'''
+    '''Returns model instance being the source of generation.
+
+    :returns: A :class:`~les.mp_model.mp_model.MPModel` instance.
+    '''
     return self._model
 
   def get_size(self):
@@ -89,14 +114,14 @@ class Generator(generator_base.GeneratorBase):
   def has_next(self):
     '''Returns whether the next model can be generated.
 
-    :returns: `True` or `False.`
+    :returns: ``True`` or ``False``.
     '''
     return self._index < self._n
 
   def next(self):
     '''Returns a model and base solution.
 
-    :see: gen()
+    :see: :func:`gen`.
     :raises: :exc:`StopIteration`.
     '''
     if not self.has_next():
@@ -106,11 +131,23 @@ class Generator(generator_base.GeneratorBase):
     return model
 
   def gen(self, mask):
-    '''Generates a model for a given mask. Note that the solution will include
-    additional variables from the model.
+    '''Generates a model and base solution for a given mask. Note, that the
+    solution will include substituted shared variables from the model.
 
-    :return: a :class:`~les.model.Model` instance.
+    :param mask: An integer that represents a mask of variables assignment.
+    :returns: a tuple of :class:`~les.mp_model.mp_model.MPModel` instance and
+      :class:`~les.mp_model.mp_solution.MPSolution` instance.
     :raises: :exc:`TypeError`
+
+    Assume we have a model ``m`` that has variables `x1`, `x2`, `x3`,
+    `x4`, `x5`, where `x1`, `x3` are local variables and `x3`, `x4`, `x5` are
+    shared variables::
+
+      g = Generator(m, [u'x3', u'x4', u'x5'], [u'x1', u'x2'])
+      m5, s5 = g.gen(5)  # 101
+
+    As the result, the model ``m5`` contains two variables `x1` and `x2`, while
+    `x3`, `x4` and `x5` were substituted by 1, 0, and 1 respectively.
     '''
     if not type(mask) in (int, long):
       raise TypeError('mask can be an int or long: %s' % type(mask))
@@ -133,7 +170,7 @@ class Generator(generator_base.GeneratorBase):
       self._cols_lower_bounds,
       self._cols_upper_bounds,
       self._cols_names)
-    name = self.relaxed_model_name_format.format(model_name=self._model.get_name(),
-                                                 counter=self._index)
+    name = self.relaxed_model_name_format.format(
+      model_name=self._model.get_name(), counter=self._index)
     params.set_name(name)
     return (params, solution)
