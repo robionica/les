@@ -28,6 +28,7 @@ class _PipelineMock(_pipeline.Pipeline):
   def __init__(self):
     pass
 
+@unittest.skip_if(DEFAULT_BACKEND_SOLVER_ID is None, 'no backend solvers')
 class DummyExecutorTest(unittest.TestCase):
 
   def setup(self):
