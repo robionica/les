@@ -12,24 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from les import _pipeline
+
+class Error(Exception):
+  pass
+
 class ExecutorBase(object):
   '''This is base class for all executors. The executor executes tasks generated
   by pipeline and monitors them in prodaction. Once the task has been performed
-  the result will be sent back to pipeline.
+  the result will be sent back to the pipeline.
+
+  :param pipeline: A :class:`~les._pipeline.Pipeline` instance.
   '''
 
   def __init__(self, pipeline):
-    from les import _pipeline
     if not isinstance(pipeline, _pipeline.Pipeline):
       raise TypeError()
     self._pipeline = pipeline
 
+  @classmethod
+  def executor(self, task):
+    raise NotImplementedError()
+
   def get_pipeline(self):
     '''Returns pipeline being used by this executor.
 
-    :returns: A :class:`~les.pipeline.pipeline.Pipeline` instance.
+    :returns: A :class:`~les._pipeline.Pipeline` instance.
     '''
     return self._pipeline
 
   def run(self):
-    raise NotImplementedError()
+    '''This method implements the common execution loop that can be replaced by
+    executor. By default executor will try to iterate over pipeline tasks and
+    execute them. Once the task has been executed it will immediately send the
+    result back to the pipeline.
+    '''
+    for task in self._pipeline:
+      result = self.execute(task)
+      if result is None:
+        self._pipeline.finalize_task(task)
+        continue
+      self._pipeline.process_result(result)
