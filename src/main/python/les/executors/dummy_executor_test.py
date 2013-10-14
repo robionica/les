@@ -47,7 +47,8 @@ class DummyExecutorTest(unittest.TestCase):
       ['<='] * 6,
       [7, 6, 9, 7, 3, 5]
     )
-    task = executor_base.Task(params, DEFAULT_BACKEND_SOLVER_ID)
+    task = _pipeline.Task(params)
+    task.set_solver_id(DEFAULT_BACKEND_SOLVER_ID)
     result = self.executor.execute(task)
     self.assert_is_not_none(result)
     solution = result.get_solution()
