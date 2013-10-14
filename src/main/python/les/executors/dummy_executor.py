@@ -13,10 +13,11 @@
 # limitations under the License.
 
 from les import backend_solvers
+from les import _pipeline
 from les.executors import executor_base
 from les.utils import logging
 
-class Error(Exception):
+class Error(executor_base.Error):
   pass
 
 class DummyExecutor(executor_base.ExecutorBase):
@@ -26,30 +27,21 @@ class DummyExecutor(executor_base.ExecutorBase):
   :param pipeline: A :class:`~les._pipeline.Pipeline` instance.
   '''
 
-  def __init__(self, pipeline):
-    executor_base.ExecutorBase.__init__(self, pipeline)
-
-  def run(self):
-    for task in self._pipeline:
-      result = self.execute(task)
-      if result is None:
-        self._pipeline.finalize_task(task)
-        continue
-      self._pipeline.process_result(result)
-
   @classmethod
   def execute(cls, task):
-    logging.debug('Solve model %s with solver %s',
-                  str(task.get_model_parameters()), task.get_solver_id())
+    model_params = task.get_model_parameters()
+    logging.debug('Solve model %s with %d rows and %d columns, with solver %s.',
+                  model_params.get_name(), model_params.get_num_rows(),
+                  model_params.get_num_columns(), task.get_solver_id())
     solver = backend_solvers.get_instance_of(task.get_solver_id())
     if not solver:
       raise Error('Cannot instantiate backend solver by id: %d' %
                   task.get_solver_id())
     try:
-      solver.load_model_params(task.get_model_parameters())
+      solver.load_model_params(model_params)
       solver.solve()
     except Exception, e:
       # TODO: send back a report.
       logging.exception('Cannot execute given task: cannot solve the model.')
       return None
-    return executor_base.Result(task.get_id(), solver.get_solution())
+    return _pipeline.Result(model_params, solver.get_solution())
