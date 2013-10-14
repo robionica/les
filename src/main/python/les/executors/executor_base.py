@@ -31,7 +31,7 @@ class ExecutorBase(object):
     self._pipeline = pipeline
 
   @classmethod
-  def executor(self, task):
+  def execute(self, task):
     raise NotImplementedError()
 
   def get_pipeline(self):
