@@ -30,7 +30,8 @@ class DummyExecutor(executor_base.ExecutorBase):
   @classmethod
   def execute(cls, task):
     model_params = task.get_model_parameters()
-    logging.debug('Solve model %s with %d rows and %d columns, with solver %s.',
+    logging.debug('Solve model %s that has %d row(s) and %d column(s)'
+                  ' with solver %s',
                   model_params.get_name(), model_params.get_num_rows(),
                   model_params.get_num_columns(), task.get_solver_id())
     solver = backend_solvers.get_instance_of(task.get_solver_id())

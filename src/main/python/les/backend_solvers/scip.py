@@ -20,9 +20,9 @@ class Error(Exception):
   pass
 
 class SCIP(_google_or_linear_solver.GoogleORLinearSolver):
-  """This class incapsulates SCIP solver represented by
+  '''This class incapsulates SCIP solver represented by
   :class:`linear_solver.scip_interface.SCIPInterface`.
-  """
+  '''
 
   def load_model_params(self, params):
     if not isinstance(params, mp_model.MPModelParameters):

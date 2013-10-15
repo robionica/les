@@ -17,6 +17,7 @@ import sys
 from les.utils import logging
 from les import frontend_solver_pb2
 
+from les.backend_solvers.knapsack_solver import fractional_knapsack_solver
 try:
   from les.backend_solvers import scip
 except ImportError, e:
@@ -26,12 +27,23 @@ _SOLVERS_TABLE = {}
 
 # Sync backend solvers IDs.
 SCIP_ID = frontend_solver_pb2.OptimizationParameters.SCIP
+FRAKTIONAL_KNAPSACK_SOLVER_ID = getattr(frontend_solver_pb2.OptimizationParameters,
+                                        'FRAKTIONAL_KNAPSACK_SOLVER')
 
+_DEFAULT_SOLVERS_TABLE = {}
 if 'les.backend_solvers.scip' in sys.modules:
-  _SOLVERS_TABLE[SCIP_ID] = scip.SCIP
+  _DEFAULT_SOLVERS_TABLE[SCIP_ID] = scip.SCIP
+_SOLVERS_TABLE.update(_DEFAULT_SOLVERS_TABLE)
+
+_RELAXATION_SOLVERS_TABLE = {
+  FRAKTIONAL_KNAPSACK_SOLVER_ID: fractional_knapsack_solver.FractionalKnapsackSolver,
+}
+_SOLVERS_TABLE.update(_RELAXATION_SOLVERS_TABLE)
 
 def get_default_solver_id():
-  return len(_SOLVERS_TABLE) and _SOLVERS_TABLE.keys()[0] or None
+  if len(_DEFAULT_SOLVERS_TABLE):
+    return _DEFAULT_SOLVERS_TABLE.keys()[0]
+  return None
 
 def get_instance_of(solver_id, *args, **kwargs):
   '''Returns an instance of the solver defined by `solver_id`, or `None`
