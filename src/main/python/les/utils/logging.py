@@ -16,9 +16,11 @@ from __future__ import absolute_import
 
 from logging import *
 
+basic_config = basicConfig
+capture_warnings = captureWarnings
 get_logger = getLogger
 
 # NOTE: full-size format: %(levelname) 7s
-_LOG_FORMAT = "[%(levelname).1s] %(message)s"
-basicConfig(level=CRITICAL, format=_LOG_FORMAT)
-captureWarnings(True)
+DEFAULT_LOG_FORMAT = '[%(created)f:%(module)s:%(levelname).1s] %(message)s'
+basic_config(level=CRITICAL, format=DEFAULT_LOG_FORMAT)
+capture_warnings(True)
