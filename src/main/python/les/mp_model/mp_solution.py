@@ -75,7 +75,7 @@ class MPSolution(object):
 
   def set_objective_value(self, value):
     if not isinstance(value, float):
-      raise TypeError()
+      raise TypeError('value has to be a float: %s' % type(value))
     self._obj_value = value
 
   def set_variable_value(self, name, value):

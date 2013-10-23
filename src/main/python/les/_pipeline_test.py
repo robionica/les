@@ -29,7 +29,7 @@ class PipelineTest(unittest.TestCase):
 
   def test_num_relaxated_models(self):
     params = frontend_solver_pb2.OptimizationParameters()
-    params.backend_solver = backend_solvers.SCIP_ID
+    params.default_backend_solver = backend_solvers.SCIP_ID
     model = mp_model.build(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2, 3, 4, 1, 0, 0, 0, 0, 0],

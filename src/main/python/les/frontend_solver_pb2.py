@@ -11,13 +11,13 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='les/frontend_solver.proto',
   package='les',
-  serialized_pb='\n\x19les/frontend_solver.proto\x12\x03les\"\xdf\x05\n\x16OptimizationParameters\x12\x41\n\x0e\x62\x61\x63kend_solver\x18\x01 \x01(\x0e\x32).les.OptimizationParameters.BackendSolver\x12;\n\x0brelaxations\x18\x02 \x03(\x0e\x32&.les.OptimizationParameters.Relaxation\x12$\n\x18max_num_shared_variables\x18\x03 \x01(\x03:\x02\x31\x30\x12\x46\n\x08\x65xecutor\x18\x04 \x01(\x0e\x32$.les.OptimizationParameters.Executor:\x0e\x44UMMY_EXECUTOR\x12]\n\ndecomposer\x18\x05 \x01(\x0e\x32&.les.OptimizationParameters.Decomposer:!QUASIBLOCK_FINKELSTEIN_DECOMPOSER\x12X\n\x0esolution_table\x18\x06 \x01(\x0e\x32).les.OptimizationParameters.SolutionTable:\x15SQLITE_SOLUTION_TABLE\"G\n\nRelaxation\x12\x07\n\x03\x43LP\x10\x00\x12\x10\n\x0c\x44UMMY_SOLVER\x10\x01\x12\x1e\n\x1a\x46RAKTIONAL_KNAPSACK_SOLVER\x10\x02\"?\n\rBackendSolver\x12\x08\n\x04GLPK\x10\x00\x12\x0c\n\x08LP_SOLVE\x10\x01\x12\x08\n\x04SCIP\x10\x02\x12\x0c\n\x08SYMPHONY\x10\x03\"3\n\x08\x45xecutor\x12\x12\n\x0e\x44UMMY_EXECUTOR\x10\x00\x12\x13\n\x0fTHREAD_EXECUTOR\x10\x01\"3\n\nDecomposer\x12%\n!QUASIBLOCK_FINKELSTEIN_DECOMPOSER\x10\x01\"*\n\rSolutionTable\x12\x19\n\x15SQLITE_SOLUTION_TABLE\x10\x01')
+  serialized_pb='\n\x19les/frontend_solver.proto\x12\x03les\"\xeb\x05\n\x16OptimizationParameters\x12I\n\x16\x64\x65\x66\x61ult_backend_solver\x18\x01 \x01(\x0e\x32).les.OptimizationParameters.BackendSolver\x12M\n\x1arelaxation_backend_solvers\x18\x02 \x03(\x0e\x32).les.OptimizationParameters.BackendSolver\x12$\n\x18max_num_shared_variables\x18\x03 \x01(\x03:\x02\x31\x30\x12\x46\n\x08\x65xecutor\x18\x04 \x01(\x0e\x32$.les.OptimizationParameters.Executor:\x0e\x44UMMY_EXECUTOR\x12]\n\ndecomposer\x18\x05 \x01(\x0e\x32&.les.OptimizationParameters.Decomposer:!QUASIBLOCK_FINKELSTEIN_DECOMPOSER\x12X\n\x0esolution_table\x18\x06 \x01(\x0e\x32).les.OptimizationParameters.SolutionTable:\x15SQLITE_SOLUTION_TABLE\"z\n\rBackendSolver\x12\x07\n\x03\x43LP\x10\x00\x12\x10\n\x0c\x44UMMY_SOLVER\x10\x01\x12\x1e\n\x1a\x46RAKTIONAL_KNAPSACK_SOLVER\x10\x02\x12\x08\n\x04GLPK\x10\x03\x12\x0c\n\x08LP_SOLVE\x10\x04\x12\x08\n\x04SCIP\x10\x05\x12\x0c\n\x08SYMPHONY\x10\x06\"3\n\x08\x45xecutor\x12\x12\n\x0e\x44UMMY_EXECUTOR\x10\x00\x12\x13\n\x0fTHREAD_EXECUTOR\x10\x01\"3\n\nDecomposer\x12%\n!QUASIBLOCK_FINKELSTEIN_DECOMPOSER\x10\x01\"*\n\rSolutionTable\x12\x19\n\x15SQLITE_SOLUTION_TABLE\x10\x01')
 
 
 
-_OPTIMIZATIONPARAMETERS_RELAXATION = descriptor.EnumDescriptor(
-  name='Relaxation',
-  full_name='les.OptimizationParameters.Relaxation',
+_OPTIMIZATIONPARAMETERS_BACKENDSOLVER = descriptor.EnumDescriptor(
+  name='BackendSolver',
+  full_name='les.OptimizationParameters.BackendSolver',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -33,40 +33,27 @@ _OPTIMIZATIONPARAMETERS_RELAXATION = descriptor.EnumDescriptor(
       name='FRAKTIONAL_KNAPSACK_SOLVER', index=2, number=2,
       options=None,
       type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=484,
-  serialized_end=555,
-)
-
-_OPTIMIZATIONPARAMETERS_BACKENDSOLVER = descriptor.EnumDescriptor(
-  name='BackendSolver',
-  full_name='les.OptimizationParameters.BackendSolver',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
     descriptor.EnumValueDescriptor(
-      name='GLPK', index=0, number=0,
+      name='GLPK', index=3, number=3,
       options=None,
       type=None),
     descriptor.EnumValueDescriptor(
-      name='LP_SOLVE', index=1, number=1,
+      name='LP_SOLVE', index=4, number=4,
       options=None,
       type=None),
     descriptor.EnumValueDescriptor(
-      name='SCIP', index=2, number=2,
+      name='SCIP', index=5, number=5,
       options=None,
       type=None),
     descriptor.EnumValueDescriptor(
-      name='SYMPHONY', index=3, number=3,
+      name='SYMPHONY', index=6, number=6,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=557,
-  serialized_end=620,
+  serialized_start=510,
+  serialized_end=632,
 )
 
 _OPTIMIZATIONPARAMETERS_EXECUTOR = descriptor.EnumDescriptor(
@@ -86,8 +73,8 @@ _OPTIMIZATIONPARAMETERS_EXECUTOR = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=622,
-  serialized_end=673,
+  serialized_start=634,
+  serialized_end=685,
 )
 
 _OPTIMIZATIONPARAMETERS_DECOMPOSER = descriptor.EnumDescriptor(
@@ -103,8 +90,8 @@ _OPTIMIZATIONPARAMETERS_DECOMPOSER = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=675,
-  serialized_end=726,
+  serialized_start=687,
+  serialized_end=738,
 )
 
 _OPTIMIZATIONPARAMETERS_SOLUTIONTABLE = descriptor.EnumDescriptor(
@@ -120,8 +107,8 @@ _OPTIMIZATIONPARAMETERS_SOLUTIONTABLE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=728,
-  serialized_end=770,
+  serialized_start=740,
+  serialized_end=782,
 )
 
 
@@ -133,14 +120,14 @@ _OPTIMIZATIONPARAMETERS = descriptor.Descriptor(
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='backend_solver', full_name='les.OptimizationParameters.backend_solver', index=0,
+      name='default_backend_solver', full_name='les.OptimizationParameters.default_backend_solver', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='relaxations', full_name='les.OptimizationParameters.relaxations', index=1,
+      name='relaxation_backend_solvers', full_name='les.OptimizationParameters.relaxation_backend_solvers', index=1,
       number=2, type=14, cpp_type=8, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -179,7 +166,6 @@ _OPTIMIZATIONPARAMETERS = descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
-    _OPTIMIZATIONPARAMETERS_RELAXATION,
     _OPTIMIZATIONPARAMETERS_BACKENDSOLVER,
     _OPTIMIZATIONPARAMETERS_EXECUTOR,
     _OPTIMIZATIONPARAMETERS_DECOMPOSER,
@@ -189,15 +175,14 @@ _OPTIMIZATIONPARAMETERS = descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=35,
-  serialized_end=770,
+  serialized_end=782,
 )
 
-_OPTIMIZATIONPARAMETERS.fields_by_name['backend_solver'].enum_type = _OPTIMIZATIONPARAMETERS_BACKENDSOLVER
-_OPTIMIZATIONPARAMETERS.fields_by_name['relaxations'].enum_type = _OPTIMIZATIONPARAMETERS_RELAXATION
+_OPTIMIZATIONPARAMETERS.fields_by_name['default_backend_solver'].enum_type = _OPTIMIZATIONPARAMETERS_BACKENDSOLVER
+_OPTIMIZATIONPARAMETERS.fields_by_name['relaxation_backend_solvers'].enum_type = _OPTIMIZATIONPARAMETERS_BACKENDSOLVER
 _OPTIMIZATIONPARAMETERS.fields_by_name['executor'].enum_type = _OPTIMIZATIONPARAMETERS_EXECUTOR
 _OPTIMIZATIONPARAMETERS.fields_by_name['decomposer'].enum_type = _OPTIMIZATIONPARAMETERS_DECOMPOSER
 _OPTIMIZATIONPARAMETERS.fields_by_name['solution_table'].enum_type = _OPTIMIZATIONPARAMETERS_SOLUTIONTABLE
-_OPTIMIZATIONPARAMETERS_RELAXATION.containing_type = _OPTIMIZATIONPARAMETERS;
 _OPTIMIZATIONPARAMETERS_BACKENDSOLVER.containing_type = _OPTIMIZATIONPARAMETERS;
 _OPTIMIZATIONPARAMETERS_EXECUTOR.containing_type = _OPTIMIZATIONPARAMETERS;
 _OPTIMIZATIONPARAMETERS_DECOMPOSER.containing_type = _OPTIMIZATIONPARAMETERS;

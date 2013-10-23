@@ -35,12 +35,12 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     self._optimization_params = None
 
   @classmethod
-  def _gen_optimization_parameters(self):
-    params = frontend_solver_pb2.OptimizationParameters()
-    default_backend_solver_id = backend_solver_manager.get_default_solver_id()
-    if not default_backend_solver_id:
-      raise Error('Cannot define default backend solver id.')
-    params.backend_solver = default_backend_solver_id
+  def _finalize_optimization_parameters(self, params):
+    if not params.HasField('default_backend_solver'):
+      default_solver_id = backend_solver_manager.get_default_solver_id()
+      if not default_solver_id:
+        raise Error('Cannot define default backend solver id.')
+      params.default_backend_solver = default_solver_id
     return params
 
   def _process_decomposition_tree(self, tree):
@@ -77,7 +77,8 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     if params and not isinstance(params, frontend_solver_pb2.OptimizationParameters):
       raise TypeError()
     if not params:
-      params = self._gen_optimization_parameters()
+      params = frontend_solver_pb2.OptimizationParameters()
+    self._finalize_optimization_parameters(params)
     self._optimization_params = params
     logging.info('Optimize model %s with %d rows and %d columns.',
                  self._model.get_name(), self._model.get_num_constraints(),
@@ -103,6 +104,9 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     pipeline = _pipeline.Pipeline(params, decomposition_tree=tree,
                                   solution_table=solution_table)
     logging.info('Pipeline has been successfully created.')
+    logging.info('Default backend solver: %d', params.default_backend_solver)
+    logging.info('Relaxation backend solvers: %s',
+                 params.relaxation_backend_solvers)
     executor = executor_manager.get_instance_of(params.executor, pipeline)
     logging.debug('Executor: %s', executor.__class__.__name__)
     try:

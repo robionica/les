@@ -48,12 +48,13 @@ class Optimize(command_base.CommandBase):
         'metavar': 'ID',
         'default': DEFAULT_EXECUTOR_ID,
         'help': 'executor id (default: %d)' % DEFAULT_EXECUTOR_ID}),
-    ('--backend-solver', {
-        'dest': 'backend_solver_id',
+    ('--default-backend-solver', {
+        'dest': 'default_backend_solver_id',
         'type': int,
         'metavar': 'ID',
         'default': DEFAULT_BACKEND_SOLVER_ID,
-        'help': 'backend solver id (default: %d)' % DEFAULT_BACKEND_SOLVER_ID}),
+        'help': ('default backend solver id (default: %d)'
+                 % DEFAULT_BACKEND_SOLVER_ID)}),
   )
 
   def run(self):
@@ -61,7 +62,7 @@ class Optimize(command_base.CommandBase):
     optimization_params = frontend_solver_pb2.OptimizationParameters()
     optimization_params.decomposer = self._args.decomposer_id
     optimization_params.executor = self._args.executor_id
-    optimization_params.backend_solver = self._args.backend_solver_id
+    optimization_params.default_backend_solver = self._args.default_backend_solver_id
     model.optimize(optimization_params)
     print('Objective value:', model.get_objective_value())
     print('Variables:')
