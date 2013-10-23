@@ -14,6 +14,7 @@
 
 from les import backend_solvers as backend_solver_manager
 from les import mp_model
+from les.mp_model import mp_model_parameters
 from les import _pipeline
 from les import mp_solver_base
 from les import frontend_solver_pb2
@@ -33,6 +34,7 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
   def __init__(self):
     self._model = None
     self._optimization_params = None
+    self._executor = None
 
   @classmethod
   def _finalize_optimization_parameters(self, params):
@@ -54,7 +56,10 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     return True
 
   def _solve_single_model(self):
-    raise NotImplementedError()
+    task = _pipeline.Task(mp_model_parameters.build(self._model))
+    task.set_solver_id(self._optimization_params.default_backend_solver)
+    result = self._executor.execute(task)
+    self._apply_solution(result.get_solution())
 
   def get_model(self):
     '''Returns model solved by this solver.
@@ -83,10 +88,6 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     logging.info('Optimize model %s with %d rows and %d columns.',
                  self._model.get_name(), self._model.get_num_constraints(),
                  self._model.get_num_variables())
-    solution_table = solution_table_manager.get_instance_of(params.solution_table)
-    if not solution_table:
-      logging.info('Cannot create solution table: %d', params.solution_table)
-      return
     try:
       decomposer = decomposer_manager.get_instance_of(params.decomposer,
                                                       self._model)
@@ -96,25 +97,31 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
       return
     logging.info('Model has been successfully decomposed.')
     tree = decomposer.get_decomposition_tree()
-    solution_table.set_decomposition_tree(tree)
     if not self._process_decomposition_tree(tree):
       return
+    self._executor = executor_manager.get_instance_of(params.executor)
+    logging.debug('Executor: %s', self._executor.__class__.__name__)
     if tree.get_num_nodes() == 1:
       return self._solve_single_model()
+    solution_table = solution_table_manager.get_instance_of(params.solution_table)
+    if not solution_table:
+      logging.info('Cannot create solution table: %d', params.solution_table)
+      return
+    solution_table.set_decomposition_tree(tree)
     pipeline = _pipeline.Pipeline(params, decomposition_tree=tree,
                                   solution_table=solution_table)
     logging.info('Pipeline has been successfully created.')
     logging.info('Default backend solver: %d', params.default_backend_solver)
     logging.info('Relaxation backend solvers: %s',
                  params.relaxation_backend_solvers)
-    executor = executor_manager.get_instance_of(params.executor, pipeline)
-    logging.debug('Executor: %s', executor.__class__.__name__)
     try:
-      executor.run()
+      self._executor.run(pipeline)
     except Exception, e:
       logging.exception('Executor failed.')
       return
-    solution = solution_table.get_solution()
+    self._apply_solution(solution_table.get_solution())
+
+  def _apply_solution(self, solution):
     # Apply solution.
     objective = self._model.get_objective()
     objective.set_value(solution.get_objective_value())

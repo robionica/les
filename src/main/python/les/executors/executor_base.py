@@ -21,14 +21,10 @@ class ExecutorBase(object):
   '''This is base class for all executors. The executor executes tasks generated
   by pipeline and monitors them in prodaction. Once the task has been performed
   the result will be sent back to the pipeline.
-
-  :param pipeline: A :class:`~les._pipeline.Pipeline` instance.
   '''
 
-  def __init__(self, pipeline):
-    if not isinstance(pipeline, _pipeline.Pipeline):
-      raise TypeError()
-    self._pipeline = pipeline
+  def __init__(self):
+    self._pipeline = None
 
   @classmethod
   def execute(self, task):
@@ -41,15 +37,23 @@ class ExecutorBase(object):
     '''
     return self._pipeline
 
-  def run(self):
+  def run(self, pipeline):
     '''This method implements the common execution loop that can be replaced by
     executor. By default executor will try to iterate over pipeline tasks and
     execute them. Once the task has been executed it will immediately send the
     result back to the pipeline.
+
+    :param pipeline: A :class:`~les._pipeline.Pipeline` instance.
     '''
-    for task in self._pipeline:
+    self.set_pipeline(pipeline)
+    for task in pipeline:
       result = self.execute(task)
       if result is None:
-        self._pipeline.finalize_task(task)
+        pipeline.finalize_task(task)
         continue
-      self._pipeline.process_result(result)
+      pipeline.process_result(result)
+
+  def set_pipeline(self, pipeline):
+    if not isinstance(pipeline, _pipeline.Pipeline):
+      raise TypeError()
+    self._pipeline = pipeline

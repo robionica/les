@@ -23,17 +23,11 @@ from les.utils import unittest
 
 DEFAULT_BACKEND_SOLVER_ID = backend_solvers.get_default_solver_id()
 
-class _PipelineMock(_pipeline.Pipeline):
-
-  def __init__(self):
-    pass
-
 @unittest.skip_if(DEFAULT_BACKEND_SOLVER_ID is None, 'no backend solvers')
 class DummyExecutorTest(unittest.TestCase):
 
   def setup(self):
-    self.pipeline = _PipelineMock()
-    self.executor = dummy_executor.DummyExecutor(self.pipeline)
+    self.executor = dummy_executor.DummyExecutor()
 
   def test_execute_task(self):
     params = mp_model_parameters.build(
