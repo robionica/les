@@ -76,7 +76,10 @@ class Reader(object):
                                          gzip.GzipFile)):
       self._stream = filename_or_stream
       data = filename_or_stream.read()
-    elif isinstance(stream, types.StringType):
+    elif isinstance(filename_or_stream, StringIO.StringIO):
+      self._stream = filename_or_stream
+      data = filename_or_stream.getvalue()
+    elif isinstance(filename_or_stream, types.StringType):
       data = filename_or_stream
     else:
       raise TypeError()
@@ -84,8 +87,10 @@ class Reader(object):
 
   def parse_from_string(self, data):
     '''Parses problem from given string.'''
-    if not isinstance(data, str):
-      raise TypeError()
+    if not isinstance(data, str) and not isinstance(data, unicode):
+      raise TypeError('data must be a string or unicode: %s' % type(data))
+    if len(data) == 0:
+      raise ValueError()
     self._buffer = StringIO.StringIO(data)
     section_name = None
     def get_first_word():
@@ -148,8 +153,8 @@ class Reader(object):
     if sense == 'N':
       self._obj_name = name
       return
-    self._rows_senses.append(sense)
-    self._rows_names.append(name)
+    self._rows_senses.append(str(sense))
+    self._rows_names.append(str(name))
     self._rows_coefs = self._rows_coefs.reshape((len(self._rows_names),
                                                  self._rows_coefs.shape[1]))
     self._rows_rhs.append(None)
@@ -161,7 +166,7 @@ class Reader(object):
       j = self._cols_names.index(column_name)
     except ValueError:
       j = len(self._cols_names)
-      self._cols_names.append(column_name)
+      self._cols_names.append(str(column_name))
       self._rows_coefs = sparse.hstack([self._rows_coefs, sparse.lil_matrix((self._rows_coefs.shape[0], 1), dtype=float)]).tolil()
       self._cols_lower_bounds.append(0.0)
       self._cols_upper_bounds.append(0.0)
@@ -207,8 +212,116 @@ class Reader(object):
   def get_rows_coefficients(self):
     return self._rows_coefs
 
+_SYMPY_MPS_SENSE_MAPPING = {
+  '<=': 'L',
+  '>=': 'G',
+  '==': 'E',
+}
+
+class Writer(object):
+  '''Writes a MPS encoded value to a stream.
+
+  :param filename_or_stream: A filename or stream.
+
+  Example
+
+  Suppose we'd like to write a MP model such as the following::
+
+    model = mp_model.build(
+      [8, 2, 5, 5, 8, 3, 9, 7, 6],
+      [[2, 3, 4, 1, 0, 0, 0, 0, 0],
+       [1, 2, 3, 2, 0, 0, 0, 0, 0],
+       [0, 0, 1, 4, 3, 4, 2, 0, 0],
+       [0, 0, 2, 1, 1, 2, 5, 0, 0],
+       [0, 0, 0, 0, 0, 0, 2, 1, 2],
+       [0, 0, 0, 0, 0, 0, 3, 4, 1]],
+      ['L'] * 6,
+      [7, 6, 9, 7, 3, 5])
+
+  This code writes the above model and prints the encoded value::
+
+    stream = StringIO.StringIO()
+    writer = mps.Writer(stream)
+    writer.write(model)
+    print stream.getvalue()
+  '''
+
+  def __init__(self, filename_or_stream, model=None):
+    self._stream = None
+    if isinstance(filename_or_stream, str):
+      self._stream = open(filename_or_stream, 'w+b')
+    elif isinstance(filename_or_stream, object):
+      self._stream = filename_or_stream
+    else:
+      raise TypeError()
+    if model:
+      self.write(model)
+
+  def write(self, model):
+    from les import mp_model
+    if isinstance(model, mp_model.MPModel):
+      self._write_mp_model(model)
+    else:
+      raise TypeError()
+
+  def _write_mp_model_parameters(self, params):
+    self._stream.write('NAME %s\n' % params.get_name())
+    # Write ROWS section.
+    self._stream.write('ROWS\n')
+    self._stream.write('\tN\t%s\n' % params.get_objective_name())
+    for i in range(params.get_num_rows()):
+      self._stream.write('\t%s\t%s\n'
+                         % (_SYMPY_MPS_SENSE_MAPPING[params.get_rows_senses()[i]],
+                            params.get_rows_names()[i]))
+    # Write COLUMNS section.
+    self._stream.write('COLUMNS\n')
+    cols_coefs = params.get_rows_coefficients().tocsc()
+    for i in range(params.get_num_columns()):
+      col = cols_coefs.getcol(i)
+      self._stream.write('\t%s' % (params.get_columns_names()[i],))
+      self._stream.write('\t%s %d' % (params.get_objective_name(),
+                                      params.get_objective_coefficient(i)))
+      row_indices, col_indices = col.nonzero()
+      counter = 1
+      for ii, ij in zip(row_indices, col_indices):
+        if not counter % 2:
+          self._stream.write('\t%s' % (params.get_columns_names()[i],))
+        self._stream.write('\t%s %d' % (params.get_rows_names()[ii], col[ii, ij]))
+        counter += 1
+        if not counter % 2:
+          self._stream.write('\n')
+      if counter % 2:
+        self._stream.write('\n')
+    # Write RHS section.
+    counter = 0
+    self._stream.write('RHS\n')
+    for i in range(params.get_num_rows()):
+      if not counter % 2:
+        # TODO: fix rhs enumeration.
+        self._stream.write('\tRHS1\t')
+      self._stream.write('%s\t%d\t' % (params.get_rows_names()[i],
+                                       params.get_rows_rhs()[i]))
+      counter += 1
+      if not counter % 2:
+        self._stream.write('\n')
+    if counter % 2:
+      self._stream.write('\n')
+    # Write BOUNDS section.
+    # TODO: fix bounds.
+    self._stream.write('BOUNDS\n')
+    for i in params.get_columns_indices():
+      self._stream.write('\tUP BND1 %s %d\n' % (params.get_columns_names()[i],
+                                                params.get_column_upper_bound(i)))
+      self._stream.write('\tLO BND1 %s %d\n' % (params.get_columns_names()[i],
+                                                params.get_column_lower_bound(i)))
+    self._stream.write('ENDATA')
+
+  def _write_mp_model(self, model):
+    from les.mp_model import mp_model_parameters
+    self._write_mp_model_parameters(mp_model_parameters.build(model))
+
 def read(filename_or_stream):
   return Reader(filename_or_stream)
 
-def write(filename, data):
-  return Writer(filename, data)
+def write(filename_or_stream, data):
+  return Writer(filename_or_stream, data)
