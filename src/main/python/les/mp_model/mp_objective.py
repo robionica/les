@@ -26,6 +26,7 @@ class MPObjective(object_base.ObjectBase, object_base.Cloneable):
   def __init__(self, expr, maximization=True):
     if not isinstance(expr, sympy_expr.Expr):
       raise TypeError()
+    self._name = None
     self._expr = expr
     self._maximization = maximization
     self._value = None
@@ -40,6 +41,9 @@ class MPObjective(object_base.ObjectBase, object_base.Cloneable):
       expr += self.get_coefficient(variables[i]) * variables[i].clone()
     return Objective(expr, self.maximization())
 
+  def get_name(self):
+    return self._name
+
   def maximization(self):
     return self._maximization
 
@@ -47,8 +51,9 @@ class MPObjective(object_base.ObjectBase, object_base.Cloneable):
     return not self._maximization
 
   def get_coefficient(self, var):
-    '''Get variable coefficient.
+    '''Gets variable coefficient in this objective function.
 
+    :param var: A :class:`~les.mp_model.mp_variable.MPVariable` instance.
     :returns: `float`.
     :raises: :exc:`TypeError`
     '''
@@ -74,6 +79,11 @@ class MPObjective(object_base.ObjectBase, object_base.Cloneable):
 
   def set_minimization(self):
     self._maximization = False
+
+  def set_name(self, name):
+    if not isinstance(name, str):
+      raise TypeError()
+    self._name = name
 
   def set_value(self, value):
     if not isinstance(value, float):

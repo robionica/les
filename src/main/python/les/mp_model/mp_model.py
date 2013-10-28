@@ -106,10 +106,11 @@ class MPModel(object_base.ObjectBase):
     e.g. `c0`, `c1`, etc.
   '''
 
-  default_name = 'UNKNOWN'
-  name_format = 'P%d'
+  default_model_name = 'UNKNOWN'
+  model_name_format = 'P%d'
   variable_name_format = 'x{index}'
   constraint_name_format = 'c{index}'
+  default_objective_name = 'OBJ'
 
   def __init__(self, name=None, variable_name_format=None,
                constraint_name_format=None):
@@ -259,10 +260,13 @@ class MPModel(object_base.ObjectBase):
   def build_from_mps(cls, reader):
     '''Builds a new model from MPS model.
 
-    :param reader: A :class:`les.model.formats.mps.Reader` instance.
+    :param reader: A :class:`~les.model.formats.mps.Reader` instance.
     :returns: A :class:`MPModel` instance.
     '''
-    logging.info('Read MPS format model from file %s', reader._stream.name)
+    # TODO: fix this.
+    logging.info('Read MPS format model from %s',
+                 hasattr(reader._stream, 'name') and getattr(reader._stream, 'name') or
+                 type(reader._stream))
     model = cls()
     model.set_name(reader.get_name())
     model.set_objective_from_scratch(reader.get_objective_coefficients())
@@ -315,6 +319,8 @@ class MPModel(object_base.ObjectBase):
 
   @classmethod
   def convert_sense_to_operator(cls, sense):
+    if isinstance(sense, unicode):
+      sense = str(sense)
     if type(sense) is types.BuiltinFunctionType:
       return sense
     elif not isinstance(sense, str):
@@ -337,18 +343,18 @@ class MPModel(object_base.ObjectBase):
   def get_constraints(self):
     '''Returns a list of constraints.
 
-    :returns: A list of :class:`les.model.mp_constraint.MPConstraint`
+    :returns: A list of :class:`~les.model.mp_constraint.MPConstraint`
       instances.
     '''
     return self._cons.values()
 
   def get_name(self):
-    '''Returns the model name. Returns :attr:`default_name` if name wasn't
+    '''Returns the model name. Returns :attr:`default_model_name` if name wasn't
     defined.
 
     :returns: A string that represents model's name.
     '''
-    return self._name or self.__class__.default_name
+    return self._name or self.__class__.default_model_name
 
   def get_num_constraints(self):
     '''Returns the number of constraints.'''
@@ -476,8 +482,8 @@ class MPModel(object_base.ObjectBase):
     :param name: A string that represents model name.
     :raises: :exc:`TypeError`
     '''
-    if not type(name) is types.StringType:
-      raise TypeError('name must be a string: %s' % type(name))
+    if not type(name) is types.StringType and not isinstance(name, unicode):
+      raise TypeError('name must be a string or unicode: %s' % type(name))
     self._name = name
 
   def set_constraints(self, constraints):
@@ -500,6 +506,7 @@ class MPModel(object_base.ObjectBase):
     for var in expr.atoms(sympy.Symbol):
       self.add_variable(var)
     self._obj = mp_objective.MPObjective(expr, maximization)
+    self._obj.set_name(self.default_objective_name)
 
   def set_variable_name_format(self, frmt):
     if frmt and type(frmt) is str:

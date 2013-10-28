@@ -35,6 +35,7 @@ class MPModelParameters(object):
     self._name = None
     self._maximization = True
     self._obj_coefs = []
+    self._obj_name = None
     self._cols_lower_bounds = []
     self._cols_upper_bounds = []
     self._cols_names = []
@@ -162,6 +163,7 @@ class MPModelParameters(object):
       self._cols_lower_bounds[var.get_index()] = var.get_lower_bound()
       self._cols_upper_bounds[var.get_index()] = var.get_upper_bound()
       self._cols_names[var.get_index()] = var.get_name()
+    self._obj_name = objective.get_name()
     # Process constraints coefficients, senses and right-hand side.
     cons_coefs = sparse.dok_matrix((m, n), dtype=float)
     self._rows_senses = []
@@ -190,6 +192,9 @@ class MPModelParameters(object):
 
   def get_objective_coefficient(self, i):
     return self._obj_coefs[i]
+
+  def get_objective_name(self):
+    return self._obj_name
 
   def get_rows_coefficients(self):
     '''Returns matrix of constraints coefficients.

@@ -119,9 +119,9 @@ class DecompositionTree(nx.DiGraph):
       node = Node(node_or_model)
     model = node.get_model()
     # Generate model name if necessary.
-    if model.get_name() is model.default_name:
+    if model.get_name() is model.default_model_name:
       model.set_name('%s_%s' % (self._model.get_name(),
-                                model.name_format % len(self)))
+                                model.model_name_format % len(self)))
     super(DecompositionTree, self).add_node(model.get_name(), node)
     return node
 
