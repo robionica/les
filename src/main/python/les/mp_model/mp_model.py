@@ -70,8 +70,8 @@ from les.mp_model import mp_objective
 from les.mp_model import mp_variable
 from les.utils import logging
 
-_FORMAT_EXT_TO_READER_MAP = {
-  '.mps': mps.Reader
+_FORMAT_EXT_TO_DECODER_MAP = {
+  '.mps': mps.Decoder
 }
 
 SENSE_STR_TO_OPERATOR = {
@@ -227,7 +227,7 @@ class MPModel(object_base.ObjectBase):
     elif len(args) in (2, 3):
       return cls.build_from_expressions(*args, **kwargs)
     model = args[0]
-    if isinstance(model, mps.Reader):
+    if isinstance(model, mps.Decoder):
       return cls.build_from_mps(model)
     elif type(model) is types.StringType:
       if not os.path.exists(model):
@@ -238,14 +238,14 @@ class MPModel(object_base.ObjectBase):
         root, ext = os.path.splitext(root)
       else:
         stream = open(model, 'r')
-      reader_class = _FORMAT_EXT_TO_READER_MAP.get(ext)
-      if not reader_class:
+      decoder_class = _FORMAT_EXT_TO_DECODER_MAP.get(ext)
+      if not decoder_class:
         raise Error("Doesn't know how to read %s format. See available formats."
                     % ext)
-      reader = reader_class()
-      reader.parse(stream)
+      decoder = decoder_class()
+      decoder.decode(stream)
       stream.close()
-      return cls.build(reader)
+      return cls.build(decoder)
     else:
       raise TypeError('Do not know how to handle this model.')
 
@@ -257,24 +257,24 @@ class MPModel(object_base.ObjectBase):
     return model
 
   @classmethod
-  def build_from_mps(cls, reader):
+  def build_from_mps(cls, decoder):
     '''Builds a new model from MPS model.
 
-    :param reader: A :class:`~les.model.formats.mps.Reader` instance.
+    :param decoder: A :class:`~les.model.formats.mps.Decoder` instance.
     :returns: A :class:`MPModel` instance.
     '''
     # TODO: fix this.
     logging.info('Read MPS format model from %s',
-                 hasattr(reader._stream, 'name') and getattr(reader._stream, 'name') or
-                 type(reader._stream))
+                 hasattr(decoder._stream, 'name') and getattr(decoder._stream, 'name') or
+                 type(decoder._stream))
     model = cls()
-    model.set_name(reader.get_name())
-    model.set_objective_from_scratch(reader.get_objective_coefficients())
-    model.set_constraints_from_scratch(reader.get_rows_coefficients(),
-                                       reader.get_rows_senses(),
-                                       reader.get_rows_rhs(),
-                                       reader.get_rows_names())
-    for i, name in enumerate(reader.get_columns_names()):
+    model.set_name(decoder.get_name())
+    model.set_objective_from_scratch(decoder.get_objective_coefficients())
+    model.set_constraints_from_scratch(decoder.get_rows_coefficients(),
+                                       decoder.get_rows_senses(),
+                                       decoder.get_rows_rhs(),
+                                       decoder.get_rows_names())
+    for i, name in enumerate(decoder.get_columns_names()):
       model.get_variable_by_index(i).set_name(name)
     return model
 

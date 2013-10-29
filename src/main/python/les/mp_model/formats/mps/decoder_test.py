@@ -18,31 +18,31 @@ from scipy import sparse
 from les.mp_model.formats import mps
 from les.utils import unittest
 
-TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'mps_test_data')
+TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'mps_test_data')
 
-class ReaderTest(unittest.TestCase):
+class DecoderTest(unittest.TestCase):
 
-  def test_read_test1_mps(self):
+  def test_decode_test1_mps(self):
     test1_filename = os.path.join(TEST_DATA_DIR, 'test1.mps')
-    reader = mps.read(test1_filename)
-    self.assert_equal('TESTPROB', reader.get_name())
-    self.assert_equal(['L', 'G', 'E'], reader.get_rows_senses())
-    self.assert_equal(['X', 'Y', 'Z'], reader.get_columns_names())
-    self.assert_equal(['LIM1', 'LIM2', 'LIM3'], reader.get_rows_names())
-    self.assert_equal([5.0, 10.0, 7.0], reader.get_rows_rhs())
-    self.assert_equal([1.0, 4.0, 9.0], reader.get_objective_coefficients())
+    decoder = mps.decode(test1_filename)
+    self.assert_equal('TESTPROB', decoder.get_name())
+    self.assert_equal(['L', 'G', 'E'], decoder.get_rows_senses())
+    self.assert_equal(['X', 'Y', 'Z'], decoder.get_columns_names())
+    self.assert_equal(['LIM1', 'LIM2', 'LIM3'], decoder.get_rows_names())
+    self.assert_equal([5.0, 10.0, 7.0], decoder.get_rows_rhs())
+    self.assert_equal([1.0, 4.0, 9.0], decoder.get_objective_coefficients())
     rows_coefs = sparse.lil_matrix([[1.0,  1.0, 0.0],
                                     [1.0,  0.0, 1.0],
                                     [0.0, -1.0, 1.0]])
     # TODO(d2rk): compare matrices.
 
-  def test_read_10teams_mps(self):
+  def test_decode_10teams_mps(self):
     test1_filename = os.path.join(TEST_DATA_DIR, '10teams.mps')
-    reader = mps.read(test1_filename)
-    self.assert_equal('10teams', reader.get_name())
-    self.assert_equal(2025, len(reader.get_objective_coefficients()))
-    self.assert_equal(230, reader.get_rows_coefficients().shape[0])
-    self.assert_equal(230, len(reader.get_rows_rhs()))
+    decoder = mps.decode(test1_filename)
+    self.assert_equal('10teams', decoder.get_name())
+    self.assert_equal(2025, len(decoder.get_objective_coefficients()))
+    self.assert_equal(230, decoder.get_rows_coefficients().shape[0])
+    self.assert_equal(230, len(decoder.get_rows_rhs()))
 
 if __name__ == '__main__':
   unittest.main()

@@ -18,9 +18,9 @@ from les import mp_model
 from les.mp_model.formats import mps
 from les.utils import unittest
 
-class MPSWriterTest(unittest.TestCase):
+class EncoderTest(unittest.TestCase):
 
-  def test_write(self):
+  def test_encode(self):
     model1 = mp_model.build(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2, 3, 4, 1, 0, 0, 0, 0, 0],
@@ -34,8 +34,8 @@ class MPSWriterTest(unittest.TestCase):
     model1.set_name('DEMO1')
     model1.get_objective().set_name('PRODUCT')
     stream = StringIO.StringIO()
-    mps.write(stream, model1)
-    model2 = mp_model.build(mps.Reader(stream))
+    mps.encode(stream, model1)
+    model2 = mp_model.build(mps.decode(stream))
     self.assert_equal(model1.get_name(), model2.get_name())
     self.assert_equal(model1.get_num_variables(), model2.get_num_variables())
     self.assert_equal(model1.get_num_constraints(), model2.get_num_constraints())
