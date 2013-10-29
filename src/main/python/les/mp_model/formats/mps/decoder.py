@@ -14,20 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''MPS (Mathematical Programming System) is a file format for presenting and
-archiving linear programming (LP) and mixed integer programming problems.
-
-Read more about format specs:
-
-* <http://en.wikipedia.org/wiki/MPS_(format)>
-* <http://lpsolve.sourceforge.net/5.5/mps-format.htm>
-* <http://www.gurobi.com/documentation/5.5/reference-manual/node900>
-'''
-
-from scipy import sparse
 import bz2
 import gzip
 import types
+from scipy import sparse
 import string
 import StringIO
 
@@ -35,8 +25,8 @@ from les.utils import logging
 
 COMMENT = '*'
 
-class Reader(object):
-  '''This class represents MPS-format problem reader.'''
+class Decoder(object):
+  '''This class represents MPS-format model decoder.'''
 
   def __init__(self, filename_or_stream=None):
     self._cols_names = []
@@ -52,7 +42,7 @@ class Reader(object):
     self._rows_rhs = []
     self._stream = None
     if filename_or_stream:
-      self.parse(filename_or_stream)
+      self.decode(filename_or_stream)
 
   def _get_next_line(self):
     self._line = self._buffer.readline()
@@ -61,8 +51,8 @@ class Reader(object):
   def _get_line_fields(self):
     return self._line.split()
 
-  def parse(self, filename_or_stream):
-    '''Parses a file or stream.
+  def decode(self, filename_or_stream):
+    '''Parses a file or stream and decodes the model.
 
     :param filename_or_stream: A string that represents filename or data or
       stream object.
@@ -83,9 +73,9 @@ class Reader(object):
       data = filename_or_stream
     else:
       raise TypeError()
-    self.parse_from_string(data)
+    self.decode_from_string(data)
 
-  def parse_from_string(self, data):
+  def decode_from_string(self, data):
     '''Parses problem from given string.'''
     if not isinstance(data, str) and not isinstance(data, unicode):
       raise TypeError('data must be a string or unicode: %s' % type(data))
@@ -118,13 +108,13 @@ class Reader(object):
           logging.error('Unknown marker')
         continue
       if section_name == 'ROWS':
-        self._parse_rows_section_entry()
+        self._decode_rows_section_entry()
       elif section_name == 'COLUMNS':
-        self._parse_columns_section_entry()
+        self._decode_columns_section_entry()
       elif section_name == 'RHS':
-        self._parse_rhs_section_entry()
+        self._decode_rhs_section_entry()
       elif section_name == 'BOUNDS':
-        self._parse_bounds_section_entry()
+        self._decode_bounds_section_entry()
       else:
         logging.error('Unknown section: %s', section_name)
         break
@@ -133,7 +123,7 @@ class Reader(object):
     self._rows_coefs = self._rows_coefs[0:self._rows_coefs.shape[0],
                                         0:self._rows_coefs.shape[1] - 1]
 
-  def _parse_bounds_section_entry(self):
+  def _decode_bounds_section_entry(self):
     fields = self._get_line_fields()
     i = self._cols_names.index(fields[2])
     if fields[0] == 'LO':
@@ -148,7 +138,7 @@ class Reader(object):
     else:
       raise Exception()
 
-  def _parse_rows_section_entry(self):
+  def _decode_rows_section_entry(self):
     sense, name = self._line.split()
     if sense == 'N':
       self._obj_name = name
@@ -159,7 +149,7 @@ class Reader(object):
                                                  self._rows_coefs.shape[1]))
     self._rows_rhs.append(None)
 
-  def _parse_columns_section_entry(self):
+  def _decode_columns_section_entry(self):
     fields = self._line.split()
     column_name, row_name, value = unicode(fields[0]), unicode(fields[1]), fields[2]
     try:
@@ -181,7 +171,7 @@ class Reader(object):
     if len(fields) > 3:
       self._rows_coefs[self._rows_names.index(fields[3]), j] = float(fields[4])
 
-  def _parse_rhs_section_entry(self):
+  def _decode_rhs_section_entry(self):
     fields = self._get_line_fields()
     rhs_name, row_name, value = unicode(fields[0]), unicode(fields[1]), float(fields[2])
     self._rows_rhs[self._rows_names.index(row_name)] = value
@@ -211,117 +201,3 @@ class Reader(object):
 
   def get_rows_coefficients(self):
     return self._rows_coefs
-
-_SYMPY_MPS_SENSE_MAPPING = {
-  '<=': 'L',
-  '>=': 'G',
-  '==': 'E',
-}
-
-class Writer(object):
-  '''Writes a MPS encoded value to a stream.
-
-  :param filename_or_stream: A filename or stream.
-
-  Example
-
-  Suppose we'd like to write a MP model such as the following::
-
-    model = mp_model.build(
-      [8, 2, 5, 5, 8, 3, 9, 7, 6],
-      [[2, 3, 4, 1, 0, 0, 0, 0, 0],
-       [1, 2, 3, 2, 0, 0, 0, 0, 0],
-       [0, 0, 1, 4, 3, 4, 2, 0, 0],
-       [0, 0, 2, 1, 1, 2, 5, 0, 0],
-       [0, 0, 0, 0, 0, 0, 2, 1, 2],
-       [0, 0, 0, 0, 0, 0, 3, 4, 1]],
-      ['L'] * 6,
-      [7, 6, 9, 7, 3, 5])
-
-  This code writes the above model and prints the encoded value::
-
-    stream = StringIO.StringIO()
-    writer = mps.Writer(stream)
-    writer.write(model)
-    print stream.getvalue()
-  '''
-
-  def __init__(self, filename_or_stream, model=None):
-    self._stream = None
-    if isinstance(filename_or_stream, str):
-      self._stream = open(filename_or_stream, 'w+b')
-    elif isinstance(filename_or_stream, object):
-      self._stream = filename_or_stream
-    else:
-      raise TypeError()
-    if model:
-      self.write(model)
-
-  def write(self, model):
-    from les import mp_model
-    if isinstance(model, mp_model.MPModel):
-      self._write_mp_model(model)
-    else:
-      raise TypeError()
-
-  def _write_mp_model_parameters(self, params):
-    self._stream.write('NAME %s\n' % params.get_name())
-    # Write ROWS section.
-    self._stream.write('ROWS\n')
-    self._stream.write('\tN\t%s\n' % params.get_objective_name())
-    for i in range(params.get_num_rows()):
-      self._stream.write('\t%s\t%s\n'
-                         % (_SYMPY_MPS_SENSE_MAPPING[params.get_rows_senses()[i]],
-                            params.get_rows_names()[i]))
-    # Write COLUMNS section.
-    self._stream.write('COLUMNS\n')
-    cols_coefs = params.get_rows_coefficients().tocsc()
-    for i in range(params.get_num_columns()):
-      col = cols_coefs.getcol(i)
-      self._stream.write('\t%s' % (params.get_columns_names()[i],))
-      self._stream.write('\t%s %d' % (params.get_objective_name(),
-                                      params.get_objective_coefficient(i)))
-      row_indices, col_indices = col.nonzero()
-      counter = 1
-      for ii, ij in zip(row_indices, col_indices):
-        if not counter % 2:
-          self._stream.write('\t%s' % (params.get_columns_names()[i],))
-        self._stream.write('\t%s %d' % (params.get_rows_names()[ii], col[ii, ij]))
-        counter += 1
-        if not counter % 2:
-          self._stream.write('\n')
-      if counter % 2:
-        self._stream.write('\n')
-    # Write RHS section.
-    counter = 0
-    self._stream.write('RHS\n')
-    for i in range(params.get_num_rows()):
-      if not counter % 2:
-        # TODO: fix rhs enumeration.
-        self._stream.write('\tRHS1\t')
-      self._stream.write('%s\t%d\t' % (params.get_rows_names()[i],
-                                       params.get_rows_rhs()[i]))
-      counter += 1
-      if not counter % 2:
-        self._stream.write('\n')
-    if counter % 2:
-      self._stream.write('\n')
-    # Write BOUNDS section.
-    # TODO: fix bounds.
-    self._stream.write('BOUNDS\n')
-    for i in params.get_columns_indices():
-      self._stream.write('\tUP BND1 %s %d\n' % (params.get_columns_names()[i],
-                                                params.get_column_upper_bound(i)))
-      self._stream.write('\tLO BND1 %s %d\n' % (params.get_columns_names()[i],
-                                                params.get_column_lower_bound(i)))
-    self._stream.write('ENDATA')
-
-  def _write_mp_model(self, model):
-    from les.mp_model import mp_model_parameters
-    self._write_mp_model_parameters(mp_model_parameters.build(model))
-
-def read(filename_or_stream):
-  return Reader(filename_or_stream)
-
-def write(filename_or_stream, data):
-  return Writer(filename_or_stream, data)

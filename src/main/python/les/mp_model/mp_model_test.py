@@ -42,10 +42,10 @@ class MPModelTest(unittest.TestCase):
   def build_model_from_mps_file(self, filename):
     if not os.path.exists(filename):
       raise IOError()
-    reader = mps.Reader()
+    decoder = mps.Decoder()
     with open(filename, 'r') as stream:
-      reader.parse(stream)
-    model = mp_model.build(reader)
+      decoder.decode(stream)
+    model = mp_model.build(decoder)
     return model
 
   def test_build_from_expressions(self):
