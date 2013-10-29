@@ -91,13 +91,13 @@ class MPModelTest(unittest.TestCase):
     self.assert_true(model.is_binary())
 
   def test_build_from_scratch1(self):
-    model = mp_model.build_from_scratch(
+    model = mp_model.build(
       [1, 2, 3], [[1, 2, 3], [7, 8, 9]], ['L', 'L'], [2, 5])
     self.assert_equal(3, model.get_num_variables())
     self.assert_equal(2, model.get_num_constraints())
 
   def test_build_from_scratch2(self):
-    model = mp_model.build_from_scratch(
+    model = mp_model.build(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2, 3, 4, 1, 0, 0, 0, 0, 0],
        [1, 2, 3, 2, 0, 0, 0, 0, 0],
