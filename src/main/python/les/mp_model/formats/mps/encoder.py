@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from les.mp_model import mp_model
+from les.mp_model import mp_model_parameters
+
 _SYMPY_MPS_SENSE_MAPPING = {
   '<=': 'L',
   '>=': 'G',
@@ -58,7 +61,6 @@ class Encoder(object):
       self.encode(model)
 
   def encode(self, model):
-    from les import mp_model
     if isinstance(model, mp_model.MPModel):
       self._encode_mp_model(model)
     else:
@@ -117,5 +119,4 @@ class Encoder(object):
     self._stream.write('ENDATA')
 
   def _encode_mp_model(self, model):
-    from les.mp_model import mp_model_parameters
     self._encode_mp_model_parameters(mp_model_parameters.build(model))
