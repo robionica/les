@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les import frontend_solver_pb2
+from les.frontend_solver import frontend_solver_pb2
 from les.decomposers import finkelstein_qb_decomposer
 
 FINKELSTEIN_QB_DECOMPOSER_ID = frontend_solver_pb2.OptimizationParameters.QUASIBLOCK_FINKELSTEIN_DECOMPOSER

@@ -30,6 +30,9 @@ class Node(dict):
     self['shared_variables'] = set()
     self['local_variables'] = set()
 
+  def __hash__(self):
+    return hash(self.get_name())
+
   def __str__(self):
     return ('%s[name="%s", num_shared_vars=%d, num_local_vars=%d]' %
             (self.__class__.__name__, self.get_name(),

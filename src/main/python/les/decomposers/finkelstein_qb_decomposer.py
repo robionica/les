@@ -52,6 +52,7 @@ from les.mp_model import mp_model_parameters
 from les import mp_model
 from les.decomposers import decomposer_base
 from les.graphs.decomposition_tree import DecompositionTree
+from les.utils import logging
 
 def _get_indices(m, i):
   start = m.indptr[i]
@@ -127,6 +128,7 @@ class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
     '''
     if max_separator_size:
       raise NotImplementedError()
+    logging.info('Decompose model %s', self._model_params.get_name())
     self._u = []
     self._s = []
     self._m = []

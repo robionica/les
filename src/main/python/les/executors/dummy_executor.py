@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from les import backend_solvers
-from les import _pipeline
 from les.executors import executor_base
 from les.utils import logging
 
@@ -23,26 +22,25 @@ class Error(executor_base.Error):
 class DummyExecutor(executor_base.ExecutorBase):
   '''Dummy executor doesn't know how to parallelize solving process. It
   simply solves models one by one in order they come.
-
-  :param pipeline: A :class:`~les._pipeline.Pipeline` instance.
   '''
 
-  @classmethod
-  def execute(cls, task):
-    model_params = task.get_model_parameters()
+  def execute(self, request):
+    model_params = request.get_model_parameters()
     logging.debug('Solve model %s that has %d row(s) and %d column(s)'
                   ' with solver %s',
                   model_params.get_name(), model_params.get_num_rows(),
-                  model_params.get_num_columns(), task.get_solver_id())
-    solver = backend_solvers.get_instance_of(task.get_solver_id())
+                  model_params.get_num_columns(), request.get_solver_id())
+    solver = backend_solvers.get_instance_of(request.get_solver_id())
     if not solver:
       raise Error('Cannot instantiate backend solver by id: %d' %
-                  task.get_solver_id())
+                  request.get_solver_id())
     try:
       solver.load_model_params(model_params)
       solver.solve()
     except Exception, e:
       # TODO: send back a report.
-      logging.exception('Cannot execute given task: cannot solve the model.')
+      logging.exception('Cannot execute given request: cannot solve the model.')
       return None
-    return _pipeline.Result(model_params, solver.get_solution())
+    response = self.build_response(model_params, solver.get_solution())
+    self._response_callback(response)
+    return response
