@@ -57,10 +57,11 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     return True
 
   def _solve_single_model(self):
-    task = pipeline.Task(mp_model_parameters.build(self._model))
-    task.set_solver_id(self._optimization_params.default_backend_solver)
-    result = self._executor.execute(task)
-    self._apply_solution(result.get_solution())
+    request = self._executor.build_request()
+    request.set_model(mp_model_parameters.build(self._model))
+    request.set_solver_id(self._optimization_params.default_backend_solver)
+    response = self._executor.execute(request)
+    self._set_solution(response.get_solution())
 
   def get_model(self):
     '''Returns model solved by this solver.
