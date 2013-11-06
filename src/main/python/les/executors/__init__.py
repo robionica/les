@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from les.executors import dummy_executor
-from les import frontend_solver_pb2
+from les.frontend_solver import frontend_solver_pb2
 
 DUMMY_EXECUTOR_ID = frontend_solver_pb2.OptimizationParameters.DUMMY_EXECUTOR
 

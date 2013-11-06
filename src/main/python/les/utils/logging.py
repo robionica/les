@@ -20,7 +20,6 @@ basic_config = basicConfig
 capture_warnings = captureWarnings
 get_logger = getLogger
 
-# NOTE: full-size format: %(levelname) 7s
-DEFAULT_LOG_FORMAT = '[%(created)f:%(module)s:%(levelname).1s] %(message)s'
+DEFAULT_LOG_FORMAT = '[%(created)f:%(module)s:%(levelname)s] %(message)s'
 basic_config(level=CRITICAL, format=DEFAULT_LOG_FORMAT)
 capture_warnings(True)

@@ -15,9 +15,9 @@
 from les import backend_solvers as backend_solver_manager
 from les import mp_model
 from les.mp_model import mp_model_parameters
-from les import _pipeline
+from les.frontend_solver import pipeline
 from les import mp_solver_base
-from les import frontend_solver_pb2
+from les.frontend_solver import frontend_solver_pb2
 from les import executors as executor_manager
 from les import decomposers as decomposer_manager
 from les import solution_tables as solution_table_manager
@@ -35,6 +35,7 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     self._model = None
     self._optimization_params = None
     self._executor = None
+    self._pipeline = None
 
   @classmethod
   def _finalize_optimization_parameters(self, params):
@@ -56,10 +57,11 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     return True
 
   def _solve_single_model(self):
-    task = _pipeline.Task(mp_model_parameters.build(self._model))
-    task.set_solver_id(self._optimization_params.default_backend_solver)
-    result = self._executor.execute(task)
-    self._apply_solution(result.get_solution())
+    request = self._executor.build_request()
+    request.set_model(mp_model_parameters.build(self._model))
+    request.set_solver_id(self._optimization_params.default_backend_solver)
+    response = self._executor.execute(request)
+    self._set_solution(response.get_solution())
 
   def get_model(self):
     '''Returns model solved by this solver.
@@ -108,21 +110,21 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
       logging.info('Cannot create solution table: %d', params.solution_table)
       return
     solution_table.set_decomposition_tree(tree)
-    pipeline = _pipeline.Pipeline(params, decomposition_tree=tree,
-                                  solution_table=solution_table)
+    self._pipeline = pipeline.Pipeline(params, decomposition_tree=tree,
+                                       solution_table=solution_table,
+                                       executor=self._executor)
     logging.info('Pipeline has been successfully created.')
     logging.info('Default backend solver: %d', params.default_backend_solver)
     logging.info('Relaxation backend solvers: %s',
                  params.relaxation_backend_solvers)
     try:
-      self._executor.run(pipeline)
+      self._pipeline.run()
     except Exception, e:
-      logging.exception('Executor failed.')
+      logging.exception('Pipeline failed.')
       return
-    self._apply_solution(solution_table.get_solution())
+    self._set_solution(solution_table.get_solution())
 
-  def _apply_solution(self, solution):
-    # Apply solution.
+  def _set_solution(self, solution):
     objective = self._model.get_objective()
     objective.set_value(solution.get_objective_value())
     # TODO(d2rk): set only triggered variables.

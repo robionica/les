@@ -15,7 +15,7 @@
 import sys
 
 from les.utils import logging
-from les import frontend_solver_pb2
+from les.frontend_solver import frontend_solver_pb2
 
 from les.backend_solvers.knapsack_solver import fractional_knapsack_solver
 try:

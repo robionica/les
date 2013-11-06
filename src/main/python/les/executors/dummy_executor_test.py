@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les import _pipeline
 from les import backend_solvers
 from les.executors import dummy_executor
 from les.executors import executor_base
@@ -41,11 +40,12 @@ class DummyExecutorTest(unittest.TestCase):
       ['<='] * 6,
       [7, 6, 9, 7, 3, 5]
     )
-    task = _pipeline.Task(params)
-    task.set_solver_id(DEFAULT_BACKEND_SOLVER_ID)
-    result = self.executor.execute(task)
-    self.assert_is_not_none(result)
-    solution = result.get_solution()
+    request = self.executor.build_request()
+    request.set_model(params)
+    request.set_solver_id(DEFAULT_BACKEND_SOLVER_ID)
+    response = self.executor.execute(request)
+    self.assert_is_not_none(response)
+    solution = response.get_solution()
     self.assert_is_not_none(solution)
     self.assert_equal(39.0, solution.get_objective_value())
 

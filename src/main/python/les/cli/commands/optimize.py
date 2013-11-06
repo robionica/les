@@ -14,7 +14,7 @@
 
 from __future__ import print_function
 
-from les import frontend_solver_pb2
+from les.frontend_solver import frontend_solver_pb2
 from les import mp_model
 from les import backend_solvers
 from les import solution_tables

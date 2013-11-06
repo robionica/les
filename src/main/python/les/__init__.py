@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-
 from les.mp_model import build as build_model
 from les.mp_model import MPModel
 from les.mp_model import MPConstraint
 from les.mp_model import MPVariable
 from les.mp_model.mp_model_parameters import MPModelParameters
-from les.frontend_solver_pb2 import OptimizationParameters
+from les.frontend_solver.frontend_solver_pb2 import OptimizationParameters

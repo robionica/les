@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les import frontend_solver_pb2
+from les.frontend_solver import frontend_solver_pb2
 from les.solution_tables import sqlite_solution_table
 
 SQLITE_SOLUTION_TABLE_ID = frontend_solver_pb2.OptimizationParameters.SQLITE_SOLUTION_TABLE
