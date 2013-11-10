@@ -50,9 +50,9 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     # TODO(d2rk): merge nodes if necessary.
     for node in tree.get_nodes():
       if node.get_num_shared_variables() > self._optimization_params.max_num_shared_variables:
-        logging.debug('node has too many shared variables: %d > %d',
-                      node.get_num_shared_variables(),
-                      params.max_num_shared_variables)
+        logging.debug('Node %s has too many shared variables: %d > %d',
+                      node.get_name(), node.get_num_shared_variables(),
+                      self._optimization_params.max_num_shared_variables)
         return False
     return True
 
