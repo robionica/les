@@ -52,7 +52,9 @@ class DecompositionTreeTest(unittest.TestCase):
       9 * x7 + 7 * x8 + 6 * x9,
       [2. * x7 + 1. * x8 + 2. * x9 <= 3,
        3. * x7 + 4. * x8 + 1. * x9 <= 5])
-    tree = decomposition_tree.DecompositionTree(model=model, root=submodel3)
+    tree = decomposition_tree.DecompositionTree(model=model)
+    tree.add_node(submodel3)
+    tree.set_root(submodel3)
     self.assert_equal(1, tree.get_num_nodes())
     node3 = tree.node[submodel3.get_name()]
     self.assert_equal(set(), node3.get_shared_variables())
