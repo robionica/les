@@ -16,11 +16,14 @@
 
 from les.frontend_solver import frontend_solver_pb2
 from les.decomposers import finkelstein_qb_decomposer
+from les.decomposers import max_cliques_decomposer
 
 FINKELSTEIN_QB_DECOMPOSER_ID = frontend_solver_pb2.OptimizationParameters.QUASIBLOCK_FINKELSTEIN_DECOMPOSER
+MAX_CLIQUES_DECOMPOSER_ID = 1
 
 _DECOMPOSERS_TABLE = {
   FINKELSTEIN_QB_DECOMPOSER_ID: finkelstein_qb_decomposer.FinkelsteinQBDecomposer,
+  MAX_CLIQUES_DECOMPOSER_ID: max_cliques_decomposer.MaxCliquesDecomposer,
 }
 
 def get_instance_of(decomposer_id, *args, **kwargs):

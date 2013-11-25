@@ -88,13 +88,12 @@ class MPModelBuilder(object):
                  type(decoder._stream))
     model = mp_model.MPModel()
     model.set_name(decoder.get_name())
-    model.set_objective_from_scratch(decoder.get_objective_coefficients())
+    model.set_objective_from_scratch(decoder.get_objective_coefficients(),
+                                     decoder.get_columns_names())
     model.set_constraints_from_scratch(decoder.get_rows_coefficients(),
                                        decoder.get_rows_senses(),
                                        decoder.get_rows_rhs(),
                                        decoder.get_rows_names())
-    for i, name in enumerate(decoder.get_columns_names()):
-      model.get_variable_by_index(i).set_name(name)
     return model
 
   # TODO: add constraints_names.

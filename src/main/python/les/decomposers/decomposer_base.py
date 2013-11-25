@@ -24,6 +24,7 @@ class DecomposerBase(object_base.ObjectBase):
   def __init__(self, model):
     object_base.ObjectBase.__init__(self)
     self._model = None
+    self._decomposition_tree = None
     self._set_model(model)
 
   def get_model(self):
@@ -46,9 +47,9 @@ class DecomposerBase(object_base.ObjectBase):
 
   def get_decomposition_tree(self):
     '''Returns result decomposition tree, once the model has been
-    decomposed.
+    decomposed or None otherwise.
 
     :returns: A :class:`~les.graphs.decomposition_tree.DecompositionTree`
       instance.
     '''
-    raise NotImplementedError()
+    return self._decomposition_tree

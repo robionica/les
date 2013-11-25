@@ -94,13 +94,13 @@ class DecompositionTree(nx.DiGraph):
 
   Edge = Edge
 
-  def __init__(self, model, root):
+  def __init__(self, model, root=None):
     nx.DiGraph.__init__(self)
     if not isinstance(model, mp_model.MPModel):
       raise TypeError('model must be derived from MPModel')
     self._model = model
-    self.add_node(root)
-    self._root = root
+    if not root is None:
+      self.set_root(root)
 
   def __str__(self):
     return ('%s[num_nodes=%d, num_edges=%d]',

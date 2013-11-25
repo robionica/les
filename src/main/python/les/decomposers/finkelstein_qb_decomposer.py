@@ -49,7 +49,8 @@ Once the model has been decomposed, its
 #
 
 from les.mp_model import mp_model_parameters
-from les import mp_model
+from les.mp_model import mp_model
+from les.mp_model import mp_submodel
 from les.decomposers import decomposer_base
 from les.graphs.decomposition_tree import DecompositionTree
 from les.utils import logging
@@ -73,41 +74,20 @@ class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
     self._u = []
     self._s = []
     self._m = []
-    self._decomposition_tree = None
     self._model_params = mp_model_parameters.build(model)
-
-  def _build_submodel(self, rows, cols):
-    model = mp_model.MPModel()
-    # Build new objective function.
-    cols = sorted(list(cols))
-    var = self._model.get_variable_by_index(cols[0])
-    var_ = var.clone()
-    model.add_variable(var_)
-    objective = var_ * self._model.get_objective().get_coefficient(var)
-    for i in range(1, len(cols)):
-      var = self._model.get_variable_by_index(cols[i])
-      var_ = var.clone()
-      model.add_variable(var_)
-      objective += var_ * self._model.get_objective().get_coefficient(var)
-    model.set_objective(objective, self._model.maximization())
-    # Build new constraints.
-    #
-    # TODO(d2rk): optimize set_constraints_from_scratch.
-    model.set_constraints_from_scratch(
-      self._model_params.get_rows_coefficients()[list(rows)][:, cols],
-      [self._model_params.get_rows_senses()[i] for i in rows],
-      [self._model_params.get_rows_rhs()[i] for i in rows],
-      [self._model_params.get_rows_names()[i] for i in rows])
-    return model
 
   def _build_decomposition_tree(self):
     # TODO: fix this. Add default empty separators set.
     s = self._s + [set()]
     # TODO: check connectivity order.
-    prev_model = self._build_submodel(self._u[-1], s[-2] | self._m[-1] | s[-1])
-    tree = DecompositionTree(self._model, root=prev_model)
+    prev_model = mp_submodel.build(self._model,
+                                   self._u[-1], s[-2] | self._m[-1] | s[-1])
+    tree = DecompositionTree(self._model)
+    tree.add_node(prev_model)
+    tree.set_root(prev_model)
     for i in xrange(len(self._u) - 2, -1, -1):
-      model = self._build_submodel(self._u[i], s[i + 1] | self._m[i] | s[i])
+      model = mp_submodel.build(self._model,
+                                self._u[i], s[i + 1] | self._m[i] | s[i])
       tree.add_node(model)
       tree.add_edge(prev_model, model,
                     [self.get_model().get_variable_by_index(i).get_name()
@@ -164,11 +144,3 @@ class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
       prev_rows = all_rows
       cntr += 1
     self._build_decomposition_tree()
-
-  def get_decomposition_tree(self):
-    """Returns decomposition tree.
-
-    :returns: A :class:`~les.decomposition_tree.DecompositionTree` instance or
-              ``None``.
-    """
-    return self._decomposition_tree

@@ -294,7 +294,7 @@ class MPModel(object_base.ObjectBase):
     :raises: :exc:`TypeError`
     '''
     if not isinstance(i, int):
-      raise TypeError()
+      raise TypeError('i must be int: %s' % i)
     var = None
     if i < self.get_num_variables():
       name, var = self._vars.items()[i]
@@ -396,7 +396,7 @@ class MPModel(object_base.ObjectBase):
       raise TypeError('frmt must be a string: %s' % frmt)
     self._var_name_frmt = frmt
 
-  def set_objective_from_scratch(self, coefficients):
+  def set_objective_from_scratch(self, coefficients, variables_names=[]):
     '''Sets objective from a list/tuple of coefficients.
 
     :param coefficients: A list/tuple of coefficients.
@@ -406,10 +406,13 @@ class MPModel(object_base.ObjectBase):
       coefficients = sparse.csr_matrix(numpy.matrix(coefficients), dtype=float)
     else:
       coefficients = sparse.csr_matrix(coefficients)
-    var = self.get_variable_by_index(coefficients.indices[0]) or self.add_variable()
+    add_variable = lambda i: self.add_variable(name=variables_names[i])
+    if len(variables_names) == 0:
+      add_variable = lambda i: self.add_variable()
+    var = self.get_variable_by_index(coefficients.indices[0]) or add_variable(0)
     expr = float(coefficients.data[0]) * var
     for j, coefficient in itertools.izip(coefficients.indices[1:], coefficients.data[1:]):
-      var = self.get_variable_by_index(j) or self.add_variable()
+      var = self.get_variable_by_index(j) or add_variable(j)
       expr += float(coefficient) * var
     self._obj = mp_objective.MPObjective(expr)
 
