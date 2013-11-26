@@ -30,10 +30,10 @@ class _SolveContext(object):
     self.partial_solution = partial_solution
 
   def set_best_objective_value(self, value):
-    if (self.submodel.maximization() and value <= self.best_objective_value):
+    if (self.submodel.maximization() and value < self.best_objective_value):
       return False
     elif (not self.submodel.maximization() and
-          value >= self.best_objective_value):
+          value > self.best_objective_value):
       return False
     self.best_objective_value = value
     return True
@@ -83,16 +83,25 @@ class Pipeline(object):
         and not solution.get_variables_values() is None):
       if ((sum(solution.get_variables_values().tolist()) % 1.0) == 0 and
           solution.is_optimal()):
+        objective_value = cxt.candidate_model.get_objective_offset() + solution.get_objective_value()
         # Check F2: do we need to continue?
         # NOTE: the best objective value will be checked inside of
         # set_best_objective_value().
-        if cxt.set_best_objective_value(solution.get_objective_value()):
+        if cxt.set_best_objective_value(objective_value):
           logging.debug('Model %s has a new best objective value: %f',
-                        response.get_id(), solution.get_objective_value())
+                        response.get_id(), objective_value)
           cxt.partial_solution.update_variables_values(solution)
-          cxt.partial_solution.set_objective_value(solution.get_objective_value())
+          cxt.partial_solution.set_objective_value(objective_value)
           logging.debug('Write %s solution to the table.', response.get_id())
           self._solution_table.write_solution(cxt.submodel, cxt.partial_solution)
+        else:
+          logging.debug("Solution is rejected: not the best objective value"
+                        ": %f <= %f", objective_value, cxt.best_objective_value)
+      else:
+        logging.debug("Solution is rejected: "
+                      "not optimal or fractional solution.")
+    else:
+      logging.debug("Solution is rejected: model wasn't solved.")
     if len(cxt.solver_id_stack) == 0:
       self._search_tree.mark_model_as_solved(cxt.candidate_model)
     else:
