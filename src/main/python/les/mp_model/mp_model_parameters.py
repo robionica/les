@@ -36,6 +36,7 @@ class MPModelParameters(object):
     self._maximization = True
     self._obj_coefs = []
     self._obj_name = None
+    self._obj_offset = 0.0
     self._cols_lower_bounds = []
     self._cols_upper_bounds = []
     self._cols_names = []
@@ -127,6 +128,9 @@ class MPModelParameters(object):
       self._cols_names.append(self.VARIABLE_NAME_FORMAT.format(index=i))
     self._obj_coefs = coefficients
 
+  def set_objective_offset(self, offset):
+    self._obj_offset = offset
+
   def set_rows_from_scratch(self, coefficients, senses, rhs, names=[]):
     # Normalize matrix of coefficients
     if isinstance(coefficients, numpy.matrix):
@@ -195,6 +199,9 @@ class MPModelParameters(object):
 
   def get_objective_name(self):
     return self._obj_name
+
+  def get_objective_offset(self):
+    return self._obj_offset
 
   def get_rows_coefficients(self):
     '''Returns matrix of constraints coefficients.
