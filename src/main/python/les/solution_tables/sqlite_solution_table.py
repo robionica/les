@@ -40,7 +40,7 @@ CREATE TABLE {table_name}(
 );
 '''
 _INDEX_TEMPLATE = 'CREATE INDEX IF NOT EXISTS {index} ON {name}({shared_vars});'
-_INSERT_TEMPLATE = ('INSERT INTO {table_name}({vars_names}, value, true_vars)'
+_INSERT_TEMPLATE = ('INSERT OR REPLACE INTO {table_name}({vars_names}, value, true_vars)'
                     ' VALUES({fields_values})')
 
 class Error(Exception):
