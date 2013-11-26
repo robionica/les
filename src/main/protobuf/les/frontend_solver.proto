@@ -33,6 +33,7 @@ message OptimizationParameters {
   };
   enum Decomposer {
     QUASIBLOCK_FINKELSTEIN_DECOMPOSER = 1;
+    MAX_CLIQUES_DECOMPOSER = 2;
   };
   enum SolutionTable {
     SQLITE_SOLUTION_TABLE = 1;
