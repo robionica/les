@@ -441,7 +441,7 @@ class MPModel(object_base.ObjectBase):
       raise Error('%d != %d != %d' % (coefficients.shape[0], len(senses), len(rhs)))
     add_constraint = add_unnamed_constraint = lambda i, op, c: self.add_constraint(op(c, rhs[i]))
     add_named_constraint = lambda i, op, c: self.add_constraint(op(c, rhs[i]), name=names[i])
-    if names:
+    if len(names):
       add_constraint = add_named_constraint
     for i, row in enumerate(coefficients):
       sense_operator = self.convert_sense_to_operator(senses[i])
