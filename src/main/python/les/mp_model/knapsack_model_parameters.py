@@ -11,16 +11,20 @@ class KnapsackModelParameters(mp_model.MPModelParameters):
   def build_from_mp_model_parameters(cls, mp_model_params):
     knapsack_model_params = cls()
     knapsack_model_params.set_objective_from_scratch(mp_model_params.get_objective_coefficients())
+    knapsack_model_params.set_columns_from_scratch(
+      mp_model_params.get_columns_lower_bounds(),
+      mp_model_params.get_columns_upper_bounds(),
+      mp_model_params.get_columns_names())
     knapsack_model_params.set_rows_from_scratch(mp_model_params.get_rows_coefficients(),
                                                 mp_model_params.get_rows_senses(),
                                                 mp_model_params.get_rows_rhs(),
                                                 mp_model_params.get_rows_names())
-    return params
+    return knapsack_model_params
 
   @classmethod
   def build(cls, *args, **kwargs):
     if len(args) and isinstance(args[0], mp_model.MPModelParameters):
-      params = self.build_from_mp_model_parameters(args[0])
+      params = cls.build_from_mp_model_parameters(args[0])
     elif not len(args) and not len(kwargs):
       return cls()
     elif len(args) == 1:

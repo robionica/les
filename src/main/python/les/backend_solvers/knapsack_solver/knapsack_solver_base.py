@@ -54,5 +54,8 @@ class KnapsackSolverBase(mp_solver_base.MPSolverBase):
 
   def load_model_params(self, params):
     if not isinstance(params, knapsack_model_parameters.KnapsackModelParameters):
-      raise TypeError()
+      if isinstance(params, mp_model_parameters.MPModelParameters):
+        params = knapsack_model_parameters.build(params)
+      else:
+        raise TypeError()
     self._model_params = params
