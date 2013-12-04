@@ -25,11 +25,11 @@ class Knapsack01Solver(knapsack_solver_base.KnapsackSolverBase):
 
   def solve(self):
     '''Starts to solve knapsack problem.'''
-    W = self._kmodel_params.get_max_weight()
-    n = self._kmodel_params.get_num_items() - 1
-    v = self._kmodel_params.get_values()
+    W = int(self._model_params.get_max_weight())
+    n = self._model_params.get_num_items() - 1
+    v = self._model_params.get_profits()
     # TODO(d2rk): remove conversion.
-    w = [int(_) for _ in self._kmodel_params.get_weights()]
+    w = [int(_) for _ in self._model_params.get_weights()]
     c = []  # create an empty 2D array
     for i in xrange(n + 1):  # c[i][j] = value of the optimal solution using
       temp = [0] * (W + 1)  # items 1 through i and maximum weight j

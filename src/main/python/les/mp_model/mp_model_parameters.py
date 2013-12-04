@@ -146,9 +146,14 @@ class MPModelParameters(object):
     if (coefficients.shape[0] != len(senses) or
         len(senses) != len(rhs)):
       raise Exception()
+    if len(names) and len(names) != len(rhs):
+      raise Exception()
+    elif not len(names):
+      names = [None] * len(rhs)
     self._rows_coefs = coefficients
     self._rows_senses = senses
     self._rows_rhs = rhs
+    self._rows_names = names
 
   def read_model(self, model):
     self.set_name(model.get_name())
@@ -170,17 +175,18 @@ class MPModelParameters(object):
     self._obj_name = objective.get_name()
     # Process constraints coefficients, senses and right-hand side.
     cons_coefs = sparse.dok_matrix((m, n), dtype=float)
-    self._rows_senses = []
-    self._rows_rhs = [0.0] * m
-    self._rows_names = [None] * m
+    rows_senses = []
+    rows_rhs = [0.0] * m
+    rows_names = [None] * m
     for constraint in model.get_constraints():
       i = constraint.get_index()
       for var in constraint.get_variables():
         cons_coefs[i, var.get_index()] = constraint.get_coefficient(var)
-      self._rows_senses.append(constraint.get_sense())
-      self._rows_rhs[i] = constraint.get_rhs()
-      self._rows_names[i] = constraint.get_name()
-    self._rows_coefs = cons_coefs.tocsr()
+      rows_senses.append(constraint.get_sense())
+      rows_rhs[i] = constraint.get_rhs()
+      rows_names[i] = constraint.get_name()
+    self.set_rows_from_scratch(cons_coefs.tocsr(), rows_senses, rows_rhs,
+                               rows_names)
 
   def get_num_columns(self):
     return self._rows_coefs.shape[1]

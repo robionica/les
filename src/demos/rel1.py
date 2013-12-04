@@ -33,6 +33,7 @@ def main():
   model.set_name('REL1')
   params = les.OptimizationParameters()
   params.relaxation_backend_solvers.append(les.OptimizationParameters.FRAKTIONAL_KNAPSACK_SOLVER)
+  model.pprint()
   model.optimize(params)
   print 'Objective value:', model.get_objective_value()
   print 'Variables:'
