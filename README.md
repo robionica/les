@@ -40,4 +40,5 @@ file for more information.
 Maintainers
 -----------
 
-Oleksandr Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova.
+Oleksandr Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova,
+[Irina Shapovalova](https://github.com/IreneZR/les).
