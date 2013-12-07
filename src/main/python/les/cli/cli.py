@@ -22,7 +22,7 @@ from les.cli import commands
 from les.cli.commands import command_base
 from les.utils import logging
 
-DEFAULT_LOGGING_LEVEL = logging.INFO
+DEFAULT_LOGGING_LEVEL = "INFO"
 
 EPILOG = ('Post bug reports and suggestions to ' +
           '<https://github.com/d2rk/les/issues>.')
@@ -43,10 +43,10 @@ class CLI(object):
 
   def __init__(self):
     self._argparser = argparse.ArgumentParser(prog='les', epilog=EPILOG)
-    self._argparser.add_argument('--logging-level', dest='logging_level', type=int,
+    self._argparser.add_argument('--logging-level', dest='logging_level', type=str,
                                  metavar='LEVEL', default=DEFAULT_LOGGING_LEVEL,
                                  help=('logging level for the messages such as DEBUG, '
-                                 'INFO, WARNING, ERROR, CRITICAL (default: %d)'
+                                 'INFO, WARNING, ERROR, CRITICAL (default: %s)'
                                  % DEFAULT_LOGGING_LEVEL))
     self._argsubparsers = None
     self._cmds = {}
@@ -89,7 +89,11 @@ class CLI(object):
   def run(self, argv=sys.argv):
     self._args = self._argparser.parse_args(argv[1:])
     logger = logging.get_logger()
-    logger.setLevel(self._args.logging_level)
+    self._args.logging_level = self._args.logging_level.upper()
+    if not self._args.logging_level in ("DEBUG", "INFO", "WARNING", "ERROR",
+                                        "CRITICAL"):
+      self.exit_and_fail("Unknown logging level: %s" % self._args.logging_level)
+    logger.setLevel(getattr(logging, self._args.logging_level))
     result = 0
     try:
       cmd_cls = self._args._command_class
