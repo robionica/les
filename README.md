@@ -36,9 +36,3 @@ License
 This software is licensed under the [Apache License, Version
 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). See the included NOTICE
 file for more information.
-
-Maintainers
------------
-
-Oleksandr Sviridenko, Oleg Shcherbina, Dariana Lemtuzhnikova,
-[Irina Shapovalova](https://github.com/IreneZR/les).
