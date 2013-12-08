@@ -17,10 +17,12 @@ import networkx
 from les.graphs import interaction_graph
 from les.decomposers import decomposer_base
 from les.mp_model import mp_model_parameters
-from les.mp_model import mp_submodel
+from les.mp_model.mp_model_builder import MPModelBuilder
 from les.graphs import decomposition_tree
+from les.utils import logging
 
-class MaxCliquesDecomposer(decomposer_base.DecomposerBase):
+
+class MaxCliqueDecomposer(decomposer_base.DecomposerBase):
 
   def __init__(self, model):
     decomposer_base.DecomposerBase.__init__(self, model)
@@ -39,22 +41,22 @@ class MaxCliquesDecomposer(decomposer_base.DecomposerBase):
         rows_scope.update(rows_indices)
       else:
         rows_scope = rows_scope.intersection(rows_indices)
-    return mp_submodel.build(self._model, list(rows_scope), cols_scope)
+    return MPModelBuilder.build_submodel(self._model, list(rows_scope), cols_scope)
 
   def decompose(self):
     self._decomposition_tree = decomposition_tree.DecompositionTree(self._model)
     igraph = interaction_graph.InteractionGraph(self.get_model())
-    generator = networkx.find_cliques(igraph)
-    # Root...
-    prev_clique = generator.next()
-    prev_submodel = self._build_submodel(prev_clique)
-    self._decomposition_tree.add_node(prev_submodel)
-    self._decomposition_tree.set_root(prev_submodel)
-    # Build the rest of the tree...
-    for clique in generator:
+    cliques = list(map(set, networkx.find_cliques(igraph)))
+    logging.debug("%d clique(s) were found." % len(cliques))
+    submodels_cache = []
+    for i, clique in enumerate(cliques):
       submodel = self._build_submodel(clique)
-      shared_cols_scope = set(clique) & set(prev_clique)
       self._decomposition_tree.add_node(submodel)
-      self._decomposition_tree.add_edge(prev_submodel, submodel,
-                                        shared_cols_scope)
-      prev_clique, prev_submodel = clique, submodel
+      submodels_cache.append(submodel)
+      for j, other_clique in enumerate(cliques[:i]):
+        other_submodel = submodels_cache[j]
+        shared_cols_scope = clique & other_clique
+        if shared_cols_scope:
+          self._decomposition_tree.add_edge(submodel, other_submodel,
+                                            shared_cols_scope)
+    self._decomposition_tree.set_root(submodels_cache[-1])
