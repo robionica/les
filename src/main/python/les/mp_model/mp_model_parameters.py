@@ -16,6 +16,7 @@ from __future__ import absolute_import
 
 import numpy
 from scipy import sparse
+import sys
 
 from les.utils import logging
 
@@ -26,8 +27,8 @@ class MPModelParameters(object):
   '''This class represents model data that can be processed by the solvers.
   '''
 
-  DEFAULT_NAME = 'UNKNOWN'
-  NAME_FORMAT = 'P%d'
+  DEFAULT_MODEL_NAME = 'UNKNOWN'
+  MODEL_NAME_FORMAT = 'P%d'
   VARIABLE_NAME_FORMAT = 'x{index}'
   CONSTRAINT_NAME_FORMAT = 'c{index}'
 
@@ -256,7 +257,7 @@ class MPModelParameters(object):
     return self._cols_names[i]
 
   def get_name(self):
-    return self._name or self.DEFAULT_NAME
+    return self._name or self.DEFAULT_MODEL_NAME
 
   def set_name(self, name):
     self._name = name
