@@ -220,8 +220,8 @@ class SQLiteSolutionTable(db_solution_table_base.DBSolutionTableBase):
       edge = self._decomposition_tree.get_edge_between(model.get_name(), name)
       for i in edge.get_shared_variables():
         if solution.get_variable_value_by_name(i) == 1.0:
-          var = model.get_variable_by_name(i)
-          d += model.get_objective().get_coefficient(var)
+          ii = model.get_columns_names().index(i)
+          d += model.get_objective_coefficients()[ii]
       stmt += [''.join(['SELECT MAX(', name, '.value), ', name, '.true_vars'])]
       stmt += [' '.join(['FROM', name, 'WHERE'])]
       stmt += [' AND '.join(['%s.%s=%d' % (name, i, solution.get_variable_value_by_name(i)) for i in edge.get_shared_variables()])]

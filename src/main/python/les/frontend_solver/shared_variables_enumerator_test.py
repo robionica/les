@@ -16,14 +16,14 @@
 
 from __future__ import with_statement
 
-from les import mp_model
+from les.mp_model import mp_model_parameters
 from les.frontend_solver import shared_variables_enumerator as enumerator
 from les.utils import unittest
 
 class SharedVariablesEnumeratorTest(unittest.TestCase):
 
   def test_generate_models(self):
-    model = mp_model.build(
+    model = mp_model_parameters.MPModelParameters.build_from_scratch(
       [8, 2, 5, 5],
       [[2, 3, 4, 1],
        [1, 2, 3, 2]],
@@ -32,7 +32,7 @@ class SharedVariablesEnumeratorTest(unittest.TestCase):
     )
     with self.assert_raises(enumerator.Error):
       enumerator.SharedVariablesEnumerator(model, (u'x3', u'x5'), (u'x0', u'x2'))
-    g = enumerator.SharedVariablesEnumerator(model, (u'x3', u'x4'), (u'x1', u'x2'))
+    g = enumerator.SharedVariablesEnumerator(model, (u'x2', u'x3'), (u'x0', u'x1'))
     model_solution_pairs = list(g)
     self.assert_equal(4, len(model_solution_pairs))
     # Since we're doing maximization the first values for the given shared

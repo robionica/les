@@ -71,7 +71,6 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
   def __init__(self, original_model, shared_vars, local_vars):
     # TODO(d2rk): do we need to keep shared variables and local variables?
     self._model = None
-    self._model_params = None
     self._shared_vars = []
     self._local_vars = []
     self._shared_vars_indices = []
@@ -82,10 +81,10 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
     return '%s[size=%d]' % (self.__class__.__name__, self._n)
 
   def _set_domain_model(self, domain_model, shared_vars, local_vars):
-    if not isinstance(domain_model, mp_model.MPModel):
+    if not isinstance(domain_model, mp_model_parameters.MPModelParameters):
       raise TypeError()
-    if not domain_model.is_binary():
-      raise TypeError('Enumerator works only with BILP models.')
+    #if not domain_model.is_binary():
+    #  raise TypeError('Enumerator works only with BILP models.')
     if not isinstance(shared_vars, tuple) and not isinstance(shared_vars, set):
       raise TypeError('shared_vars should be a tuple: %s' % shared_vars)
     if not isinstance(local_vars, tuple) and not isinstance(shared_vars, set):
@@ -99,14 +98,13 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
     self._shared_vars = shared_vars
     self._local_vars = local_vars
     try:
-      self._shared_vars_indices = [domain_model.get_variable_by_name(name).get_index()
+      self._shared_vars_indices = [domain_model.get_columns_names().index(name)
                                    for name in shared_vars]
-      self._local_vars_indices = [domain_model.get_variable_by_name(name).get_index()
+      self._local_vars_indices = [domain_model.get_columns_names().index(name)
                                   for name in local_vars]
-    except AttributeError:
+    except ValueError:
       raise Error('Domain model does not containt this variable: %s' % name)
     self._model = domain_model
-    self._model_params = params = mp_model_parameters.build(domain_model)
     self._n = 1 << len(shared_vars)
     self._index = 0
     # TODO(d2rk): this is maximization pattern, add minimization pattern
@@ -117,10 +115,10 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
     self._template = template = _Template()
     # Copy the local part of domain model.
     for i in self._local_vars_indices:
-      template.objective_coefficients.append(params.get_objective_coefficient(i))
-      template.columns_names.append(params.get_column_name(i))
-      template.columns_lower_bounds.append(params.get_column_lower_bound(i))
-      template.columns_upper_bounds.append(params.get_column_upper_bound(i))
+      template.objective_coefficients.append(domain_model.get_objective_coefficient(i))
+      template.columns_names.append(domain_model.get_column_name(i))
+      template.columns_lower_bounds.append(domain_model.get_column_lower_bound(i))
+      template.columns_upper_bounds.append(domain_model.get_column_upper_bound(i))
 
   def gen_candidate_model(self, mask):
     '''Generates a candidate model and partial solution for it by the given
@@ -144,10 +142,10 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
     if not type(mask) in (int, long):
       raise TypeError('mask can be an int or long: %s' % type(mask))
     solution_base = mp_model.MPSolution()
-    solution_base.set_variables_values(self._model_params.get_columns_names(),
-                                       [0.] * self._model_params.get_num_columns())
-    rows_rhs = list(self._model_params.get_rows_rhs())
-    rows_coefs = self._model_params.get_rows_coefficients().tocsc()
+    solution_base.set_variables_values(self._model.get_columns_names(),
+                                       [0.] * self._model.get_num_columns())
+    rows_rhs = list(self._model.get_rows_rhs())
+    rows_coefs = self._model.get_rows_coefficients().tocsc()
     for c, i in enumerate(self._shared_vars_indices):
       if not (mask >> c) & 1:
         continue
@@ -156,8 +154,8 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
       solution_base.get_variables_values()[i] = 1.0
     model_params = mp_model_parameters.build(
       self._template.objective_coefficients,
-      self._model_params.get_rows_coefficients()[:, self._local_vars_indices],
-      self._model_params.get_rows_senses(),
+      self._model.get_rows_coefficients()[:, self._local_vars_indices],
+      self._model.get_rows_senses(),
       rows_rhs,
       self._template.columns_lower_bounds,
       self._template.columns_upper_bounds,
