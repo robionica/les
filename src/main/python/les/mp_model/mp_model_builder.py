@@ -138,8 +138,8 @@ class MPModelBuilder(object):
   @classmethod
   def build_from_scratch(cls, objective_coefficients, constraints_coefficients,
                          constraints_senses, constraints_rhs,
-                         variables_lower_bounds=None,
-                         variables_upper_bounds=None, variables_names=None):
+                         variables_lower_bounds=[],
+                         variables_upper_bounds=[], variables_names=[]):
     '''Builds model from a scratch.
 
     The following code snippet shows how to define two models from scratch,
@@ -168,7 +168,7 @@ class MPModelBuilder(object):
     '''
     logging.debug('Build new model from scratch')
     model = mp_model.MPModel()
-    model.set_objective_from_scratch(objective_coefficients)
+    model.set_objective_from_scratch(objective_coefficients, variables_names)
     model.set_constraints_from_scratch(constraints_coefficients,
                                        constraints_senses, constraints_rhs)
     return model
