@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import timeit
+
 from les import backend_solvers as backend_solver_manager
 from les import mp_model
 from les.mp_model import mp_model_parameters
@@ -90,6 +92,7 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     logging.info('Optimize model %s with %d rows and %d columns.',
                  self._model.get_name(), self._model.get_num_constraints(),
                  self._model.get_num_variables())
+    start_time = timeit.default_timer()
     try:
       decomposer = decomposer_manager.get_instance_of(params.decomposer,
                                                       self._model)
@@ -98,6 +101,8 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     except Exception, e:
       logging.exception('Decomposition has been failed.')
       return
+    logging.info("Model was decomposed in %f second(s)"
+                 % (timeit.default_timer() - start_time,))
     logging.info('Model has been successfully decomposed.')
     tree = decomposer.get_decomposition_tree()
     if not self._process_decomposition_tree(tree):
@@ -118,11 +123,14 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     logging.info('Default backend solver: %d', params.default_backend_solver)
     logging.info('Relaxation backend solvers: %s',
                  params.relaxation_backend_solvers)
+    start_time = timeit.default_timer()
     try:
       self._pipeline.run()
     except Exception, e:
       logging.exception('Pipeline failed.')
       return
+    logging.info("Model was solved in %f second(s)"
+                 % (timeit.default_timer() - start_time,))
     self._set_solution(solution_table.get_solution())
 
   def _set_solution(self, solution):
