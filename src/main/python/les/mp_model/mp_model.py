@@ -99,8 +99,8 @@ class MPModel(object_base.ObjectBase):
     e.g. `c0`, `c1`, etc.
   '''
 
-  default_model_name = 'UNKNOWN'
-  model_name_format = 'P%d'
+  DEFAULT_MODEL_NAME = 'UNKNOWN'
+  MODEL_NAME_FORMAT = 'P%d'
   variable_name_format = 'x{index}'
   constraint_name_format = 'c{index}'
   default_objective_name = 'OBJ'
@@ -223,6 +223,20 @@ class MPModel(object_base.ObjectBase):
     '''Generates variable name.'''
     return self._var_name_frmt.format(**kwargs)
 
+  def get_constraint_by_index(self, i):
+    '''Returns constraint by the given index.
+
+    :param i: An Integer.
+    :returns: A :class:`~les.model.mp_constraint.MPConstraint` instance.
+    :raises: :exc:`TypeError`
+    '''
+    if not isinstance(i, int):
+      raise TypeError('i must be int: %s' % i)
+    var = None
+    if i < self.get_num_constraints():
+      name, constraint = self._cons.items()[i]
+    return constraint
+
   def get_constraints(self):
     '''Returns a list of constraints.
 
@@ -232,12 +246,12 @@ class MPModel(object_base.ObjectBase):
     return self._cons.values()
 
   def get_name(self):
-    '''Returns the model name. Returns :attr:`default_model_name` if name wasn't
+    '''Returns the model name. Returns :attr:`DEFAULT_MODEL_NAME` if name wasn't
     defined.
 
     :returns: A string that represents model's name.
     '''
-    return self._name or self.__class__.default_model_name
+    return self._name or self.__class__.DEFAULT_MODEL_NAME
 
   def get_num_constraints(self):
     '''Returns the number of constraints.'''

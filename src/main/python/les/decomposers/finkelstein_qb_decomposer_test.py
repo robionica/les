@@ -43,13 +43,9 @@ class FinkelsteinQBDecomposerTest(unittest.TestCase):
         self.assert_equal(t[i], r[i])
     tree = decomposer.get_decomposition_tree()
     p0 = tree.node[tree.get_root()].get_model()
-    extract_indices = lambda vars_: set([var.get_index() for var in vars_])
-    self.assert_equal(set([0, 1, 2]), extract_indices(p0.get_variables()))
+    self.assert_equal([u'x7', u'x8', u'x9'], p0.get_columns_names())
     p1 = tree.node[tree.neighbors(tree.get_root())[0]].get_model()
-    self.assert_equal(set([0, 1, 2, 3, 4]), extract_indices(p1.get_variables()))
-    for constraint in p1.get_constraints():
-      self.assert_equal(set([0, 1, 2, 3, 4]),
-                        extract_indices(constraint.get_variables()))
+    self.assert_equal([u'x3', u'x4', u'x5', u'x6', u'x7'], p1.get_columns_names())
 
   def rtest_decompose2(self):
     model = linear_model.build(

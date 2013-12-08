@@ -15,8 +15,10 @@
 import gzip
 import os
 import types
+from scipy import sparse
 
 from les.mp_model import mp_model
+from les.mp_model import mp_model_parameters
 from les.mp_model.formats import mps
 from les.utils import logging
 
@@ -26,6 +28,42 @@ _FORMAT_EXT_TO_DECODER_MAP = {
 
 class MPModelBuilder(object):
   '''The builder builds MP model instances.'''
+
+  @classmethod
+  def build_submodel(cls, model, rows_scope, columns_scope):
+    """Builds a submodel/slice on top of the another model."""
+    submodel = mp_model_parameters.MPModelParameters()
+    # Build objective function and define columns.
+    columns_scope = sorted(list(columns_scope))
+    rows_scope = list(rows_scope)
+    col_coefs = []
+    col_lower = []
+    col_upper = []
+    col_names = []
+    for i in range(len(columns_scope)):
+      var = model.get_variable_by_index(columns_scope[i])
+      columns_scope[i] = var.get_name()
+      col_lower.append(var.get_lower_bound())
+      col_upper.append(var.get_upper_bound())
+      col_names.append(var.get_name())
+      col_coefs.append(model.get_objective().get_coefficient(var))
+    submodel.set_objective_from_scratch(col_coefs)
+    submodel.set_columns_from_scratch(col_lower, col_upper, col_names)
+    # Build rows.
+    row_senses = []
+    row_rhs = []
+    row_names = []
+    row_coefs = sparse.dok_matrix((len(rows_scope), len(columns_scope)), dtype=float)
+    for j in range(len(rows_scope)):
+      constraint = model.get_constraint_by_index(rows_scope[j])
+      row_names.append(constraint.get_name())
+      row_rhs.append(constraint.get_rhs())
+      row_senses.append(constraint.get_sense())
+      for var in constraint.get_variables():
+        if var.get_name() in columns_scope:
+          row_coefs[j, columns_scope.index(var.get_name())] = constraint.get_coefficient(var)
+    submodel.set_rows_from_scratch(row_coefs.tocsr(), row_senses, row_rhs, row_names)
+    return submodel
 
   @classmethod
   def build(cls, *args, **kwargs):
@@ -100,8 +138,8 @@ class MPModelBuilder(object):
   @classmethod
   def build_from_scratch(cls, objective_coefficients, constraints_coefficients,
                          constraints_senses, constraints_rhs,
-                         variables_lower_bounds=None,
-                         variables_upper_bounds=None, variables_names=None):
+                         variables_lower_bounds=[],
+                         variables_upper_bounds=[], variables_names=[]):
     '''Builds model from a scratch.
 
     The following code snippet shows how to define two models from scratch,
@@ -130,7 +168,7 @@ class MPModelBuilder(object):
     '''
     logging.debug('Build new model from scratch')
     model = mp_model.MPModel()
-    model.set_objective_from_scratch(objective_coefficients)
+    model.set_objective_from_scratch(objective_coefficients, variables_names)
     model.set_constraints_from_scratch(constraints_coefficients,
                                        constraints_senses, constraints_rhs)
     return model
