@@ -17,7 +17,8 @@ import timeit
 from les import backend_solvers as backend_solver_manager
 from les import mp_model
 from les.mp_model import mp_model_parameters
-from les.frontend_solver import pipeline
+from les.pipeline import Pipeline
+from les.frontend_solver.driver import Driver
 from les import mp_solver_base
 from les.frontend_solver import frontend_solver_pb2
 from les import executors as executor_manager
@@ -101,13 +102,13 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
     except Exception, e:
       logging.exception('Decomposition has been failed.')
       return
-    logging.info("Model was decomposed in %f second(s)"
+    logging.info("Model was decomposed in %f second(s)."
                  % (timeit.default_timer() - start_time,))
-    logging.info('Model has been successfully decomposed.')
     tree = decomposer.get_decomposition_tree()
     if not self._process_decomposition_tree(tree):
       return
-    self._executor = executor_manager.get_instance_of(params.executor)
+    self._pipeline = Pipeline()
+    self._executor = executor_manager.get_instance_of(params.executor, self._pipeline)
     logging.debug('Executor: %s', self._executor.__class__.__name__)
     if tree.get_num_nodes() == 1:
       return self._solve_single_model()
@@ -116,18 +117,22 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
       logging.info('Cannot create solution table: %d', params.solution_table)
       return
     solution_table.set_decomposition_tree(tree)
-    self._pipeline = pipeline.Pipeline(params, decomposition_tree=tree,
-                                       solution_table=solution_table,
-                                       executor=self._executor)
-    logging.info('Pipeline has been successfully created.')
+    self._driver = Driver(params, self._pipeline, decomposition_tree=tree,
+                          solution_table=solution_table)
     logging.info('Default backend solver: %d', params.default_backend_solver)
     logging.info('Relaxation backend solvers: %s',
                  params.relaxation_backend_solvers)
-    start_time = timeit.default_timer()
     try:
-      self._pipeline.run()
+      self._executor.start()
+      start_time = timeit.default_timer()
+      self._driver.run()
+      self._executor.stop()
+    except KeyboardInterrupt:
+      self._executor.stop()
+      return
     except Exception, e:
-      logging.exception('Pipeline failed.')
+      logging.exception("Driver failed.")
+      self._executor.stop()
       return
     logging.info("Model was solved in %f second(s)"
                  % (timeit.default_timer() - start_time,))

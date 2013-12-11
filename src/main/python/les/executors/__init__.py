@@ -23,7 +23,7 @@ _EXECUTORS_TABLE = {
   DUMMY_EXECUTOR_ID  : dummy_executor.DummyExecutor,
 }
 
-def get_instance_of(executor_id):
+def get_instance_of(executor_id, *args, **kwargs):
   '''Returns an instance of the executor defined by `executor_id`, or `None`
   otherwise.
   '''
@@ -32,4 +32,4 @@ def get_instance_of(executor_id):
   if not executor_id in _EXECUTORS_TABLE:
     return None
   executor_class = _EXECUTORS_TABLE[executor_id]
-  return executor_class()
+  return executor_class(*args, **kwargs)

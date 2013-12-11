@@ -19,6 +19,7 @@ from les.mp_model import mp_solution
 from les.solution_tables import solution_table_base
 from les.frontend_solver import search_tree
 
+
 class _SolveContext(object):
 
   def __init__(self, submodel, candidate_model, solver_id_stack,
@@ -39,38 +40,36 @@ class _SolveContext(object):
     return True
 
 
-class Pipeline(object):
+class Driver(object):
 
-  def __init__(self, optimization_parameters, decomposition_tree,
-               solution_table, executor):
-    self._executor = None
+  def __init__(self, optimization_parameters, pipeline, decomposition_tree,
+               solution_table):
+    self._pipeline = pipeline
     self._search_tree = search_tree.SearchTree(decomposition_tree)
     self._solution_table = solution_table
     self._solver_id_stack = list(optimization_parameters.relaxation_backend_solvers)
     self._solver_id_stack.append(optimization_parameters.default_backend_solver)
     self._active_contexts = collections.OrderedDict()
     self._frozen_contexts = {}
-    self._set_executor(executor)
-
-  def _set_executor(self, executor):
-    self._executor = executor
-    executor.set_response_callback(self.process_response)
 
   def run(self):
-    while not self._search_tree.is_empty():
-      if (self._executor.is_busy() or
-          (self._search_tree.is_blocked() and len(self._active_contexts) == 0)):
+    while True:
+      if self._pipeline.has_responses():
+        self.process_response(self._pipeline.get_response())
+      if self._search_tree.is_empty():
+        break
+      if (self._search_tree.is_blocked() and len(self._active_contexts) == 0):
         continue
       if len(self._active_contexts) == 0:
         submodel, candidate_model, partial_solution = self._search_tree.next_unsolved_model()
         self._active_contexts[candidate_model.get_name()] = _SolveContext(
           submodel, candidate_model, list(self._solver_id_stack), partial_solution)
       name, cxt = self._active_contexts.popitem()
-      request = self._executor.build_request()
+      request = self._pipeline.build_request()
       request.set_model(cxt.candidate_model)
       request.set_solver_id(cxt.solver_id_stack[0])
       self._frozen_contexts[name] = cxt
-      self._executor.execute(request)
+      self._pipeline.put_request(request)
 
   def process_response(self, response):
     cxt = self._frozen_contexts.pop(response.get_id())

@@ -19,14 +19,18 @@ from les.executors import dummy_executor
 from les.executors import executor_base
 from les.mp_model import mp_model_parameters
 from les.utils import unittest
+from les.pipeline import Pipeline
+
 
 DEFAULT_BACKEND_SOLVER_ID = backend_solvers.get_default_solver_id()
+
 
 @unittest.skip_if(DEFAULT_BACKEND_SOLVER_ID is None, 'no backend solvers')
 class DummyExecutorTest(unittest.TestCase):
 
   def setup(self):
-    self.executor = dummy_executor.DummyExecutor()
+    self.pipeline = Pipeline()
+    self.executor = dummy_executor.DummyExecutor(self.pipeline)
 
   def test_execute_task(self):
     params = mp_model_parameters.build(
@@ -40,7 +44,7 @@ class DummyExecutorTest(unittest.TestCase):
       ['<='] * 6,
       [7, 6, 9, 7, 3, 5]
     )
-    request = self.executor.build_request()
+    request = self.pipeline.build_request()
     request.set_model(params)
     request.set_solver_id(DEFAULT_BACKEND_SOLVER_ID)
     response = self.executor.execute(request)
