@@ -15,37 +15,13 @@
 from les.graphs import decomposition_tree
 from les.utils import logging
 from les.frontend_solver import shared_variables_enumerator
-
-class _LazyDecompositionTreeTraversal:
-
-  def __init__(self, tree):
-    if not isinstance(tree, decomposition_tree.DecompositionTree):
-      raise TypeError()
-    if not tree.get_leaves():
-      raise Error('Empty tree, no leaves.')
-    self._tree = tree
-    self._visited_nodes = set()
-    self._unvisited_nodes = set(tree.get_leaves())
-
-  def mark_node_as_visited(self, node):
-    unvisited_parent_nodes = set()
-    self._visited_nodes.add(node.get_name())
-    self._unvisited_nodes.remove(node.get_name())
-    for v in self._tree.predecessors(node.get_name()):
-      if (v not in self._visited_nodes and
-          set(self._tree.neighbors(v)) <= self._visited_nodes):
-        unvisited_parent_nodes.add(v)
-    self._unvisited_nodes.update(unvisited_parent_nodes)
-    return [self._tree.node[name] for name in unvisited_parent_nodes]
-
-  def get_unvisited_nodes(self):
-    return [self._tree.node[name] for name in self._unvisited_nodes]
+from les.utils.lazy_decomposition_tree_traversal import LazyDecompositionTreeTraversal
 
 
 class SearchTree(object):
 
   def __init__(self, decomposition_tree):
-    self._dtree_traversal = _LazyDecompositionTreeTraversal(decomposition_tree)
+    self._dtree_traversal = LazyDecompositionTreeTraversal(decomposition_tree)
     self._enumerators = {}
     self._unsolved_models = {}
     self._unsolved_models_counter = {}
