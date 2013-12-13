@@ -17,24 +17,27 @@ import sympy
 
 from les import object_base
 
+
 class Error(Exception):
   pass
+
 
 class Term(sympy.Dummy, object_base.ObjectBase, object_base.Cloneable):
 
   def __new__(meta_class, *args, **kwargs):
     return sympy.Dummy.__new__(meta_class, str(uuid.uuid1()))
 
+
 # TODO(d2rk): remove objective_coefficient.
 class MPVariable(Term):
-  '''This class represents the base variable type. Variables are always
+  """This class represents the base variable type. Variables are always
   associated with a particular problem model.
 
   :param lower_bound: Lower bound for new variable.
   :param upper_bound: Upper bound for new variable.
   :param vtype: Variable type: MPVariable.BINARY.
   :param name: Variable name.
-  '''
+  """
 
   VAR_TYPE_RANGE = range(2)
   (BINARY, INTEGER) = VAR_TYPE_RANGE
@@ -74,22 +77,22 @@ class MPVariable(Term):
     return other
 
   def is_binary(self):
-    '''Returns whether this variable is binary variable.
+    """Returns whether this variable is binary variable.
 
     :returns: `True` or `False`.
-    '''
+    """
     return self._vtype is self.BINARY
 
   def get_name(self):
-    '''Returns the name of the variable.'''
+    """Returns the name of the variable."""
     return self._name
 
   def get_upper_bound(self):
-    '''Returns the variable upper bound value.'''
+    """Returns the variable upper bound value."""
     return self._upper_bound
 
   def get_lower_bound(self):
-    '''Returns the variable lower bound value.'''
+    """Returns the variable lower bound value."""
     return self._lower_bound
 
   def get_value(self):

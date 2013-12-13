@@ -15,21 +15,22 @@
 from les.backend_solvers.knapsack_solver import knapsack_solver_base
 from les.mp_model import mp_solution
 
+
 class Knapsack01Solver(knapsack_solver_base.KnapsackSolverBase):
-  '''This class implements a dynamic programming algorithm for the 0-1 knapsack
+  """This class implements a dynamic programming algorithm for the 0-1 knapsack
   problem.
-  '''
+  """
 
   def __init__(self):
     knapsack_solver_base.KnapsackSolverBase.__init__(self)
 
   def solve(self):
-    '''Starts to solve knapsack problem.'''
-    W = int(self._model_params.get_max_weight())
-    n = self._model_params.get_num_items() - 1
-    v = self._model_params.get_profits()
+    """Starts to solve knapsack problem."""
+    W = int(self._model.get_max_weight())
+    n = self._model.get_num_items() - 1
+    v = self._model.get_profits()
     # TODO(d2rk): remove conversion.
-    w = [int(_) for _ in self._model_params.get_weights()]
+    w = [int(_) for _ in self._model.get_weights()]
     c = []  # create an empty 2D array
     for i in xrange(n + 1):  # c[i][j] = value of the optimal solution using
       temp = [0] * (W + 1)  # items 1 through i and maximum weight j
@@ -56,7 +57,7 @@ class Knapsack01Solver(knapsack_solver_base.KnapsackSolverBase):
         vars_vals[i] = 1.0
         W = W - w[i]
       i = i-1
-    self._solution.set_variables_values(self._model_params.get_columns_names(),
+    self._solution.set_variables_values(self._model.get_columns_names(),
                                         vars_vals)
 
   def get_solution(self):

@@ -16,11 +16,9 @@ import timeit
 
 from les import backend_solvers as backend_solver_manager
 from les import mp_model
-from les.mp_model import mp_model_parameters
 from les.pipeline import Pipeline
 from les.frontend_solver.driver import Driver
 from les import mp_solver_base
-from les.frontend_solver import frontend_solver_pb2
 from les import executors as executor_manager
 from les import decomposers as decomposer_manager
 from les import solution_tables as solution_table_manager
@@ -84,15 +82,15 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
   def solve(self, params=None):
     if not self._model:
       raise Error()
-    if params and not isinstance(params, frontend_solver_pb2.OptimizationParameters):
+    if params and not isinstance(params, mp_model.OptimizationParameters):
       raise TypeError()
     if not params:
-      params = frontend_solver_pb2.OptimizationParameters()
+      params = mp_model.OptimizationParameters()
     self._finalize_optimization_parameters(params)
     self._optimization_params = params
     logging.info('Optimize model %s with %d rows and %d columns.',
-                 self._model.get_name(), self._model.get_num_constraints(),
-                 self._model.get_num_variables())
+                 self._model.get_name(), self._model.get_num_rows(),
+                 self._model.get_num_columns())
     start_time = timeit.default_timer()
     try:
       decomposer = decomposer_manager.get_instance_of(params.decomposer,
@@ -136,12 +134,4 @@ class FrontendSolver(mp_solver_base.MPSolverBase):
       return
     logging.info("Model was solved in %f second(s)"
                  % (timeit.default_timer() - start_time,))
-    self._set_solution(solution_table.get_solution())
-
-  def _set_solution(self, solution):
-    objective = self._model.get_objective()
-    objective.set_value(solution.get_objective_value())
-    # TODO(d2rk): set only triggered variables.
-    for var in self._model.get_variables():
-      if var.get_name() in solution.get_variables_names():
-        var.set_value(solution.get_variable_value_by_name(var.get_name()))
+    self._model.set_solution(solution_table.get_solution())

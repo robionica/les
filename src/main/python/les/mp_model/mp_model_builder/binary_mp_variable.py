@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.mp_model.mp_solution import MPSolution
-from les.mp_model.mp_model import MPModel
-from les.mp_model.mp_model_builder import MPModelBuilder
-from les.mp_model.mp_model_pb2 import OptimizationParameters
+from les.mp_model.mp_model_builder import mp_variable
 
-build = MPModelBuilder.build_from
+class BinaryMPVariable(mp_variable.MPVariable):
+  """This class represents binary variable (also known as a dummy variable,
+  indicator variable, design variable, Boolean indicator, categorical variable).
+
+  :param name: The string that represents variable name.
+  """
+
+  def __init__(self, name=None):
+    mp_variable.MPVariable.__init__(self, 0.0, 1.0,
+                                    mp_variable.MPVariable.BINARY, name)

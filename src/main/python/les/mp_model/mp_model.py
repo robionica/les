@@ -12,78 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''The :class:`MPModel` represents mathematical programming (MP) problem.
-
-The following snippet shows how to build binary problem from scratch::
-
-  import les
-  model = les.build_model(
-    # Objective function
-    ([8., 2., 5., 5., 8., 3., 9., 7., 6.], True),
-    # Matrix A
-    [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
-     [1., 2., 3., 2., 0., 0., 0., 0., 0.],
-     [0., 0., 1., 4., 3., 4., 2., 0., 0.],
-     [0., 0., 2., 1., 1., 2., 5., 0., 0.],
-     [0., 0., 0., 0., 0., 0., 2., 1., 2.],
-     [0., 0., 0., 0., 0., 0., 3., 4., 1.]],
-    # Senses
-    ['L'] * 6,
-    # Right-hand side
-    [7, 6, 9, 7, 3, 5]
-  )
-  model.pprint()
-
-Will print::
-
-  maximize 8.0 * x1 + 2.0 * x2 + 5.0 * x3 + 5.0 * x4 + 8.0 * x5 + 3.0 * x6 +
-           9.0 * x7 + 7.0 * x8 + 6.0 * x9
-  s.t.
-  c1: 2.0 * x1 + 3.0 * x2 + 4.0 * x3 + 1.0 * x4 <= 7.0
-  c2: 1.0 * x1 + 2.0 * x2 + 3.0 * x3 + 2.0 * x4 <= 6.0
-  c3: 1.0 * x3 + 4.0 * x4 + 3.0 * x5 + 4.0 * x6 + 2.0 * x7 <= 9.0
-  c4: 2.0 * x3 + 1.0 * x4 + 1.0 * x5 + 2.0 * x6 + 5.0 * x7 <= 7.0
-  c5: 2.0 * x7 + 1.0 * x8 + 2.0 * x9 <= 3.0
-  c6: 3.0 * x7 + 4.0 * x8 + 1.0 * x9 <= 5.0
-
-.. seealso:: http://en.wikipedia.org/wiki/Optimization_(mathematics)
-'''
-
-from __future__ import absolute_import
-
-import collections
+import uuid
 import numpy
-import sympy
-from sympy.core import relational
-import sys
-import types
-import itertools
 from scipy import sparse
+import sys
 
-from les import object_base
-from les.mp_model import binary_mp_variable
-from les.mp_model import mp_constraint
-from les.mp_model import mp_objective
-from les.mp_model import mp_variable
 from les.utils import logging
+from les import object_base
 
-SENSE_STR_TO_OPERATOR = {
-  'L'  : relational.Le,
-  'G'  : relational.Ge,
-  'E'  : relational.Eq,
-
-  '<=' : relational.Le,
-  '<'  : relational.Lt,
-  '>=' : relational.Ge,
-  '>'  : relational.Gt,
-}
 
 class Error(Exception):
   pass
 
-# TODO(d2rk): make global variable register to track MPVariable instances.
+
 class MPModel(object_base.ObjectBase):
-  '''The model of mathmatical programming problem consists of a set of variables
+  """The model of mathmatical programming problem consists of a set of variables
   (where a variable is represented by
   :class:`~les.model.mp_variable.MPVariable`) and a set of constraints (where a
   constraint is represented by :class:`~les.model.mp_constraint.MPConstraint`).
@@ -97,184 +40,135 @@ class MPModel(object_base.ObjectBase):
   :param constraint_name_format: A string that represents a format that will be
     used to automitically generate constraint names if they were not provided,
     e.g. `c0`, `c1`, etc.
-  '''
+  """
 
-  DEFAULT_MODEL_NAME = 'UNKNOWN'
-  MODEL_NAME_FORMAT = 'P%d'
-  variable_name_format = 'x{index}'
-  constraint_name_format = 'c{index}'
-  default_objective_name = 'OBJ'
-
-  def __init__(self, name=None, variable_name_format=None,
-               constraint_name_format=None):
-    self._cons = collections.OrderedDict()
-    self._cons_name_frmt = self.constraint_name_format
-    self._maximize = True
-    self._name = None
-    self._obj = None
-    self._vars = collections.OrderedDict()
-    self._var_name_frmt = self.variable_name_format
-    if variable_name_format:
-      self.set_variable_name_format(variable_name_format)
-    if constraint_name_format:
-      self.set_constraint_format(constraint_name_format)
-    if name:
-      self.set_name(name)
+  def __init__(self, name=None):
+    self._name = name or str(uuid.uuid1())
+    self._maximization = True
+    self.objective_coefficients = []
+    self.objective_name = None
+    self.objective_value = None
+    self.columns_lower_bounds = []
+    self.columns_upper_bounds = []
+    self.columns_names = []
+    self.columns_values = []
+    self.rows_names = []
+    self.rows_coefficients = None
+    self.rows_rhs = []
+    self.rows_senses = []
 
   def __str__(self):
-    return '%s[name=%s, num_constraints=%d, num_variables=%d]' \
-        % (self.__class__.__name__, self.get_name(), self.get_num_constraints(),
-           self.get_num_variables())
-
-  def add_constraint(self, *args, **kwargs):
-    '''Adds and returns a model constraint.
-
-    Examples::
-
-      c1 = model.add_constraint(2.0 * x + 3.0 * y <= 10.0, 'c1')
-      c2 = model.add_constraint(3.0 * x, 'L', 8.0)
-
-    :param expression: Left-hand side for new constraint.
-    :param sense: Sense for new constraint.
-    :param rhs: Right-hand side for new constraint.
-    :param name: Constraint name.
-    :return: A :class:`les.model.mp_constraint.MPConstraint` instance.
-    '''
-    name = None
-    cons = None
-    if (len(args) in (1, 2) and
-        not isinstance(args[0], mp_constraint.MPConstraint)):
-      cons = mp_constraint.MPConstraint(args[0])
-      name = args[1] if len(args) == 2 else kwargs.get('name', None)
-    elif len(args) in (3, 4):
-      sense = self.convert_sense_to_operator(args[1])
-      cons = mp_constraint.MPConstraint(sense(args[0], args[2]))
-      name = args[3] if len(args) == 4 else kwargs.get('name', None)
-    else:
-      raise Error()
-    if not cons.get_name():
-      if not name:
-        name = self._cons_name_frmt.format(index=self.get_num_constraints() + 1)
-      cons.set_name(name)
-    # TODO(d2rk): fix the case when we remove the constraint.
-    cons.set_index(self.get_num_constraints())
-    self._cons[cons.get_name()] = cons
-    return cons
-
-  def add_variables(self, variables):
-    '''Adds variables from iterable `variables`.
-
-    .. seealso:: :func:`add_variable`
-    '''
-    if not isinstance(variables, collections.Iterable):
-      raise TypeError()
-    for var in variables:
-      self.add_variable(var)
-
-  def add_variable(self, *args, **kwargs):
-    '''Adds new variable.
-
-    :returns: :class:`~les.model.mp_variable.MPVariable` instance.
-    :raises: :exc:`TypeError`
-    '''
-    var = None
-    if len(args) == 1 and isinstance(args[0], mp_variable.MPVariable):
-      var = args[0]
-    else:
-      var = mp_variable.MPVariable(*args, **kwargs)
-    if not var.get_name():
-      var.set_name(self.gen_variable_name(index=self.get_num_variables() + 1))
-    if var.get_name() in self._vars:
-      return
-    # TODO(d2rk): how about to remove the variable?
-    i = self.get_num_variables()
-    var.set_index(i)
-    self._vars[var.get_name()] = var
-    return var
-
-  def add_binary_variable(self, *args, **kwargs):
-    var = None
-    if len(args) == 1 and isinstance(args[0], mp_variable.MPVariable):
-      var = args[0]
-    else:
-      var = binary_mp_variable.BinaryMPVariable(*args, **kwargs)
-    return self.add_variable(var)
-
-  @classmethod
-  def convert_sense_to_operator(cls, sense):
-    if isinstance(sense, unicode):
-      sense = str(sense)
-    if type(sense) is types.BuiltinFunctionType:
-      return sense
-    elif not isinstance(sense, str):
-      raise TypeError('Unknown sense type: ' + str(type(sense)))
-    return SENSE_STR_TO_OPERATOR[sense.upper()]
-
-  @classmethod
-  def convert_senses_to_operators(cls, senses):
-    if not isinstance(senses, collections.Iterable):
-      raise TypeError()
-    operators = []
-    for sense in senses:
-      operators.append(cls.convert_sense_to_operator(sense))
-    return operators
-
-  def gen_variable_name(self, **kwargs):
-    '''Generates variable name.'''
-    return self._var_name_frmt.format(**kwargs)
-
-  def get_constraint_by_index(self, i):
-    '''Returns constraint by the given index.
-
-    :param i: An Integer.
-    :returns: A :class:`~les.model.mp_constraint.MPConstraint` instance.
-    :raises: :exc:`TypeError`
-    '''
-    if not isinstance(i, int):
-      raise TypeError('i must be int: %s' % i)
-    var = None
-    if i < self.get_num_constraints():
-      name, constraint = self._cons.items()[i]
-    return constraint
-
-  def get_constraints(self):
-    '''Returns a list of constraints.
-
-    :returns: A list of :class:`~les.model.mp_constraint.MPConstraint`
-      instances.
-    '''
-    return self._cons.values()
-
-  def get_name(self):
-    '''Returns the model name. Returns :attr:`DEFAULT_MODEL_NAME` if name wasn't
-    defined.
-
-    :returns: A string that represents model's name.
-    '''
-    return self._name or self.__class__.DEFAULT_MODEL_NAME
-
-  def get_num_constraints(self):
-    '''Returns the number of constraints.'''
-    return len(self._cons)
-
-  def get_num_variables(self):
-    '''Returns the number of variables.
-
-    :returns: The number of variables.
-    '''
-    return len(self._vars)
-
-  # TODO(d2rk): update objective function once new function has been added?
-  def get_objective(self):
-    '''Returns objective function.
-
-    :returns: An :class:`~les.model.mp_objective.MPObjective` instance.
-    '''
-    return self._obj
+    return ("%s[num_rows=%d, num_columns=%d, maximization=%s]" %
+            (self.__class__.__name__, self.get_num_rows(),
+             self.get_num_columns(), self.maximization()))
 
   def get_objective_value(self):
-    '''Returns objective function value or `None` if it wasn't defined.'''
-    return self._obj and self._obj.get_value() or None
+    return self.objective_value
+
+  def set_solution(self, solution):
+    self.objective_value = solution.get_objective_value()
+    # TODO(d2rk): set only triggered variables.
+    for i in range(self.get_num_columns()):
+      name = self.columns_names[i]
+      if name in solution.get_variables_names():
+        self.columns_values[i] = solution.get_variable_value_by_name(name)
+
+  def is_binary(self):
+    """Returns whether the model is binary integer linear programming
+    model.
+
+    :returns: `True` or `False`.
+    """
+    for i in range(len(self.objective_coefficients)):
+      if (self.columns_lower_bounds[i] != 0.0
+          or self.columns_upper_bounds[i] != 1.0):
+        return False
+    return True
+
+  def optimize(self, optimization_params=None):
+    """Optimize the model by using given optimization parameters."""
+    from les import frontend_solver
+    solver = frontend_solver.FrontendSolver()
+    solver.load_model(self)
+    solver.solve(params=optimization_params)
+
+  def set_columns(self, columns_lower_bounds=[], columns_upper_bounds=[],
+                  columns_names=[]):
+    if (len(columns_lower_bounds) != len(columns_upper_bounds)
+        or len(columns_upper_bounds) != len(columns_names)):
+      raise ValueError("upper bounds == lower bounds == names: %d == %d == %d"
+                       % (len(columns_lower_bounds), len(columns_upper_bounds),
+                          len(columns_names)))
+    self.columns_lower_bounds = columns_lower_bounds
+    self.columns_upper_bounds = columns_upper_bounds
+    self.columns_names = columns_names
+    self.columns_values = [0.0] * len(columns_names)
+    return self
+
+  def set_objective(self, coefficients, name=None):
+    if isinstance(coefficients, tuple):
+      self.objective_coefficients = list(coefficients)
+    if not isinstance(coefficients, list):
+      raise TypeError("coefficients: %s" % coefficients)
+    self.objective_coefficients = coefficients
+    self.objective_name = name
+    return self
+
+  def set_rows(self, coefficients, senses, rhs, names=[]):
+    # Normalize matrix of coefficients
+    if isinstance(coefficients, list):
+      coefficients = numpy.matrix(coefficients)
+    if isinstance(coefficients, numpy.matrix):
+      coefficients = sparse.csr_matrix(coefficients)
+    else:
+      coefficients = coefficients.tocsr()
+    # Normalize RHS
+    if isinstance(rhs, (tuple, list)):
+      rhs = list(rhs)
+    else:
+      raise TypeError()
+    # TODO(d2rk): Normalize senses.
+    if (coefficients.shape[0] != len(senses) or
+        len(senses) != len(rhs)):
+      raise Exception()
+    if len(names) and len(names) != len(rhs):
+      raise Exception()
+    elif not len(names):
+      names = [None] * len(rhs)
+    self.rows_coefficients = coefficients
+    self.rows_senses = senses
+    self.rows_rhs = rhs
+    self.rows_names = names
+    return self
+
+  def maximization(self):
+    return self._maximization
+
+  def minimization(self):
+    return self._minimization
+
+  def check_columns_values(self, columns_values):
+    """Checks whether the given columns values are correct.
+
+    :param columns_values: A list of column values.
+
+    :returns: ``True`` or ``False``.
+    """
+    raise NotImplementedError()
+    # TODO: solution can be a tuple, list or sparse.base.spmatrix
+    if type(columns_values) in (tuple, list):
+      columns_values = numpy.array(columns_values)
+    if columns_values.shape[0] != self.get_num_columns():
+      logging.warning("Number of columns values doesn't match number of "
+                      "columns: %d != %d", columns_values.shape[0],
+                      self.get_num_columns())
+      return False
+    v = self.rows_coefficients.dot(columns_values)
+    for i in xrange(len(v)):
+      # TODO: add sense.
+      if not v[i] <= self.rows_rhs[i]:
+        return False
+    return True
 
   def get_status(self):
     return None
@@ -282,61 +176,6 @@ class MPModel(object_base.ObjectBase):
   @classmethod
   def status_to_string(self):
     return None
-
-  def get_variables(self):
-    '''Return a list of presented variables.
-
-    .. note:: The variables come in order they are stored in the constraint
-              matrix.
-    '''
-    return self._vars.values()
-
-  def get_variable_by_name(self, name):
-    '''Returns variable by name or `None` if such variable cannot be found.
-
-    :raises: :exc:`TypeError`
-    '''
-    if not isinstance(name, unicode):
-      raise TypeError('name must be a unicode: %s' % type(name))
-    return self._vars.get(name, None)
-
-  def get_variable_by_index(self, i):
-    '''Returns variable by the given index.
-
-    :param i: An Integer.
-    :returns: A :class:`~les.model.mp_variable.MPVariable` instance.
-    :raises: :exc:`TypeError`
-    '''
-    if not isinstance(i, int):
-      raise TypeError('i must be int: %s' % i)
-    var = None
-    if i < self.get_num_variables():
-      name, var = self._vars.items()[i]
-    return var
-
-  def maximize(self, expr):
-    self.set_objective(expr, maximization=True)
-
-  def minimize(self, expr):
-    self.set_objective(expr, maximization=False)
-
-  def optimize(self, optimization_params=None):
-    '''Optimize the model by using given optimization parameters.'''
-    from les import frontend_solver
-    solver = frontend_solver.FrontendSolver()
-    solver.load_model(self)
-    solver.solve(params=optimization_params)
-
-  def is_binary(self):
-    '''Returns whether the model is binary integer linear programming
-    model.
-
-    :returns: `True` or `False`.
-    '''
-    for var in self.get_variables():
-      if not var.is_binary():
-        return False
-    return True
 
   def is_feasible(self):
     return False
@@ -347,124 +186,106 @@ class MPModel(object_base.ObjectBase):
   def is_optimal_or_feasible(self):
     return self.is_optimal() or self.is_feasible()
 
-  def maximization(self):
-    return self.get_objective().maximization()
+  def get_num_columns(self):
+    return self.rows_coefficients.shape[1]
 
-  def set_maximization(self):
-    self.get_objective().maximization()
+  def get_columns_indices(self):
+    return range(len(self.objective_coefficients))
 
-  def set_minimization(self):
-    self.get_objective().minimization()
+  def get_num_rows(self):
+    return self.rows_coefficients.shape[0]
 
-  def pprint(self, file=sys.stdout):
-    '''Prints this model instance to the `file`.
+  def get_objective_coefficients(self):
+    return self.objective_coefficients
 
-    :param file: A stream.
-    '''
-    if not self.get_num_variables():
-      return
-    file.write('%s ' % (self._maximize and 'maximize' or 'minimize',))
-    file.write(str(self.get_objective()))
-    file.write('\n')
-    if not self.get_num_constraints():
-      return
-    file.write('s.t.\n')
-    for cons in self.get_constraints():
-      file.write('%s: %s' % (cons.get_name(), str(cons)))
-      file.write('\n')
+  def get_objective_coefficient(self, i):
+    return self.objective_coefficients[i]
+
+  def get_objective_name(self):
+    return self.objective_name
+
+  def get_rows_coefficients(self):
+    """Returns matrix of constraints coefficients.
+
+    :returns: A :class:`scipy.sparse.csr_matrix` instance. By default returns
+      ``None``.
+    """
+    return self.rows_coefficients
+
+  def get_rows_names(self):
+    """Returns list of rows names."""
+    return self.rows_names
+
+  def get_row_name(self, i):
+    return len(self.rows_names) and self.rows_names[i] or None
+
+  def get_rows_rhs(self):
+    """Returns vector that represents right-hand side."""
+    return self.rows_rhs
+
+  def get_rows_senses(self):
+    return self.rows_senses
+
+  def get_column_lower_bound(self, i):
+    if not isinstance(i, int):
+      raise TypeError()
+    return self.columns_lower_bounds[i]
+
+  def get_columns_lower_bounds(self):
+    return self.columns_lower_bounds
+
+  def get_columns_names(self):
+    return self.columns_names
+
+  def get_column_upper_bound(self, i):
+    if not isinstance(i, int):
+      raise TypeError()
+    return self.columns_upper_bounds[i]
+
+  def get_columns_upper_bounds(self):
+    return self.columns_upper_bounds
+
+  def get_column_name(self, i):
+    if not isinstance(i, int):
+      raise TypeError()
+    return self.columns_names[i]
+
+  def get_name(self):
+    return self._name
 
   def set_name(self, name):
-    '''Sets model name.
-
-    :param name: A string that represents model name.
-    :raises: :exc:`TypeError`
-    '''
-    if not type(name) is types.StringType and not isinstance(name, unicode):
-      raise TypeError('name must be a string or unicode: %s' % type(name))
     self._name = name
+    return self
 
-  def set_constraints(self, constraints):
-    '''Set constraints.'''
-    if not isinstance(constraints, collections.Iterable):
-      raise TypeError()
-    for constraint in constraints:
-      self.add_constraint(constraint)
+  def slice(self, rows_scope, columns_scope):
+    """Builds a submodel/slice based on this model."""
+    columns_scope = list(columns_scope)
+    rows_scope = list(rows_scope)
+    return (self.__class__()
+             .set_columns([self.columns_lower_bounds[_] for _ in columns_scope],
+                          [self.columns_upper_bounds[_] for _ in columns_scope],
+                          [self.columns_names[_] for _ in columns_scope])
+             .set_objective([self.objective_coefficients[_] for _ in columns_scope],
+                            self.objective_name)
+             .set_rows(self.rows_coefficients[rows_scope, :][:, columns_scope],
+                       [self.rows_senses[_] for _ in rows_scope],
+                       [self.rows_rhs[_] for _ in rows_scope],
+                       [self.rows_names[_] for _ in rows_scope]))
 
-  def set_constraint_name_format(self, frmt):
-    if frmt and type(frmt) is str:
-      raise TypeError()
-    self._cons_name_frmt = frmt
-
-  # TODO: review this method.
-  def set_objective(self, expr, maximization=True):
-    '''Set objective and optionaly its sense direction.'''
-    if not isinstance(expr, sympy.Expr):
-      raise TypeError()
-    for var in expr.atoms(sympy.Symbol):
-      self.add_variable(var)
-    self._obj = mp_objective.MPObjective(expr, maximization)
-    self._obj.set_name(self.default_objective_name)
-
-  def set_variable_name_format(self, frmt):
-    if frmt and type(frmt) is str:
-      raise TypeError('frmt must be a string: %s' % frmt)
-    self._var_name_frmt = frmt
-
-  def set_objective_from_scratch(self, coefficients, variables_names=[]):
-    '''Sets objective from a list/tuple of coefficients.
-
-    :param coefficients: A list/tuple of coefficients.
-    '''
-    self._obj = None
-    if isinstance(coefficients, tuple) or isinstance(coefficients, list):
-      coefficients = sparse.csr_matrix(numpy.matrix(coefficients), dtype=float)
-    else:
-      coefficients = sparse.csr_matrix(coefficients)
-    add_variable = lambda i: self.add_variable(name=variables_names[i])
-    if len(variables_names) == 0:
-      add_variable = lambda i: self.add_variable()
-    var = self.get_variable_by_index(coefficients.indices[0]) or add_variable(0)
-    expr = float(coefficients.data[0]) * var
-    for j, coefficient in itertools.izip(coefficients.indices[1:], coefficients.data[1:]):
-      var = self.get_variable_by_index(j) or add_variable(j)
-      expr += float(coefficient) * var
-    self._obj = mp_objective.MPObjective(expr)
-
-  def set_constraints_from_scratch(self, coefficients, senses, rhs, names=[]):
-    '''Sets constraints from scratch by the given coefficients matrix, list of
-    constraint senses, list of right-hand side values, list of names.
-
-    :param coefficients: Coefficients can be represented by a sparse matrix.
-    :param senses: A list/tuple of senses of the constraints.
-    :param rhs: Right-hand side. Can be represented by a list, tuple or vector.
-    :param optional names: A list/tuple of names for new constraints.
-
-    .. note:: The number of elements in `coefficients`, `senses`, `rhs` and
-              `names` must be the same.
-    '''
-    if isinstance(coefficients, numpy.matrix) or isinstance(coefficients, sparse.lil_matrix):
-      coefficients = sparse.csr_matrix(coefficients)
-    elif isinstance(coefficients, list):
-      coefficients = sparse.csr_matrix(numpy.matrix(coefficients))
-    if isinstance(rhs, tuple):
-      rhs = list(rhs)
-    if not isinstance(rhs, list):
-      raise TypeError()
-    # TODO(d2rk): Normalize senses.
-    if coefficients.shape[0] != len(senses) or len(senses) != len(rhs):
-      raise Error('%d != %d != %d' % (coefficients.shape[0], len(senses), len(rhs)))
-    add_constraint = add_unnamed_constraint = lambda i, op, c: self.add_constraint(op(c, rhs[i]))
-    add_named_constraint = lambda i, op, c: self.add_constraint(op(c, rhs[i]), name=names[i])
-    if len(names):
-      add_constraint = add_named_constraint
-    for i, row in enumerate(coefficients):
-      sense_operator = self.convert_sense_to_operator(senses[i])
-      if not sense_operator:
-        raise Error()
-      var = self.get_variable_by_index(row.indices[0]) or self.add_variable()
-      constraint = float(row.data[0]) * var
-      # TODO(d2rk): it was row.indices[1:] but in this case we have a bug.
-      for j, coefficient in itertools.izip(row.indices[1:], row.data[1:]):
-        var = self.get_variable_by_index(j) or self.add_variable()
-        constraint += float(coefficient) * var
-      add_constraint(i, sense_operator, constraint)
+  def pprint(self, file=sys.stdout):
+    if bool(len(self.objective_coefficients)):
+      file.write("%s: %s" % (self.objective_name, self._maximization
+                             and "maximize" or "minimize"))
+      for i in range(len(self.objective_coefficients)):
+        file.write(" %+.20g %s" % (self.objective_coefficients[i],
+                                   self.columns_names[i]))
+      file.write("\n")
+    if bool(self.rows_coefficients.shape[0]):
+      file.write("s.t.\n")
+      for i in range(self.rows_coefficients.shape[0]):
+        file.write("%s:" % self.rows_names[i])
+        row = self.rows_coefficients.getrow(i)
+        for ii, ij in zip(*row.nonzero()):
+          file.write(" %+.20g %s" % (row[ii, ij], self.columns_names[ij]))
+        file.write(" %s %+.20g" % (self.rows_senses[i], self.rows_rhs[i]))
+        file.write("\n")

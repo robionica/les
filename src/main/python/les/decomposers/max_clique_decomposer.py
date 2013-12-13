@@ -16,8 +16,8 @@ import networkx
 
 from les.graphs import interaction_graph
 from les.decomposers import decomposer_base
-from les.mp_model import mp_model_parameters
-from les.mp_model.mp_model_builder import MPModelBuilder
+from les.mp_model import MPModel
+from les.mp_model import MPModelBuilder
 from les.graphs import decomposition_tree
 from les.utils import logging
 
@@ -26,22 +26,20 @@ class MaxCliqueDecomposer(decomposer_base.DecomposerBase):
 
   def __init__(self, model):
     decomposer_base.DecomposerBase.__init__(self, model)
-    model_params = mp_model_parameters.build(model)
-    self._A = model_params.get_rows_coefficients()
+    self._A = model.rows_coefficients
 
   def _build_submodel(self, clique):
     rows_scope = set()
     cols_scope = list()
     for label in clique:
-      var = self._model.get_variable_by_name(label)
-      i = var.get_index()
+      i = self._model.columns_names.index(label)
       cols_scope.append(i)
       rows_indices = set(self._A.getcol(i).nonzero()[0])
       if not len(rows_scope):
         rows_scope.update(rows_indices)
       else:
         rows_scope = rows_scope.intersection(rows_indices)
-    return MPModelBuilder.build_submodel(self._model, list(rows_scope), cols_scope)
+    return self._model.slice(list(rows_scope), cols_scope)
 
   def decompose(self):
     self._decomposition_tree = decomposition_tree.DecompositionTree(self._model)

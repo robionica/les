@@ -61,8 +61,7 @@ class CLI(object):
       try:
         __import__(fq_module)
       except ImportError, e:
-        logging.exception('Cannot import module')
-        continue
+        self.exit_and_fail(e)
       for (_, cls) in inspect.getmembers(sys.modules[fq_module],
                                          inspect.isclass):
         if (issubclass(cls, command_base.CommandBase) and

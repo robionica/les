@@ -26,15 +26,15 @@ class FractionalKnapsackSolver(knapsack_solver_base.KnapsackSolverBase):
 
   def solve(self):
     '''Starts to solve knapsack problem model.'''
-    n = self._model_params.get_num_items()
-    v = self._model_params.get_profits()
-    w = self._model_params.get_weights()
+    n = self._model.get_num_items()
+    v = self._model.get_profits()
+    w = self._model.get_weights()
     # Sort in descending order
     order = sorted(range(n), key=lambda i: float(v[i]) / w[i], reverse=True);
     weight = 0.0  # current weight of the solution
     value = 0.0  # current value of the solution
     index = 0  # order[index] is the index in v and w of the considere item
-    W = self._model_params.get_max_weight()
+    W = self._model.get_max_weight()
     knapsack = [0.0] * n
     while (weight < W) and (index < n):
       # if we can fit the entire order[index]-th item
@@ -54,7 +54,7 @@ class FractionalKnapsackSolver(knapsack_solver_base.KnapsackSolverBase):
     self._solution = mp_solution.MPSolution()
     self._solution.set_status(mp_solution.MPSolution.OPTIMAL)
     self._solution.set_objective_value(value)
-    self._solution.set_variables_values(self._model_params.get_columns_names(),
+    self._solution.set_variables_values(self._model.get_columns_names(),
                                         knapsack)
 
   def get_solution(self):

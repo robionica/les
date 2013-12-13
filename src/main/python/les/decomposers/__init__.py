@@ -14,17 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.frontend_solver import frontend_solver_pb2
+from les.mp_model import OptimizationParameters
 from les.decomposers import finkelstein_qb_decomposer
 from les.decomposers import max_clique_decomposer
 
-FINKELSTEIN_QB_DECOMPOSER_ID = frontend_solver_pb2.OptimizationParameters.QUASIBLOCK_FINKELSTEIN_DECOMPOSER
-MAX_CLIQUE_DECOMPOSER_ID = frontend_solver_pb2.OptimizationParameters.MAX_CLIQUE_DECOMPOSER
+
+FINKELSTEIN_QB_DECOMPOSER_ID = OptimizationParameters.QUASIBLOCK_FINKELSTEIN_DECOMPOSER
+MAX_CLIQUE_DECOMPOSER_ID = OptimizationParameters.MAX_CLIQUE_DECOMPOSER
 
 _DECOMPOSERS_TABLE = {
   FINKELSTEIN_QB_DECOMPOSER_ID: finkelstein_qb_decomposer.FinkelsteinQBDecomposer,
   MAX_CLIQUE_DECOMPOSER_ID: max_clique_decomposer.MaxCliqueDecomposer,
 }
+
 
 def get_instance_of(decomposer_id, *args, **kwargs):
   '''Returns an instance of the decomposer defined by `decomposer_id`, or `None`

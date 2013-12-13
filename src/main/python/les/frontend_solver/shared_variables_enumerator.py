@@ -37,7 +37,6 @@ variables::
 '''
 
 from les import mp_model
-from les.mp_model import mp_model_parameters
 from les.utils import generator_base
 
 
@@ -81,7 +80,7 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
     return '%s[size=%d]' % (self.__class__.__name__, self._n)
 
   def _set_domain_model(self, domain_model, shared_vars, local_vars):
-    if not isinstance(domain_model, mp_model_parameters.MPModelParameters):
+    if not isinstance(domain_model, mp_model.MPModel):
       raise TypeError()
     #if not domain_model.is_binary():
     #  raise TypeError('Enumerator works only with BILP models.')
@@ -152,18 +151,19 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
       for j in rows_coefs.getcol(i).nonzero()[0]:
         rows_rhs[j] -= rows_coefs[j, i]
       solution_base.get_variables_values()[i] = 1.0
-    model_params = mp_model_parameters.build(
+    model = mp_model.build(
       self._template.objective_coefficients,
       self._model.get_rows_coefficients()[:, self._local_vars_indices],
       self._model.get_rows_senses(),
       rows_rhs,
+      self._model.rows_names,
       self._template.columns_lower_bounds,
       self._template.columns_upper_bounds,
       self._template.columns_names)
     name = self.model_name_format.format(
       source_model_name=self._model.get_name(), counter=self._index)
-    model_params.set_name(name)
-    return (model_params, solution_base)
+    model.set_name(name)
+    return (model, solution_base)
 
   def get_domain_model(self):
     '''Returns model instance being the domain model of generation.

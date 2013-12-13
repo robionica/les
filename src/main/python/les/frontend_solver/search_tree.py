@@ -42,15 +42,15 @@ class SearchTree(object):
 
   def next_unsolved_model(self):
     node, enumerator = self._enumerators.popitem()
-    candidate_model_params, partial_solution = enumerator.next()
+    candidate_model, partial_solution = enumerator.next()
     self._unsolved_models_counter[node] += 1
-    self._unsolved_models[candidate_model_params.get_name()] = node
+    self._unsolved_models[candidate_model.get_name()] = node
     if enumerator.has_next():
       self._enumerators[node] = enumerator
-    return node.get_model(), candidate_model_params, partial_solution
+    return node.get_model(), candidate_model, partial_solution
 
-  def mark_model_as_solved(self, model_params):
-    node = self._unsolved_models.pop(model_params.get_name())
+  def mark_model_as_solved(self, model):
+    node = self._unsolved_models.pop(model.get_name())
     self._unsolved_models_counter[node] -= 1
     if (not node in self._enumerators and
         self._unsolved_models_counter[node] == 0):

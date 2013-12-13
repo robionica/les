@@ -37,7 +37,7 @@ class DummyExecutor(executor_base.ExecutorBase):
       raise Error("Cannot instantiate backend solver by id: %d" %
                   request.get_solver_id())
     try:
-      solver.load_model_params(model)
+      solver.load_model(model)
       solver.solve()
     except Error, e:
       # TODO: send back a report.

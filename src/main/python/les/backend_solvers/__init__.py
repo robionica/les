@@ -15,7 +15,7 @@
 import sys
 
 from les.utils import logging
-from les.frontend_solver import frontend_solver_pb2
+from les import mp_model
 
 from les.backend_solvers.knapsack_solver import fractional_knapsack_solver
 try:
@@ -26,8 +26,8 @@ except ImportError, e:
 _SOLVERS_TABLE = {}
 
 # Sync backend solvers IDs.
-SCIP_ID = frontend_solver_pb2.OptimizationParameters.SCIP
-FRAKTIONAL_KNAPSACK_SOLVER_ID = getattr(frontend_solver_pb2.OptimizationParameters,
+SCIP_ID = mp_model.OptimizationParameters.SCIP
+FRAKTIONAL_KNAPSACK_SOLVER_ID = getattr(mp_model.OptimizationParameters,
                                         'FRAKTIONAL_KNAPSACK_SOLVER')
 
 _DEFAULT_SOLVERS_TABLE = {}

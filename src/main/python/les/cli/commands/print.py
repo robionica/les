@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les import mp_model
+from les.mp_model import MPModelBuilder
 from les.cli.commands import command_base
 
 class Print(command_base.CommandBase):
@@ -23,5 +23,5 @@ class Print(command_base.CommandBase):
     pass
 
   def run(self):
-    problem = mp_model.build(self._args.file)
-    problem.pprint()
+    model = MPModelBuilder.build_from_file(self._args.file)
+    model.pprint()

@@ -18,6 +18,7 @@ from les import mp_model
 from les.backend_solvers.knapsack_solver import fractional_knapsack_solver
 from les.utils import unittest
 
+
 class FractionalKnapsackSolverTest(unittest.TestCase):
 
   def test_solve1(self):

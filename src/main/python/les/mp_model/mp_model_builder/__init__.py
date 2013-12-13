@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2013 Oleksandr Sviridenko
+# Copyright (c) 2013 Oleksandr Sviridenko.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.mp_model import mp_variable
-
-class BinaryMPVariable(mp_variable.MPVariable):
-  '''This class represents binary variable (also known as a dummy variable,
-  indicator variable, design variable, Boolean indicator, categorical variable).
-
-  :param name: The string that represents variable name.
-  '''
-
-  def __init__(self, name=None):
-    mp_variable.MPVariable.__init__(self, 0.0, 1.0,
-                                    mp_variable.MPVariable.BINARY, name)
+from les.mp_model.mp_model_builder.mp_constraint import MPConstraint
+from les.mp_model.mp_model_builder.mp_model_builder import MPModelBuilder
+from les.mp_model.mp_model_builder.mp_objective import MPObjective
+from les.mp_model.mp_model_builder.mp_variable import MPVariable

@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function
+import sys
 
-from les.frontend_solver import frontend_solver_pb2
 from les import mp_model
 from les import backend_solvers
 from les import solution_tables
@@ -23,10 +22,12 @@ from les import decomposers
 from les.utils import logging
 from les.cli.commands import command_base
 
+
 DEFAULT_SOLUTION_TABLE_ID = solution_tables.SQLITE_SOLUTION_TABLE_ID
 DEFAULT_DECOMPOSER_ID = decomposers.FINKELSTEIN_QB_DECOMPOSER_ID
 DEFAULT_EXECUTOR_ID = executors.DUMMY_EXECUTOR_ID
 DEFAULT_BACKEND_SOLVER_ID = backend_solvers.get_default_solver_id()
+
 
 class Optimize(command_base.CommandBase):
   default_arguments = (
@@ -59,12 +60,13 @@ class Optimize(command_base.CommandBase):
 
   def run(self):
     model = mp_model.build(self._args.file)
-    optimization_params = frontend_solver_pb2.OptimizationParameters()
+    optimization_params = mp_model.OptimizationParameters()
     optimization_params.decomposer = self._args.decomposer_id
     optimization_params.executor = self._args.executor_id
     optimization_params.default_backend_solver = self._args.default_backend_solver_id
     model.optimize(optimization_params)
-    print('Objective value:', model.get_objective_value())
-    print('Variables:')
-    for var in model.get_variables():
-      print('%15s = %f' % (var.get_name(), var.get_value()))
+    file = sys.stdout
+    file.write("Objective value: %f\n" % model.get_objective_value())
+    file.write("Variables:\n")
+    for i in range(model.get_num_columns()):
+      file.write("%15s = %f\n" % (model.columns_names[i], model.columns_values[i]))

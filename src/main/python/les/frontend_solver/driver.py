@@ -82,7 +82,7 @@ class Driver(object):
         and not solution.get_variables_values() is None):
       if ((sum(solution.get_variables_values().tolist()) % 1.0) == 0 and
           solution.is_optimal()):
-        objective_value = cxt.candidate_model.get_objective_offset() + solution.get_objective_value()
+        objective_value = solution.get_objective_value()
         # Check F2: do we need to continue?
         # NOTE: the best objective value will be checked inside of
         # set_best_objective_value().

@@ -23,7 +23,9 @@ import StringIO
 
 from les.utils import logging
 
+
 COMMENT = '*'
+
 
 class Decoder(object):
   '''This class represents MPS-format model decoder.'''
@@ -189,8 +191,17 @@ class Decoder(object):
   def get_columns_names(self):
     return self._cols_names
 
+  def get_columns_lower_bounds(self):
+    return self._cols_lower_bounds
+
+  def get_columns_upper_bounds(self):
+    return self._cols_upper_bounds
+
   def get_objective_coefficients(self):
     return self._obj_coefs
+
+  def get_objective_name(self):
+    return self._obj_name
 
   def get_rows_senses(self):
     '''Returns a list of rows senses.'''

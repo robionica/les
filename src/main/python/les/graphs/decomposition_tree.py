@@ -18,9 +18,9 @@ original model of the given problem with help of decomposers.
 
 import networkx as nx
 
-from les import mp_model
-from les.mp_model import mp_model_parameters
+from les.mp_model import MPModel
 from les.utils import logging
+
 
 class Node(dict):
   '''Name of the node equals to the name of the models it holds.'''
@@ -63,9 +63,7 @@ class Edge(dict):
     if not type(shared_variables) in (list, set):
       raise TypeError('shared_variables must be a sequence: %s'
                       % type(shared_variables))
-    if not all([type(name) is unicode for name in shared_variables]):
-      raise TypeError('shared_variables has to be a list of unicode strings: '
-                      + str(shared_variables))
+    shared_variables = map(unicode, shared_variables)
     self['shared_variables'] = set(shared_variables)
 
   def __str__(self):
@@ -97,7 +95,7 @@ class DecompositionTree(nx.DiGraph):
 
   def __init__(self, model, root=None):
     nx.DiGraph.__init__(self)
-    if not isinstance(model, mp_model.MPModel):
+    if not isinstance(model, MPModel):
       raise TypeError('model must be derived from MPModel: %s' % model)
     self._model = model
     if not root is None:
@@ -117,15 +115,12 @@ class DecompositionTree(nx.DiGraph):
     '''
     node = node_or_model
     if not isinstance(node, Node):
-      if not isinstance(node_or_model, mp_model_parameters.MPModelParameters):
-        raise TypeError('node_or_model must be derived from '
-                        'MPModelParameters: %s' % node)
+      if not isinstance(node_or_model, MPModel):
+        raise TypeError('node_or_model must be derived from MPModel: %s' % node)
       node = Node(node_or_model)
     model = node.get_model()
     # Generate model name if necessary.
-    if model.get_name() is model.DEFAULT_MODEL_NAME:
-      model.set_name('%s_%s' % (self._model.get_name(),
-                                model.MODEL_NAME_FORMAT % len(self)))
+    model.set_name('%s_D%d' % (self._model.get_name(), len(self)))
     super(DecompositionTree, self).add_node(model.get_name(), node)
     return node
 

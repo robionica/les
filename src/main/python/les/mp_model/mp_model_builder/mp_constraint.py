@@ -15,10 +15,10 @@
 from sympy.core import relational
 
 from les import object_base
-from les.mp_model import mp_variable
+from les.mp_model.mp_model_builder import mp_variable
 
 class MPConstraint(object_base.ObjectBase):
-  '''This class represents model constraint.'''
+  """This class represents model constraint."""
 
   def __init__(self, expr):
     # TODO(d2rk): check expr type.
@@ -42,25 +42,25 @@ class MPConstraint(object_base.ObjectBase):
     return float(self._expr.lhs.coeff(var))
 
   def get_index(self):
-    '''Returns constraint index in the list of model constraints.'''
+    """Returns constraint index in the list of model constraints."""
     return self._index
 
   def get_name(self):
-    '''Returns constraint name.'''
+    """Returns constraint name."""
     return self._name
 
   def get_rhs(self):
-    '''Returns constraint right-hand side value.'''
+    """Returns constraint right-hand side value."""
     return float(self._expr.rhs or self._expr.lhs)
 
   def get_sense(self):
     return self._expr.rel_op
 
   def get_variables(self):
-    '''Returns list of variables from this constraint.
+    """Returns list of variables from this constraint.
 
     :returns: A list of :class:`les.model.mp_variable.MPVariable` instances.
-    '''
+    """
     return self._expr.lhs.atoms(mp_variable.MPVariable)
 
   def set_index(self, i):

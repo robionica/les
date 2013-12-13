@@ -15,13 +15,15 @@
 # limitations under the License.
 
 from les.executors import dummy_executor
-from les.frontend_solver import frontend_solver_pb2
+from les import mp_model
 
-DUMMY_EXECUTOR_ID = frontend_solver_pb2.OptimizationParameters.DUMMY_EXECUTOR
+
+DUMMY_EXECUTOR_ID = mp_model.OptimizationParameters.DUMMY_EXECUTOR
 
 _EXECUTORS_TABLE = {
   DUMMY_EXECUTOR_ID  : dummy_executor.DummyExecutor,
 }
+
 
 def get_instance_of(executor_id, *args, **kwargs):
   '''Returns an instance of the executor defined by `executor_id`, or `None`

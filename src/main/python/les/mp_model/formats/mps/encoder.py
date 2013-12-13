@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from les.mp_model import mp_model
-from les.mp_model import mp_model_parameters
+
 
 _SYMPY_MPS_SENSE_MAPPING = {
   '<=': 'L',
@@ -21,8 +21,9 @@ _SYMPY_MPS_SENSE_MAPPING = {
   '==': 'E',
 }
 
+
 class Encoder(object):
-  '''Encodes a MPS value to a stream.
+  """Encodes a MPS value to a stream.
 
   :param filename_or_stream: A filename or stream.
 
@@ -47,7 +48,7 @@ class Encoder(object):
     writer = mps.Writer(stream)
     writer.write(model)
     print stream.getvalue()
-  '''
+  """
 
   def __init__(self, filename_or_stream, model=None):
     self._stream = None
