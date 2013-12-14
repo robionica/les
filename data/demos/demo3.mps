@@ -13,4 +13,8 @@ RHS
 BOUNDS
  UP BND1    X1                 1
  LO BND1    X1                 0
+ UP BND1    X2                 1
+ LO BND1    X2                 0
+ UP BND1    X3                 1
+ LO BND1    X3                 0
 ENDATA
