@@ -62,37 +62,8 @@ message MPSolution {
   repeated MPVariableValue variable_values = 3;
 }
 
+// NOTE: this message will be automatically extended by other components such as
+// executors, decomposers, solution tables and drivers.
 message OptimizationParameters {
-  enum BackendSolver {
-    CLP = 0;  // https://projects.coin-or.org/Clp/
-    DUMMY_SOLVER = 1;
-    FRAKTIONAL_KNAPSACK_SOLVER = 2;
-    GLPK = 3;  // http://www.gnu.org/software/glpk/
-    LP_SOLVE = 4;  // http://lpsolve.sourceforge.net/
-    SCIP = 5;  // http://scip.zib.de/
-    SYMPHONY = 6;  // https://projects.coin-or.org/SYMPHONY/
-  };
-  // NOTE: this enumeration has to be synced with les.solver.executors package.
-  enum Executor {
-    DUMMY_EXECUTOR = 0;
-    THREAD_EXECUTOR = 1;
-  };
-  enum Decomposer {
-    QUASIBLOCK_FINKELSTEIN_DECOMPOSER = 1;
-    MAX_CLIQUE_DECOMPOSER = 2;
-  };
-  enum SolutionTable {
-    SQLITE_SOLUTION_TABLE = 1;
-  };
-  // A backend solver that will be used to solve relaxed problem or entire
-  // problem in the worst case.
-  optional BackendSolver default_backend_solver = 1;
-  // A list of relaxations that will be applied one by one.
-  repeated BackendSolver relaxation_backend_solvers = 2;
-  // Max number of shared variables betweet two subproblems. In the worst case
-  // les will have to solve 2**max_num_shared_variables problems.
-  optional int64 max_num_shared_variables = 3 [default = 10];
-  optional Executor executor = 4 [default = DUMMY_EXECUTOR];
-  optional Decomposer decomposer = 5 [default = QUASIBLOCK_FINKELSTEIN_DECOMPOSER];
-  optional SolutionTable solution_table = 6 [default = SQLITE_SOLUTION_TABLE];
+  extensions 100 to max;
 }
