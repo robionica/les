@@ -61,7 +61,7 @@ class Optimize(command_base.CommandBase):
     return params
 
   def run(self):
-    model = mp_model.build(self._args.file)
+    model = mp_model.MPModelBuilder.build_from(self._args.file)
     params = self._get_optimization_parameters()
     model.optimize(params)
     file = sys.stdout

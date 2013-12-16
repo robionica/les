@@ -14,3 +14,4 @@
 
 from les.mp_model import MPModel
 from les.mp_model.mp_model_builder import MPModelBuilder
+from les.mp_model.optimization_parameters import OptimizationParameters
