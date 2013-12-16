@@ -16,8 +16,6 @@ import logging
 import threading
 import Queue
 
-from les.mp_model import mp_model_parameters
-
 
 class Error(Exception):
   pass

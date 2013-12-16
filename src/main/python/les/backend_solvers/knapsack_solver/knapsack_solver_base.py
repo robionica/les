@@ -28,10 +28,10 @@ The following code snippet shows a simple to define and solve knapsack problem::
 
 import numpy
 
-from les import mp_model
 from les import mp_solver_base
-from les.mp_model import mp_model_parameters
-from les.mp_model import knapsack_model_parameters
+from les.mp_model import mp_model
+from les.mp_model import mp_model_builder
+from les.mp_model.knapsack_model import KnapsackModel
 
 
 class KnapsackSolverBase(mp_solver_base.MPSolverBase):
@@ -40,22 +40,17 @@ class KnapsackSolverBase(mp_solver_base.MPSolverBase):
   def __init__(self):
     mp_solver_base.MPSolverBase.__init__(self)
     self._model = None
-    self._model_params = None
 
   def load_model(self, model):
-    '''Loads model to be solved.
+    """Loads model to be solved.
 
     :param model: A :class:`~les.mp_model.mp_model.MPModel` instance.
-    '''
-    if not isinstance(model, mp_model.MPModel):
-      raise TypeError()
-    self.load_model_params(knapsack_model_parameters.build(model))
-    self._model = model
-
-  def load_model_params(self, params):
-    if not isinstance(params, knapsack_model_parameters.KnapsackModelParameters):
-      if isinstance(params, mp_model_parameters.MPModelParameters):
-        params = knapsack_model_parameters.build(params)
+    """
+    if not isinstance(model, KnapsackModel):
+      if isinstance(model, mp_model.MPModel):
+        model = mp_model_builder.MPModelBuilder.build_knapsack_model(model)
       else:
         raise TypeError()
-    self._model_params = params
+    else:
+      raise TypeError()
+    self._model = model

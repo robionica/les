@@ -21,6 +21,8 @@ from les import mp_model
 from les.backend_solvers import scip
 from les.utils import unittest
 
+
+
 SRC_DIR = os.path.join(os.path.dirname(__file__))
 
 class SCIPTest(unittest.TestCase):
@@ -29,7 +31,7 @@ class SCIPTest(unittest.TestCase):
     self.solver = scip.SCIP()
 
   def test_solve1(self):
-    model = mp_model.build(
+    model = mp_model.MPModelBuilder.build_from_scratch(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2, 3, 4, 1, 0, 0, 0, 0, 0],
        [1, 2, 3, 2, 0, 0, 0, 0, 0],
@@ -49,7 +51,7 @@ class SCIPTest(unittest.TestCase):
   def test_solve2(self):
     test_filename = os.path.join(SRC_DIR, '..', 'mp_model',
                                  'mp_model_test_data', 'test2.mps')
-    model = mp_model.build(test_filename)
+    model = mp_model.MPModelBuilder.build_from(test_filename)
     self.solver.load_model(model)
     self.solver.solve()
     values = [
@@ -63,12 +65,11 @@ class SCIPTest(unittest.TestCase):
       1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0
     ]
     solution = self.solver.get_solution()
-    self.assert_equal(0.0, sum([var.get_value() for var in model.get_variables()]) % 1.0)
     self.assert_almost_equal(sum(values), sum(solution.get_variables_values().tolist()))
     self.assert_equal(3087.0, solution.get_objective_value())
 
   def test_solve3(self):
-    model = mp_model.build(
+    model = mp_model.MPModelBuilder.build_from_scratch(
       [42., 100., 22.],
       [[2., 3., 4.],
        [3., 4., 3.],

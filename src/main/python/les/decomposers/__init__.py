@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (c) 2012-2013 Oleksandr Sviridenko
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.frontend_solver import frontend_solver_pb2
 from les.decomposers import finkelstein_qb_decomposer
 from les.decomposers import max_clique_decomposer
+from les.decomposers import decomposers_pb2
 
-FINKELSTEIN_QB_DECOMPOSER_ID = frontend_solver_pb2.OptimizationParameters.QUASIBLOCK_FINKELSTEIN_DECOMPOSER
-MAX_CLIQUE_DECOMPOSER_ID = frontend_solver_pb2.OptimizationParameters.MAX_CLIQUE_DECOMPOSER
+
+FINKELSTEIN_QB_DECOMPOSER_ID = decomposers_pb2.QUASIBLOCK_FINKELSTEIN_DECOMPOSER
+MAX_CLIQUE_DECOMPOSER_ID = decomposers_pb2.MAX_CLIQUE_DECOMPOSER
 
 _DECOMPOSERS_TABLE = {
   FINKELSTEIN_QB_DECOMPOSER_ID: finkelstein_qb_decomposer.FinkelsteinQBDecomposer,
   MAX_CLIQUE_DECOMPOSER_ID: max_clique_decomposer.MaxCliqueDecomposer,
 }
+
 
 def get_instance_of(decomposer_id, *args, **kwargs):
   '''Returns an instance of the decomposer defined by `decomposer_id`, or `None`
