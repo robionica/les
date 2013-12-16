@@ -1,5 +1,9 @@
+# Copyright (c) 2013 Oleksandr Sviridenko.
+
+
 from les.utils import unittest
-from les.base import sparse_vector
+from les.utils.math import sparse_vector
+
 
 class SparseVectorTest(unittest.TestCase):
 
@@ -9,6 +13,7 @@ class SparseVectorTest(unittest.TestCase):
     self.assert_equal(2, vector.get_num_entries())
     self.assert_equal([0, 2], vector.get_entries_indices())
     self.assert_equal([1, 0, 3], vector.copy_to_list())
+
 
 if __name__ == '__main__':
   unittest.main()

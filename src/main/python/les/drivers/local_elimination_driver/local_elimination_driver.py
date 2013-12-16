@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import collections
+import timeit
 
-from les.utils import logging
+from les import decomposers
+from les import solution_tables
 from les.mp_model import mp_solution
-from les.solution_tables import solution_table_base
-from les.frontend_solver import search_tree
+from les.drivers import driver_base
+from les.drivers.local_elimination_driver import search_tree
+from les.utils import logging
 
 
 class _SolveContext(object):
@@ -40,17 +43,63 @@ class _SolveContext(object):
     return True
 
 
-class Driver(object):
+class LocalEliminationDriver(driver_base.DriverBase):
 
-  def __init__(self, optimization_parameters, pipeline, decomposition_tree,
-               solution_table):
+  def __init__(self, model, optimization_parameters, pipeline):
+    super(LocalEliminationDriver, self).__init__()
+    if not model.is_binary():
+      raise TypeError("Optimization can be applied only to binary integer "
+                      "linear programming problems.")
     self._pipeline = pipeline
-    self._search_tree = search_tree.SearchTree(decomposition_tree)
-    self._solution_table = solution_table
-    self._solver_id_stack = list(optimization_parameters.relaxation_backend_solvers)
-    self._solver_id_stack.append(optimization_parameters.default_backend_solver)
+    self._optimization_params = optimization_parameters
+    self._driver_params = optimization_parameters.driver.local_elimination_driver_parameters
+    self._decomposer = decomposers.get_instance_of(self._driver_params.decomposer, model)
+    logging.info("Decomposer: %s" % self._decomposer.__class__.__name__)
+    self._solution_table = solution_tables.get_instance_of(self._driver_params.solution_table)
+    if not self._solution_table:
+      logging.info("Cannot create solution table: %d", self._driver_params.solution_table)
+      return
+    logging.info("Relaxation backend solvers are %s", self._driver_params.relaxation_backend_solvers)
+    self._solver_id_stack = list(self._driver_params.relaxation_backend_solvers)
+    self._solver_id_stack.append(optimization_parameters.driver.default_backend_solver)
     self._active_contexts = collections.OrderedDict()
     self._frozen_contexts = {}
+
+  def _trivial_case(self):
+    request = self._executor.build_request()
+    request.set_model(mp_model_parameters.build(self._model))
+    request.set_solver_id(self._optimization_params.driver.default_backend_solver)
+    response = self._pipeline.put_request(request)
+    self._set_solution(response.get_solution())
+    raise NotImplementedError()
+
+  def _process_decomposition_tree(self, tree):
+    # TODO(d2rk): merge nodes if necessary.
+    for node in tree.get_nodes():
+      if node.get_num_shared_variables() > self._driver_params.max_num_shared_variables:
+        logging.debug('Node %s has too many shared variables: %d > %d',
+                      node.get_name(), node.get_num_shared_variables(),
+                      self._driver_params.max_num_shared_variables)
+        return False
+    return True
+
+  def start(self):
+    start_time = timeit.default_timer()
+    try:
+      self._decomposer.decompose()
+    except Exception, e:
+      logging.exception("Decomposition failed.")
+      return
+    logging.info("Model was decomposed in %f second(s)."
+                 % (timeit.default_timer() - start_time,))
+    tree = self._decomposer.get_decomposition_tree()
+    if not self._process_decomposition_tree(tree):
+      return
+    if tree.get_num_nodes() == 1:
+      return self._trivial_case()
+    self._search_tree = search_tree.SearchTree(tree)
+    self._solution_table.set_decomposition_tree(tree)
+    self.run()
 
   def run(self):
     while True:
@@ -74,7 +123,7 @@ class Driver(object):
   def process_response(self, response):
     cxt = self._frozen_contexts.pop(response.get_id())
     solution = response.get_solution()
-    logging.debug('Process %s solution produced by %d with status %d',
+    logging.debug("Process %s solution produced by %d with status %d",
                   response.get_id(), cxt.solver_id_stack[0], solution.get_status())
     cxt.solver_id_stack.pop(0)
     # Check F3: whether optimal solution has been found.
@@ -105,3 +154,6 @@ class Driver(object):
       self._search_tree.mark_model_as_solved(cxt.candidate_model)
     else:
       self._active_contexts[cxt.candidate_model.get_name()] = cxt
+
+  def get_solution(self):
+    return self._solution_table.get_solution()

@@ -15,10 +15,12 @@
 import os
 from scipy import sparse
 
-from les.mp_model.formats import mps
+from les.mp_model.mp_model_builder.formats import mps
 from les.utils import unittest
 
+
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'mps_test_data')
+
 
 class DecoderTest(unittest.TestCase):
 

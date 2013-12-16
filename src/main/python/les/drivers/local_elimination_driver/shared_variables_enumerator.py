@@ -151,7 +151,7 @@ class SharedVariablesEnumerator(generator_base.GeneratorBase):
       for j in rows_coefs.getcol(i).nonzero()[0]:
         rows_rhs[j] -= rows_coefs[j, i]
       solution_base.get_variables_values()[i] = 1.0
-    model = mp_model.build(
+    model = mp_model.MPModelBuilder.build_from(
       self._template.objective_coefficients,
       self._model.get_rows_coefficients()[:, self._local_vars_indices],
       self._model.get_rows_senses(),

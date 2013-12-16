@@ -15,13 +15,13 @@
 # limitations under the License.
 
 from les.executors import dummy_executor
-from les import mp_model
+from les.executors import executors_pb2
 
 
-DUMMY_EXECUTOR_ID = mp_model.OptimizationParameters.DUMMY_EXECUTOR
+DUMMY_EXECUTOR = executors_pb2.DUMMY_EXECUTOR
 
 _EXECUTORS_TABLE = {
-  DUMMY_EXECUTOR_ID  : dummy_executor.DummyExecutor,
+  DUMMY_EXECUTOR: dummy_executor.DummyExecutor,
 }
 
 
@@ -30,7 +30,7 @@ def get_instance_of(executor_id, *args, **kwargs):
   otherwise.
   '''
   if not isinstance(executor_id, int):
-    raise TypeError()
+    raise TypeError("executor_id must be integer: %d" % executor_id)
   if not executor_id in _EXECUTORS_TABLE:
     return None
   executor_class = _EXECUTORS_TABLE[executor_id]

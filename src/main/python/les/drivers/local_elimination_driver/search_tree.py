@@ -14,7 +14,7 @@
 
 from les.graphs import decomposition_tree
 from les.utils import logging
-from les.frontend_solver import shared_variables_enumerator
+from les.drivers.local_elimination_driver import shared_variables_enumerator
 from les.utils.lazy_decomposition_tree_traversal import LazyDecompositionTreeTraversal
 
 

@@ -21,7 +21,7 @@ import os
 from les.mp_model import MPModel
 from les.mp_model.mp_model_builder import MPModelBuilder
 from les.mp_model.mp_model_builder import MPVariable
-from les.mp_model.formats import mps
+from les.mp_model.mp_model_builder.formats import mps
 from les.utils import unittest
 
 

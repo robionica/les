@@ -29,7 +29,8 @@ The following code snippet shows a simple to define and solve knapsack problem::
 import numpy
 
 from les import mp_solver_base
-from les import mp_model
+from les.mp_model import mp_model
+from les.mp_model import mp_model_builder
 from les.mp_model.knapsack_model import KnapsackModel
 
 
@@ -47,7 +48,7 @@ class KnapsackSolverBase(mp_solver_base.MPSolverBase):
     """
     if not isinstance(model, KnapsackModel):
       if isinstance(model, mp_model.MPModel):
-        model = mp_model.MPModelBuilder.build_knapsack_model(model)
+        model = mp_model_builder.MPModelBuilder.build_knapsack_model(model)
       else:
         raise TypeError()
     else:

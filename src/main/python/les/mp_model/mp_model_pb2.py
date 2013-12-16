@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='les/mp_model/mp_model.proto',
   package='les.mp_model',
-  serialized_pb='\n\x1bles/mp_model/mp_model.proto\x12\x0cles.mp_model\"+\n\x06MPTerm\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0b\x63oefficient\x18\x02 \x02(\x01\"J\n\nMPVariable\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x16\n\x0blower_bound\x18\x02 \x02(\x01:\x01\x30\x12\x16\n\x0bupper_bound\x18\x03 \x02(\x01:\x01\x31\".\n\x0fMPVariableValue\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\"k\n\x0cMPConstraint\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0blower_bound\x18\x02 \x02(\x01\x12\x13\n\x0bupper_bound\x18\x03 \x02(\x01\x12#\n\x05terms\x18\x04 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"N\n\x0bMPObjective\x12\x1a\n\x0cmaximization\x18\x01 \x02(\x08:\x04true\x12#\n\x05terms\x18\x02 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"v\n\x07MPModel\x12\x0c\n\x04name\x18\x01 \x02(\t\x12,\n\tobjective\x18\x02 \x02(\x0b\x32\x19.les.mp_model.MPObjective\x12/\n\x0b\x63onstraints\x18\x03 \x02(\x0b\x32\x1a.les.mp_model.MPConstraint\"\xd3\x01\n\nMPSolution\x12/\n\x06status\x18\x01 \x02(\x0e\x32\x1f.les.mp_model.MPSolution.Status\x12\x17\n\x0fobjective_value\x18\x02 \x01(\x01\x12\x36\n\x0fvariable_values\x18\x03 \x03(\x0b\x32\x1d.les.mp_model.MPVariableValue\"C\n\x06Status\x12\x0b\n\x07OPTIMAL\x10\x00\x12\x0c\n\x08\x46\x45\x41SIBLE\x10\x01\x12\x0e\n\nINFEASIBLE\x10\x02\x12\x0e\n\nNOT_SOLVED\x10\x03\"\xb3\x06\n\x16OptimizationParameters\x12R\n\x16\x64\x65\x66\x61ult_backend_solver\x18\x01 \x01(\x0e\x32\x32.les.mp_model.OptimizationParameters.BackendSolver\x12V\n\x1arelaxation_backend_solvers\x18\x02 \x03(\x0e\x32\x32.les.mp_model.OptimizationParameters.BackendSolver\x12$\n\x18max_num_shared_variables\x18\x03 \x01(\x03:\x02\x31\x30\x12O\n\x08\x65xecutor\x18\x04 \x01(\x0e\x32-.les.mp_model.OptimizationParameters.Executor:\x0e\x44UMMY_EXECUTOR\x12\x66\n\ndecomposer\x18\x05 \x01(\x0e\x32/.les.mp_model.OptimizationParameters.Decomposer:!QUASIBLOCK_FINKELSTEIN_DECOMPOSER\x12\x61\n\x0esolution_table\x18\x06 \x01(\x0e\x32\x32.les.mp_model.OptimizationParameters.SolutionTable:\x15SQLITE_SOLUTION_TABLE\"z\n\rBackendSolver\x12\x07\n\x03\x43LP\x10\x00\x12\x10\n\x0c\x44UMMY_SOLVER\x10\x01\x12\x1e\n\x1a\x46RAKTIONAL_KNAPSACK_SOLVER\x10\x02\x12\x08\n\x04GLPK\x10\x03\x12\x0c\n\x08LP_SOLVE\x10\x04\x12\x08\n\x04SCIP\x10\x05\x12\x0c\n\x08SYMPHONY\x10\x06\"3\n\x08\x45xecutor\x12\x12\n\x0e\x44UMMY_EXECUTOR\x10\x00\x12\x13\n\x0fTHREAD_EXECUTOR\x10\x01\"N\n\nDecomposer\x12%\n!QUASIBLOCK_FINKELSTEIN_DECOMPOSER\x10\x01\x12\x19\n\x15MAX_CLIQUE_DECOMPOSER\x10\x02\"*\n\rSolutionTable\x12\x19\n\x15SQLITE_SOLUTION_TABLE\x10\x01')
+  serialized_pb='\n\x1bles/mp_model/mp_model.proto\x12\x0cles.mp_model\"+\n\x06MPTerm\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0b\x63oefficient\x18\x02 \x02(\x01\"J\n\nMPVariable\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x16\n\x0blower_bound\x18\x02 \x02(\x01:\x01\x30\x12\x16\n\x0bupper_bound\x18\x03 \x02(\x01:\x01\x31\".\n\x0fMPVariableValue\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\"k\n\x0cMPConstraint\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0blower_bound\x18\x02 \x02(\x01\x12\x13\n\x0bupper_bound\x18\x03 \x02(\x01\x12#\n\x05terms\x18\x04 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"N\n\x0bMPObjective\x12\x1a\n\x0cmaximization\x18\x01 \x02(\x08:\x04true\x12#\n\x05terms\x18\x02 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"v\n\x07MPModel\x12\x0c\n\x04name\x18\x01 \x02(\t\x12,\n\tobjective\x18\x02 \x02(\x0b\x32\x19.les.mp_model.MPObjective\x12/\n\x0b\x63onstraints\x18\x03 \x02(\x0b\x32\x1a.les.mp_model.MPConstraint\"\xd3\x01\n\nMPSolution\x12/\n\x06status\x18\x01 \x02(\x0e\x32\x1f.les.mp_model.MPSolution.Status\x12\x17\n\x0fobjective_value\x18\x02 \x01(\x01\x12\x36\n\x0fvariable_values\x18\x03 \x03(\x0b\x32\x1d.les.mp_model.MPVariableValue\"C\n\x06Status\x12\x0b\n\x07OPTIMAL\x10\x00\x12\x0c\n\x08\x46\x45\x41SIBLE\x10\x01\x12\x0e\n\nINFEASIBLE\x10\x02\x12\x0e\n\nNOT_SOLVED\x10\x03\"\"\n\x16OptimizationParameters*\x08\x08\x64\x10\x80\x80\x80\x80\x02')
 
 
 
@@ -42,106 +42,6 @@ _MPSOLUTION_STATUS = descriptor.EnumDescriptor(
   options=None,
   serialized_start=668,
   serialized_end=735,
-)
-
-_OPTIMIZATIONPARAMETERS_BACKENDSOLVER = descriptor.EnumDescriptor(
-  name='BackendSolver',
-  full_name='les.mp_model.OptimizationParameters.BackendSolver',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    descriptor.EnumValueDescriptor(
-      name='CLP', index=0, number=0,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='DUMMY_SOLVER', index=1, number=1,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='FRAKTIONAL_KNAPSACK_SOLVER', index=2, number=2,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='GLPK', index=3, number=3,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='LP_SOLVE', index=4, number=4,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='SCIP', index=5, number=5,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='SYMPHONY', index=6, number=6,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=1258,
-  serialized_end=1380,
-)
-
-_OPTIMIZATIONPARAMETERS_EXECUTOR = descriptor.EnumDescriptor(
-  name='Executor',
-  full_name='les.mp_model.OptimizationParameters.Executor',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    descriptor.EnumValueDescriptor(
-      name='DUMMY_EXECUTOR', index=0, number=0,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='THREAD_EXECUTOR', index=1, number=1,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=1382,
-  serialized_end=1433,
-)
-
-_OPTIMIZATIONPARAMETERS_DECOMPOSER = descriptor.EnumDescriptor(
-  name='Decomposer',
-  full_name='les.mp_model.OptimizationParameters.Decomposer',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    descriptor.EnumValueDescriptor(
-      name='QUASIBLOCK_FINKELSTEIN_DECOMPOSER', index=0, number=1,
-      options=None,
-      type=None),
-    descriptor.EnumValueDescriptor(
-      name='MAX_CLIQUE_DECOMPOSER', index=1, number=2,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=1435,
-  serialized_end=1513,
-)
-
-_OPTIMIZATIONPARAMETERS_SOLUTIONTABLE = descriptor.EnumDescriptor(
-  name='SolutionTable',
-  full_name='les.mp_model.OptimizationParameters.SolutionTable',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    descriptor.EnumValueDescriptor(
-      name='SQLITE_SOLUTION_TABLE', index=0, number=1,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=1515,
-  serialized_end=1557,
 )
 
 
@@ -433,63 +333,17 @@ _OPTIMIZATIONPARAMETERS = descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
-    descriptor.FieldDescriptor(
-      name='default_backend_solver', full_name='les.mp_model.OptimizationParameters.default_backend_solver', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='relaxation_backend_solvers', full_name='les.mp_model.OptimizationParameters.relaxation_backend_solvers', index=1,
-      number=2, type=14, cpp_type=8, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='max_num_shared_variables', full_name='les.mp_model.OptimizationParameters.max_num_shared_variables', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=True, default_value=10,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='executor', full_name='les.mp_model.OptimizationParameters.executor', index=3,
-      number=4, type=14, cpp_type=8, label=1,
-      has_default_value=True, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='decomposer', full_name='les.mp_model.OptimizationParameters.decomposer', index=4,
-      number=5, type=14, cpp_type=8, label=1,
-      has_default_value=True, default_value=1,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='solution_table', full_name='les.mp_model.OptimizationParameters.solution_table', index=5,
-      number=6, type=14, cpp_type=8, label=1,
-      has_default_value=True, default_value=1,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
-    _OPTIMIZATIONPARAMETERS_BACKENDSOLVER,
-    _OPTIMIZATIONPARAMETERS_EXECUTOR,
-    _OPTIMIZATIONPARAMETERS_DECOMPOSER,
-    _OPTIMIZATIONPARAMETERS_SOLUTIONTABLE,
   ],
   options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=738,
-  serialized_end=1557,
+  is_extendable=True,
+  extension_ranges=[(100, 536870912), ],
+  serialized_start=737,
+  serialized_end=771,
 )
 
 _MPCONSTRAINT.fields_by_name['terms'].message_type = _MPTERM
@@ -499,15 +353,6 @@ _MPMODEL.fields_by_name['constraints'].message_type = _MPCONSTRAINT
 _MPSOLUTION.fields_by_name['status'].enum_type = _MPSOLUTION_STATUS
 _MPSOLUTION.fields_by_name['variable_values'].message_type = _MPVARIABLEVALUE
 _MPSOLUTION_STATUS.containing_type = _MPSOLUTION;
-_OPTIMIZATIONPARAMETERS.fields_by_name['default_backend_solver'].enum_type = _OPTIMIZATIONPARAMETERS_BACKENDSOLVER
-_OPTIMIZATIONPARAMETERS.fields_by_name['relaxation_backend_solvers'].enum_type = _OPTIMIZATIONPARAMETERS_BACKENDSOLVER
-_OPTIMIZATIONPARAMETERS.fields_by_name['executor'].enum_type = _OPTIMIZATIONPARAMETERS_EXECUTOR
-_OPTIMIZATIONPARAMETERS.fields_by_name['decomposer'].enum_type = _OPTIMIZATIONPARAMETERS_DECOMPOSER
-_OPTIMIZATIONPARAMETERS.fields_by_name['solution_table'].enum_type = _OPTIMIZATIONPARAMETERS_SOLUTIONTABLE
-_OPTIMIZATIONPARAMETERS_BACKENDSOLVER.containing_type = _OPTIMIZATIONPARAMETERS;
-_OPTIMIZATIONPARAMETERS_EXECUTOR.containing_type = _OPTIMIZATIONPARAMETERS;
-_OPTIMIZATIONPARAMETERS_DECOMPOSER.containing_type = _OPTIMIZATIONPARAMETERS;
-_OPTIMIZATIONPARAMETERS_SOLUTIONTABLE.containing_type = _OPTIMIZATIONPARAMETERS;
 DESCRIPTOR.message_types_by_name['MPTerm'] = _MPTERM
 DESCRIPTOR.message_types_by_name['MPVariable'] = _MPVARIABLE
 DESCRIPTOR.message_types_by_name['MPVariableValue'] = _MPVARIABLEVALUE

@@ -24,8 +24,8 @@ Read more about format specs:
 * <http://www.gurobi.com/documentation/5.5/reference-manual/node900>
 '''
 
-from les.mp_model.formats.mps.encoder import Encoder
-from les.mp_model.formats.mps.decoder import Decoder
+from les.mp_model.mp_model_builder.formats.mps.encoder import Encoder
+from les.mp_model.mp_model_builder.formats.mps.decoder import Decoder
 
 def decode(filename_or_stream):
   return Decoder(filename_or_stream)

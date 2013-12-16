@@ -67,7 +67,7 @@ import sys
 from les import object_base
 from les.mp_model import mp_model
 from les.mp_model.knapsack_model import KnapsackModel
-from les.mp_model.formats import mps
+from les.mp_model.mp_model_builder.formats import mps
 from les.mp_model.mp_model_builder import binary_mp_variable
 from les.mp_model.mp_model_builder import mp_constraint
 from les.mp_model.mp_model_builder import mp_objective
@@ -129,6 +129,41 @@ class MPModelBuilder(object):
       var = binary_mp_variable.BinaryMPVariable(*args, **kwargs)
     return self.add_variable(var)
 
+  def add_variable(self, *args, **kwargs):
+    """Adds new variable.
+
+    :returns: :class:`~les.mp_model.mp_model_builder.mp_variable.MPVariable`
+      instance.
+    :raises: :exc:`TypeError`
+    """
+    var = None
+    if len(args) == 1:
+      if isinstance(args[0], mp_variable.MPVariable):
+        var = args[0]
+      else:
+        var = binary_mp_variable.BinaryMPVariable(*args, **kwargs)
+    else:
+      var = mp_variable.MPVariable(*args, **kwargs)
+    if not var.get_name():
+      var.set_name(self.gen_variable_name(index=self.get_num_variables() + 1))
+    if var.get_name() in self._vars:
+      return
+    # TODO(d2rk): how about to remove the variable?
+    i = self.get_num_variables()
+    var.set_index(i)
+    self._vars[var.get_name()] = var
+    return var
+
+  def add_variables(self, variables):
+    """Adds variables from iterable `variables`.
+
+    .. seealso:: :func:`add_variable`
+    """
+    if not isinstance(variables, collections.Iterable):
+      raise TypeError()
+    for var in variables:
+      self.add_variable(var)
+
   def add_constraint(self, *args, **kwargs):
     """Adds and returns a model constraint.
 
@@ -163,40 +198,6 @@ class MPModelBuilder(object):
     cons.set_index(self.get_num_constraints())
     self._cons[cons.get_name()] = cons
     return cons
-
-  def add_variable(self, *args, **kwargs):
-    """Adds new variable.
-
-    :returns: :class:`~les.model.mp_variable.MPVariable` instance.
-    :raises: :exc:`TypeError`
-    """
-    var = None
-    if len(args) == 1:
-      if isinstance(args[0], mp_variable.MPVariable):
-        var = args[0]
-      else:
-        var = binary_mp_variable.BinaryMPVariable(*args, **kwargs)
-    else:
-      var = mp_variable.MPVariable(*args, **kwargs)
-    if not var.get_name():
-      var.set_name(self.gen_variable_name(index=self.get_num_variables() + 1))
-    if var.get_name() in self._vars:
-      return
-    # TODO(d2rk): how about to remove the variable?
-    i = self.get_num_variables()
-    var.set_index(i)
-    self._vars[var.get_name()] = var
-    return var
-
-  def add_variables(self, variables):
-    """Adds variables from iterable `variables`.
-
-    .. seealso:: :func:`add_variable`
-    """
-    if not isinstance(variables, collections.Iterable):
-      raise TypeError()
-    for var in variables:
-      self.add_variable(var)
 
   def build(self):
     objective = self.get_objective()
@@ -371,6 +372,9 @@ class MPModelBuilder(object):
                       model.rows_rhs,
                       model.rows_names))
 
+  def build_protobuf(self):
+    raise NotImplementedError()
+
   @classmethod
   def convert_sense_to_operator(cls, sense):
     if isinstance(sense, unicode):
@@ -478,8 +482,9 @@ class MPModelBuilder(object):
       name, var = self._vars.items()[i]
     return var
 
-  def maximize(self, expr):
-    self.set_objective(expr, maximization=True)
+  def maximize(self, expr, name=None):
+    self.set_objective(expr, maximization=True, name=name)
+    return self
 
   def minimize(self, expr):
     self.set_objective(expr, maximization=False)
@@ -530,6 +535,7 @@ class MPModelBuilder(object):
     if not type(name) is types.StringType and not isinstance(name, unicode):
       raise TypeError('name must be a string or unicode: %s' % type(name))
     self._name = name
+    return self
 
   def set_constraints(self, constraints):
     """Set constraints."""
@@ -537,6 +543,7 @@ class MPModelBuilder(object):
       raise TypeError()
     for constraint in constraints:
       self.add_constraint(constraint)
+    return self
 
   def set_constraint_name_format(self, frmt):
     if frmt and type(frmt) is str:
@@ -544,14 +551,14 @@ class MPModelBuilder(object):
     self._cons_name_frmt = frmt
 
   # TODO: review this method.
-  def set_objective(self, expr, maximization=True):
+  def set_objective(self, expr, maximization=True, name=None):
     """Set objective and optionaly its sense direction."""
     if not isinstance(expr, sympy.Expr):
       raise TypeError()
     for var in expr.atoms(sympy.Symbol):
       self.add_variable(var)
     self._obj = mp_objective.MPObjective(expr, maximization)
-    self._obj.set_name(self.DEFAULT_OBJECTIVE_NAME)
+    self._obj.set_name(name or self.DEFAULT_OBJECTIVE_NAME)
 
   def __getattr__(self, name):
     if self.VARIABLE_NAME_FORMAT_RE.match(name):

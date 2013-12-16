@@ -17,6 +17,14 @@ from sympy.core import relational
 from les import object_base
 from les.mp_model.mp_model_builder import mp_variable
 
+
+_SYMPY_MPS_SENSE_MAPPING = {
+  "<=": "L",
+  ">=": "G",
+  "==": "E",
+}
+
+
 class MPConstraint(object_base.ObjectBase):
   """This class represents model constraint."""
 
@@ -54,7 +62,7 @@ class MPConstraint(object_base.ObjectBase):
     return float(self._expr.rhs or self._expr.lhs)
 
   def get_sense(self):
-    return self._expr.rel_op
+    return _SYMPY_MPS_SENSE_MAPPING[self._expr.rel_op]
 
   def get_variables(self):
     """Returns list of variables from this constraint.

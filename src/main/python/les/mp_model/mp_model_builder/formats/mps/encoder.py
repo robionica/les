@@ -74,7 +74,7 @@ class Encoder(object):
     self._stream.write('\tN\t%s\n' % params.get_objective_name())
     for i in range(params.get_num_rows()):
       self._stream.write('\t%s\t%s\n'
-                         % (_SYMPY_MPS_SENSE_MAPPING[params.get_rows_senses()[i]],
+                         % (params.get_rows_senses()[i],
                             params.get_rows_names()[i]))
     # Write COLUMNS section.
     self._stream.write('COLUMNS\n')
@@ -120,4 +120,4 @@ class Encoder(object):
     self._stream.write('ENDATA')
 
   def _encode_mp_model(self, model):
-    self._encode_mp_model_parameters(mp_model_parameters.build(model))
+    self._encode_mp_model_parameters(model)

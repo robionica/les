@@ -16,9 +16,10 @@ from scipy import sparse
 import numpy
 import random
 
-from les import mp_model
-from les.mp_model_generators import mp_model_generator_base
+from les.mp_model import mp_model_builder
+from les.mp_model.mp_model_generators import mp_model_generator_base
 from les.utils import logging
+
 
 class Range(tuple):
 
@@ -161,7 +162,7 @@ class QBBILPModelGenerator(mp_model_generator_base.MPModelGeneratorBase):
         self._fill_block(blocks[i])
     self._fill_block(blocks[-1])
     # Build and return problem
-    return mp_model.build(
+    return mp_model_builder.MPModelBuilder.build_from(
       [random.randint(1, n) for i in xrange(n)],
       self._matrix.tocsr(),
       ['L'] * m,

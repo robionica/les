@@ -17,8 +17,9 @@
 from __future__ import print_function
 
 from les.decomposers import finkelstein_qb_decomposer
-from les.mp_model_generators import qbbilp_model_generator
+from les.mp_model.mp_model_generators import qbbilp_model_generator
 from les.utils import unittest
+
 
 class QBBILPModelGeneratorTest(unittest.TestCase):
 
@@ -27,8 +28,8 @@ class QBBILPModelGeneratorTest(unittest.TestCase):
 
   def test_gen_random_model(self):
     model = self._g.gen(num_variables=400, num_constraints=200)
-    self.assert_equal(200, model.get_num_constraints())
-    self.assert_equal(400, model.get_num_variables())
+    self.assert_equal(200, model.get_num_rows())
+    self.assert_equal(400, model.get_num_columns())
 
   def test_gen_random_model_with_fixed_num_blocks(self):
     num_blocks = 3
@@ -43,5 +44,6 @@ class QBBILPModelGeneratorTest(unittest.TestCase):
     models = decomposer.get_decomposition_tree().get_models()
     self.assert_equal(num_blocks, len(models))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
   unittest.main()

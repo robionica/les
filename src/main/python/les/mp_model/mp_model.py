@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import uuid
 import numpy
 from scipy import sparse
+import string
 import sys
 
 from les.utils import logging
+from les.utils import uuid
 from les import object_base
 
 
@@ -43,7 +44,7 @@ class MPModel(object_base.ObjectBase):
   """
 
   def __init__(self, name=None):
-    self._name = name or str(uuid.uuid1())
+    self._name = name or uuid.ShortUUID().uuid()
     self._maximization = True
     self.objective_coefficients = []
     self.objective_name = None
@@ -85,12 +86,15 @@ class MPModel(object_base.ObjectBase):
         return False
     return True
 
-  def optimize(self, optimization_params=None):
-    """Optimize the model by using given optimization parameters."""
-    from les import frontend_solver
-    solver = frontend_solver.FrontendSolver()
+  def optimize(self, params=None):
+    """Optimize the model by using given optimization parameters.
+
+    :param params: A OptimizationParameters instance.
+    """
+    from les.frontend_solver import FrontendSolver
+    solver = FrontendSolver()
     solver.load_model(self)
-    solver.solve(params=optimization_params)
+    solver.solve(params)
 
   def set_columns(self, columns_lower_bounds=[], columns_upper_bounds=[],
                   columns_names=[]):
@@ -114,12 +118,15 @@ class MPModel(object_base.ObjectBase):
     self.objective_name = name
     return self
 
+  def set_objective_name(self, name):
+    self.objective_name = name
+
   def set_rows(self, coefficients, senses, rhs, names=[]):
     # Normalize matrix of coefficients
     if isinstance(coefficients, list):
-      coefficients = numpy.matrix(coefficients)
+      coefficients = numpy.matrix(coefficients, dtype=float)
     if isinstance(coefficients, numpy.matrix):
-      coefficients = sparse.csr_matrix(coefficients)
+      coefficients = sparse.csr_matrix(coefficients, dtype=float)
     else:
       coefficients = coefficients.tocsr()
     # Normalize RHS

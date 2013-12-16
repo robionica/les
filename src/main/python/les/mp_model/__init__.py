@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les.mp_model.mp_solution import MPSolution
 from les.mp_model.mp_model import MPModel
-from les.mp_model.mp_model_builder import MPModelBuilder
-from les.mp_model.mp_model_pb2 import OptimizationParameters
-
-build = MPModelBuilder.build_from
+from les.mp_model.mp_model_builder import *
+from les.mp_model.mp_solution import MPSolution
+#from les.mp_model.optimization_parameters import OptimizationParameters

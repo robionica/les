@@ -77,7 +77,7 @@ class GoogleORLinearSolver(mp_solver_base.MPSolverBase):
       elif model.rows_senses[i] == 'L':
         lb, ub = -infinity, model.rows_rhs[i]
       else:
-        raise NotImplementedError()
+        raise ValueError("Unknown row sense: %s" % model.rows_senses[i])
       cons = self._solver.Constraint(lb, ub, model.rows_names[i] or '')
       for j, v in itertools.izip(map(int, row.indices), map(float, row.data)):
         cons.SetCoefficient(self._vars[j], v)
