@@ -15,13 +15,14 @@
 # limitations under the License.
 
 from les.graphs import interaction_graph
-from les import mp_model
+from les.mp_model import mp_model_builder
 from les.utils import unittest
+
 
 class InteractionGraphTest(unittest.TestCase):
 
   def test_constructor(self):
-    model = mp_model.build(
+    model = mp_model_builder.MPModelBuilder.build_from(
       [8, 2, 5, 5, 8, 3, 9, 7, 6],
       [[2., 3., 4., 1., 0., 0., 0., 0., 0.],
        [1., 2., 3., 2., 0., 0., 0., 0., 0.],
@@ -34,5 +35,6 @@ class InteractionGraphTest(unittest.TestCase):
     g = interaction_graph.InteractionGraph(model)
     self.assert_equal(9, g.get_num_nodes())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
   unittest.main()

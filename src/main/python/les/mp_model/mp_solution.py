@@ -19,7 +19,7 @@ http://en.wikipedia.org/wiki/Candidate_solution).
 import collections
 import numpy
 
-from les.utils import sparse_vector
+from les.utils.math import sparse_vector
 from les.mp_model import mp_model_pb2
 
 class MPSolution(object):

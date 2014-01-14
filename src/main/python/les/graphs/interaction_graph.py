@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''The interaction graph of the discrete optimization problem (DOP) is called an
+"""The interaction graph of the discrete optimization problem (DOP) is called an
 undirected graph :math:`G=(X,E)`, such that:
 
 1. Vertices :math:`X` of :math:`G` correspond to variables of the DOP;
 2. Two vertices of :math:`G` are adjacent if corresponding variables interact.
 
 Interaction graph of variables is also called constraint graph.
-'''
+"""
 
 import networkx
 
 from les import mp_model
-from les.mp_model import mp_model_parameters
+
 
 def _extract_indices(m, i):
   start = m.indptr[i]
@@ -33,6 +33,7 @@ def _extract_indices(m, i):
   for j in xrange(start, start + size):
     result.append(m.indices[j])
   return result
+
 
 class InteractionGraph(networkx.Graph):
   '''This class represents an interaction graph of a given model.'''
@@ -47,13 +48,12 @@ class InteractionGraph(networkx.Graph):
     if not isinstance(model, mp_model.MPModel):
       raise TypeError()
     # TODO: improve this
-    model_params = mp_model_parameters.build(model)
-    for p in xrange(model.get_num_constraints()):
-      J = _extract_indices(model_params.get_rows_coefficients(), p)
+    for p in xrange(model.get_num_rows()):
+      J = _extract_indices(model.rows_coefficients, p)
       for i in xrange(0, len(J)):
         for j in xrange(i, len(J)):
-          self.add_edge(model_params.get_columns_names()[J[i]],
-                        model_params.get_columns_names()[J[j]])
+          self.add_edge(model.columns_names[J[i]],
+                        model.columns_names[J[j]])
     self._model = model
 
   def get_num_nodes(self):

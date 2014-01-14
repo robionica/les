@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='les/mp_model/mp_model.proto',
   package='les.mp_model',
-  serialized_pb='\n\x1bles/mp_model/mp_model.proto\x12\x0cles.mp_model\"+\n\x06MPTerm\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0b\x63oefficient\x18\x02 \x02(\x01\"J\n\nMPVariable\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x16\n\x0blower_bound\x18\x02 \x02(\x01:\x01\x30\x12\x16\n\x0bupper_bound\x18\x03 \x02(\x01:\x01\x31\".\n\x0fMPVariableValue\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\"k\n\x0cMPConstraint\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0blower_bound\x18\x02 \x02(\x01\x12\x13\n\x0bupper_bound\x18\x03 \x02(\x01\x12#\n\x05terms\x18\x04 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"N\n\x0bMPObjective\x12\x1a\n\x0cmaximization\x18\x01 \x02(\x08:\x04true\x12#\n\x05terms\x18\x02 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"v\n\x07MPModel\x12\x0c\n\x04name\x18\x01 \x02(\t\x12,\n\tobjective\x18\x02 \x02(\x0b\x32\x19.les.mp_model.MPObjective\x12/\n\x0b\x63onstraints\x18\x03 \x02(\x0b\x32\x1a.les.mp_model.MPConstraint\"\xd3\x01\n\nMPSolution\x12/\n\x06status\x18\x01 \x02(\x0e\x32\x1f.les.mp_model.MPSolution.Status\x12\x17\n\x0fobjective_value\x18\x02 \x01(\x01\x12\x36\n\x0fvariable_values\x18\x03 \x03(\x0b\x32\x1d.les.mp_model.MPVariableValue\"C\n\x06Status\x12\x0b\n\x07OPTIMAL\x10\x00\x12\x0c\n\x08\x46\x45\x41SIBLE\x10\x01\x12\x0e\n\nINFEASIBLE\x10\x02\x12\x0e\n\nNOT_SOLVED\x10\x03')
+  serialized_pb='\n\x1bles/mp_model/mp_model.proto\x12\x0cles.mp_model\"+\n\x06MPTerm\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0b\x63oefficient\x18\x02 \x02(\x01\"J\n\nMPVariable\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x16\n\x0blower_bound\x18\x02 \x02(\x01:\x01\x30\x12\x16\n\x0bupper_bound\x18\x03 \x02(\x01:\x01\x31\".\n\x0fMPVariableValue\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\"k\n\x0cMPConstraint\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0blower_bound\x18\x02 \x02(\x01\x12\x13\n\x0bupper_bound\x18\x03 \x02(\x01\x12#\n\x05terms\x18\x04 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"N\n\x0bMPObjective\x12\x1a\n\x0cmaximization\x18\x01 \x02(\x08:\x04true\x12#\n\x05terms\x18\x02 \x03(\x0b\x32\x14.les.mp_model.MPTerm\"v\n\x07MPModel\x12\x0c\n\x04name\x18\x01 \x02(\t\x12,\n\tobjective\x18\x02 \x02(\x0b\x32\x19.les.mp_model.MPObjective\x12/\n\x0b\x63onstraints\x18\x03 \x02(\x0b\x32\x1a.les.mp_model.MPConstraint\"\xd3\x01\n\nMPSolution\x12/\n\x06status\x18\x01 \x02(\x0e\x32\x1f.les.mp_model.MPSolution.Status\x12\x17\n\x0fobjective_value\x18\x02 \x01(\x01\x12\x36\n\x0fvariable_values\x18\x03 \x03(\x0b\x32\x1d.les.mp_model.MPVariableValue\"C\n\x06Status\x12\x0b\n\x07OPTIMAL\x10\x00\x12\x0c\n\x08\x46\x45\x41SIBLE\x10\x01\x12\x0e\n\nINFEASIBLE\x10\x02\x12\x0e\n\nNOT_SOLVED\x10\x03\"\"\n\x16OptimizationParameters*\x08\x08\x64\x10\x80\x80\x80\x80\x02')
 
 
 
@@ -325,6 +325,27 @@ _MPSOLUTION = descriptor.Descriptor(
   serialized_end=735,
 )
 
+
+_OPTIMIZATIONPARAMETERS = descriptor.Descriptor(
+  name='OptimizationParameters',
+  full_name='les.mp_model.OptimizationParameters',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=True,
+  extension_ranges=[(100, 536870912), ],
+  serialized_start=737,
+  serialized_end=771,
+)
+
 _MPCONSTRAINT.fields_by_name['terms'].message_type = _MPTERM
 _MPOBJECTIVE.fields_by_name['terms'].message_type = _MPTERM
 _MPMODEL.fields_by_name['objective'].message_type = _MPOBJECTIVE
@@ -339,6 +360,7 @@ DESCRIPTOR.message_types_by_name['MPConstraint'] = _MPCONSTRAINT
 DESCRIPTOR.message_types_by_name['MPObjective'] = _MPOBJECTIVE
 DESCRIPTOR.message_types_by_name['MPModel'] = _MPMODEL
 DESCRIPTOR.message_types_by_name['MPSolution'] = _MPSOLUTION
+DESCRIPTOR.message_types_by_name['OptimizationParameters'] = _OPTIMIZATIONPARAMETERS
 
 class MPTerm(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
@@ -381,5 +403,11 @@ class MPSolution(message.Message):
   DESCRIPTOR = _MPSOLUTION
   
   # @@protoc_insertion_point(class_scope:les.mp_model.MPSolution)
+
+class OptimizationParameters(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _OPTIMIZATIONPARAMETERS
+  
+  # @@protoc_insertion_point(class_scope:les.mp_model.OptimizationParameters)
 
 # @@protoc_insertion_point(module_scope)

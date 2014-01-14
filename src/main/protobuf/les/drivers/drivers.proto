@@ -1,0 +1,51 @@
+// Copyright (c) 2013 Oleksandr Sviridenko
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package les.drivers;
+
+
+import "les/mp_model/mp_model.proto";
+import "les/decomposers/decomposers.proto";
+import "les/backend_solvers/backend_solvers.proto";
+import "les/solution_tables/solution_tables.proto";
+
+
+enum Driver {
+  LOCAL_ELIMINATION_DRIVER = 0;
+}
+
+message DriverParameters {
+  required Driver driver = 1 [default = LOCAL_ELIMINATION_DRIVER];
+  // A backend solver that will be used to solve relaxed problem or entire
+  // problem in the worst case.
+  optional les.backend_solvers.BackendSolver default_backend_solver = 2;
+  // Driver parameters extensions...
+  optional LocalEliminationDriverParameters local_elimination_driver_parameters = 3;
+}
+
+message LocalEliminationDriverParameters {
+  // Max number of shared variables between two subproblems. In the worst case
+  // this driver will have to solve 2**max_num_shared_variables problems.
+  optional int64 max_num_shared_variables = 1 [default = 10];
+  optional les.decomposers.Decomposer decomposer = 2 [default = QUASIBLOCK_FINKELSTEIN_DECOMPOSER];
+  optional les.solution_tables.SolutionTable solution_table = 3 [default = SQLITE_SOLUTION_TABLE];
+  // A list of relaxations that will be applied one by one.
+  repeated les.backend_solvers.BackendSolver relaxation_backend_solvers = 4;
+}
+
+extend les.mp_model.OptimizationParameters {
+  optional DriverParameters driver_parameters = 100;
+}
