@@ -241,9 +241,10 @@ class SQLiteSolutionTable(db_solution_table_base.DBSolutionTableBase):
     if not indices:
       return
     node = self._decomposition_tree.node[model.get_name()]
-    true_vars = json.dumps([solution.get_variables_names()[i]
-                            for i in solution.get_variables_values().get_entries_indices()] +
-                           (dep_true_vars and json.loads(dep_true_vars) or []))
+    _true_vars = ([solution.get_variables_names()[i]
+                   for i in solution.get_variables_values().get_entries_indices()] +
+                  (dep_true_vars and json.loads(dep_true_vars) or []))
+    true_vars = json.dumps(list(set(_true_vars)))
     stmt = _INSERT_TEMPLATE.format(
       table_name=model.get_name(),
       vars_names=', '.join(node.get_shared_variables()),
