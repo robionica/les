@@ -20,9 +20,11 @@ import os.path
 import subprocess
 import sys
 
+
 PYTHON_SRC_DIR = os.path.join('src', 'main', 'python')
 PROTOBUF_SRC_DIR = os.path.join('src', 'main', 'protobuf')
 PROTOC = distutils.spawn.find_executable('protoc')
+
 
 def gen_proto(in_file):
   '''Invokes the Protocol Compiler to generate a _pb2.py from the given .proto
@@ -53,10 +55,16 @@ def gen_proto(in_file):
   else:
     distutils.log.info('%s is up to date.', out_file)
 
-def main():
-  gen_proto(os.path.join(PROTOBUF_SRC_DIR, 'les', 'mp_model', 'mp_model.proto'))
-  gen_proto(os.path.join(PROTOBUF_SRC_DIR, 'les', 'frontend_solver.proto'))
 
-if __name__ == '__main__':
+def main():
+  gen_proto(os.path.join(PROTOBUF_SRC_DIR, "les", "mp_model", "mp_model.proto"))
+  gen_proto(os.path.join(PROTOBUF_SRC_DIR, "les", "backend_solvers", "backend_solvers.proto"))
+  gen_proto(os.path.join(PROTOBUF_SRC_DIR, "les", "drivers", "drivers.proto"))
+  gen_proto(os.path.join(PROTOBUF_SRC_DIR, "les", "decomposers", "decomposers.proto"))
+  gen_proto(os.path.join(PROTOBUF_SRC_DIR, "les", "solution_tables", "solution_tables.proto"))
+  gen_proto(os.path.join(PROTOBUF_SRC_DIR, "les", "executors", "executors.proto"))
+
+
+if __name__ == "__main__":
   distutils.log.set_verbosity(distutils.log.DEBUG)
   sys.exit(main())

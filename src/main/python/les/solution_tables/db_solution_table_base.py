@@ -16,6 +16,7 @@ import types
 
 from les.solution_tables import solution_table_base
 
+
 class DataStore(object):
   '''This class represents interface to the actual data stores such as SQLite,
   MySQL, PostgreSQL, etc.

@@ -48,9 +48,7 @@ Once the model has been decomposed, its
 # |   M     |  S   |     M      | S |    M    |
 #
 
-from les.mp_model import mp_model_parameters
-from les.mp_model import mp_model
-from les.mp_model.mp_model_builder import MPModelBuilder
+from les.mp_model import MPModel
 from les.decomposers import decomposer_base
 from les.graphs.decomposition_tree import DecompositionTree
 from les.utils import logging
@@ -63,6 +61,7 @@ def _get_indices(m, i):
     result.append(m.indices[j])
   return result
 
+
 class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
   '''This class represents Finkelstein QB decomposer for MP problems.
 
@@ -74,24 +73,20 @@ class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
     self._u = []
     self._s = []
     self._m = []
-    self._model_params = mp_model_parameters.build(model)
 
   def _build_decomposition_tree(self):
     # TODO: fix this. Add default empty separators set.
     s = self._s + [set()]
     # TODO: check connectivity order.
-    prev_model = MPModelBuilder.build_submodel(self._model,
-                                               self._u[-1], s[-2] | self._m[-1] | s[-1])
+    prev_model = self._model.slice(self._u[-1], s[-2] | self._m[-1] | s[-1])
     tree = DecompositionTree(self._model)
     tree.add_node(prev_model)
     tree.set_root(prev_model)
     for i in xrange(len(self._u) - 2, -1, -1):
-      model = MPModelBuilder.build_submodel(self._model,
-                                            self._u[i], s[i + 1] | self._m[i] | s[i])
+      model = self._model.slice(self._u[i], s[i + 1] | self._m[i] | s[i])
       tree.add_node(model)
       tree.add_edge(prev_model, model,
-                    [self.get_model().get_variable_by_index(i).get_name()
-                     for i in s[i + 1]])
+                    [self.get_model().get_columns_names()[i] for i in s[i + 1]])
       prev_model = model
     self._decomposition_tree = tree
 
@@ -108,11 +103,11 @@ class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
     '''
     if max_separator_size:
       raise NotImplementedError()
-    logging.info('Decompose model %s', self._model_params.get_name())
+    logging.info('Decompose model %s', self._model.get_name())
     self._u = []
     self._s = []
     self._m = []
-    row_matrix = self._model_params.get_rows_coefficients()
+    row_matrix = self._model.get_rows_coefficients()
     col_matrix = row_matrix.tocsc()
     all_cols = set(initial_cols)
     prev_cols = set()

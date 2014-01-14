@@ -14,17 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from les import mp_model
+from les.mp_model import mp_model_builder
 from les.backend_solvers.knapsack_solver import fractional_knapsack_solver
 from les.utils import unittest
+
 
 class FractionalKnapsackSolverTest(unittest.TestCase):
 
   def test_solve1(self):
-    model = mp_model.build([8, 11, 6, 4],
-                           [[5, 7, 4, 3]],
-                           ['L'],
-                           [14])
+    model = mp_model_builder.MPModelBuilder.build_from([8, 11, 6, 4],
+                                                       [[5, 7, 4, 3]],
+                                                       ['L'],
+                                                       [14])
     solver = fractional_knapsack_solver.FractionalKnapsackSolver()
     solver.load_model(model)
     solver.solve()
@@ -34,10 +35,10 @@ class FractionalKnapsackSolverTest(unittest.TestCase):
                       solution.get_variables_values().tolist())
 
   def test_solve2(self):
-    model = mp_model.build([50, 140, 60, 60],
-                           [[5, 20, 10, 12]],
-                           ['L'],
-                           [30])
+    model = mp_model_builder.MPModelBuilder.build_from([50, 140, 60, 60],
+                                                       [[5, 20, 10, 12]],
+                                                       ['L'],
+                                                       [30])
     solver = fractional_knapsack_solver.FractionalKnapsackSolver()
     solver.load_model(model)
     solver.solve()
@@ -47,11 +48,11 @@ class FractionalKnapsackSolverTest(unittest.TestCase):
                       solution.get_variables_values().tolist())
 
   def test_solve_model_with_several_constraints(self):
-    model = mp_model.build([8, 11, 6, 4],
-                           [[1, 4, 2, 2],
-                            [4, 3, 2, 1]],
-                           ['L', 'L'],
-                           [7, 7])
+    model = mp_model_builder.MPModelBuilder.build_from([8, 11, 6, 4],
+                                                       [[1, 4, 2, 2],
+                                                        [4, 3, 2, 1]],
+                                                       ['L', 'L'],
+                                                       [7, 7])
     solver = fractional_knapsack_solver.FractionalKnapsackSolver()
     solver.load_model(model)
     solver.solve()
@@ -60,5 +61,6 @@ class FractionalKnapsackSolverTest(unittest.TestCase):
     self.assert_equal([1.0, 1.0, 0.5, 0.0],
                       solution.get_variables_values().tolist())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
   unittest.main()

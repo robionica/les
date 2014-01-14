@@ -15,21 +15,23 @@
 # limitations under the License.
 
 from les.executors import dummy_executor
-from les.frontend_solver import frontend_solver_pb2
+from les.executors import executors_pb2
 
-DUMMY_EXECUTOR_ID = frontend_solver_pb2.OptimizationParameters.DUMMY_EXECUTOR
+
+DUMMY_EXECUTOR = executors_pb2.DUMMY_EXECUTOR
 
 _EXECUTORS_TABLE = {
-  DUMMY_EXECUTOR_ID  : dummy_executor.DummyExecutor,
+  DUMMY_EXECUTOR: dummy_executor.DummyExecutor,
 }
 
-def get_instance_of(executor_id):
+
+def get_instance_of(executor_id, *args, **kwargs):
   '''Returns an instance of the executor defined by `executor_id`, or `None`
   otherwise.
   '''
   if not isinstance(executor_id, int):
-    raise TypeError()
+    raise TypeError("executor_id must be integer: %d" % executor_id)
   if not executor_id in _EXECUTORS_TABLE:
     return None
   executor_class = _EXECUTORS_TABLE[executor_id]
-  return executor_class()
+  return executor_class(*args, **kwargs)

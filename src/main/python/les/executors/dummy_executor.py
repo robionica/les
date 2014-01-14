@@ -16,31 +16,32 @@ from les import backend_solvers
 from les.executors import executor_base
 from les.utils import logging
 
+
 class Error(executor_base.Error):
   pass
 
+
 class DummyExecutor(executor_base.ExecutorBase):
-  '''Dummy executor doesn't know how to parallelize solving process. It
-  simply solves models one by one in order they come.
-  '''
+  """Dummy executor doesn't know how to parallelize solving process. It simply
+  solves models one by one in order they come.
+  """
 
   def execute(self, request):
-    model_params = request.get_model_parameters()
+    model = request.get_model()
     logging.debug('Solve model %s that has %d row(s) and %d column(s)'
                   ' with solver %s',
-                  model_params.get_name(), model_params.get_num_rows(),
-                  model_params.get_num_columns(), request.get_solver_id())
+                  model.get_name(), model.get_num_rows(),
+                  model.get_num_columns(), request.get_solver_id())
     solver = backend_solvers.get_instance_of(request.get_solver_id())
     if not solver:
-      raise Error('Cannot instantiate backend solver by id: %d' %
+      raise Error("Cannot instantiate backend solver by id: %d" %
                   request.get_solver_id())
     try:
-      solver.load_model_params(model_params)
+      solver.load_model(model)
       solver.solve()
-    except Exception, e:
+    except Error, e:
       # TODO: send back a report.
-      logging.exception('Cannot execute given request: cannot solve the model.')
+      logging.exception("Cannot execute given request: cannot solve the model.")
       return None
-    response = self.build_response(model_params, solver.get_solution())
-    self._response_callback(response)
+    response = self._pipeline.build_response(model, solver.get_solution())
     return response

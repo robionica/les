@@ -12,59 +12,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function
+import sys
 
-from les.frontend_solver import frontend_solver_pb2
 from les import mp_model
+from les.mp_model import optimization_parameters
 from les import backend_solvers
-from les import solution_tables
 from les import executors
+from les import drivers
 from les import decomposers
 from les.utils import logging
 from les.cli.commands import command_base
 
-DEFAULT_SOLUTION_TABLE_ID = solution_tables.SQLITE_SOLUTION_TABLE_ID
-DEFAULT_DECOMPOSER_ID = decomposers.FINKELSTEIN_QB_DECOMPOSER_ID
-DEFAULT_EXECUTOR_ID = executors.DUMMY_EXECUTOR_ID
+
+DEFAULT_EXECUTOR = executors.DUMMY_EXECUTOR
 DEFAULT_BACKEND_SOLVER_ID = backend_solvers.get_default_solver_id()
+DEFAULT_DRIVER = drivers.LOCAL_ELIMINATION_DRIVER
+
 
 class Optimize(command_base.CommandBase):
+
   default_arguments = (
-    ('--decomposer', {
-        'dest': 'decomposer_id',
-        'type': int,
-        'metavar': 'ID',
-        'default': DEFAULT_DECOMPOSER_ID,
-        'help': ('decomposer id (default: %d)' % DEFAULT_DECOMPOSER_ID)}),
-    ('--solution-table', {
-        'dest': 'solution_table_id',
-        'type': int,
-        'default': DEFAULT_SOLUTION_TABLE_ID,
-        'metavar': 'ID',
-        'help': 'solution table id (default: %d)' % DEFAULT_SOLUTION_TABLE_ID}),
-    ('--executor', {
-        'dest': 'executor_id',
-        'type': int,
-        'metavar': 'ID',
-        'default': DEFAULT_EXECUTOR_ID,
-        'help': 'executor id (default: %d)' % DEFAULT_EXECUTOR_ID}),
-    ('--default-backend-solver', {
-        'dest': 'default_backend_solver_id',
-        'type': int,
-        'metavar': 'ID',
-        'default': DEFAULT_BACKEND_SOLVER_ID,
-        'help': ('default backend solver id (default: %d)'
+    ("--executor", {
+        "dest": "executor",
+        "type": int,
+        "metavar": "ID",
+        "default": DEFAULT_EXECUTOR,
+        "help": "executor id (default: %d)" % DEFAULT_EXECUTOR}),
+    ("--driver", {
+        "dest": "driver",
+        "type": int,
+        "metavar": "ID",
+        "default": DEFAULT_DRIVER,
+        "help": "driver name (default: %d)" % DEFAULT_DRIVER}),
+    ("--default-backend-solver", {
+        "dest": "default_backend_solver_id",
+        "type": int,
+        "metavar": "ID",
+        "default": DEFAULT_BACKEND_SOLVER_ID,
+        "help": ("default backend solver id (default: %d)"
                  % DEFAULT_BACKEND_SOLVER_ID)}),
   )
 
+  def _get_optimization_parameters(self):
+    params = optimization_parameters.OptimizationParameters()
+    params.executor.executor = self._args.executor
+    params.driver.default_backend_solver = self._args.default_backend_solver_id
+    params.driver.driver = self._args.driver
+    return params
+
   def run(self):
-    model = mp_model.build(self._args.file)
-    optimization_params = frontend_solver_pb2.OptimizationParameters()
-    optimization_params.decomposer = self._args.decomposer_id
-    optimization_params.executor = self._args.executor_id
-    optimization_params.default_backend_solver = self._args.default_backend_solver_id
-    model.optimize(optimization_params)
-    print('Objective value:', model.get_objective_value())
-    print('Variables:')
-    for var in model.get_variables():
-      print('%15s = %f' % (var.get_name(), var.get_value()))
+    model = mp_model.MPModelBuilder.build_from(self._args.file)
+    params = self._get_optimization_parameters()
+    model.optimize(params)
+    file = sys.stdout
+    file.write("Objective value: %f\n" % model.get_objective_value())
+    file.write("Variables:\n")
+    for i in range(model.get_num_columns()):
+      file.write("%15s = %f\n" % (model.columns_names[i], model.columns_values[i]))
