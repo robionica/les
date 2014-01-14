@@ -16,8 +16,6 @@
 http://en.wikipedia.org/wiki/Candidate_solution).
 '''
 
-from __future__ import absolute_import
-
 import collections
 import numpy
 
