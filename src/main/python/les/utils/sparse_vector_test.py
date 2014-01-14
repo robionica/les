@@ -1,5 +1,5 @@
 from les.utils import unittest
-from les.base import sparse_vector
+from les.utils import sparse_vector
 
 class SparseVectorTest(unittest.TestCase):
 
