@@ -85,10 +85,12 @@ class GoogleORLinearSolver(mp_solver_base.MPSolverBase):
   def get_solution(self):
     return self._solution
 
-  def solve(self):
+  def solve(self, params=None):
+    if params is None:
+      params = pywraplp.MPSolverParameters()
     if not self._model:
       raise Error("Nothing to solve.")
-    result_status = self._solver.Solve()
+    result_status = self._solver.Solve(params)
     self._solution = mp_solution.MPSolution()
     self._solution.set_status(_RESULT_STATUS_MAP[result_status])
     if not result_status == pywraplp.Solver.OPTIMAL:
