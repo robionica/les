@@ -48,6 +48,8 @@ Once the model has been decomposed, its
 # |   M     |  S   |     M      | S |    M    |
 #
 
+import networkx
+
 from les.mp_model import MPModel
 from les.decomposers import decomposer_base
 from les.graphs.decomposition_tree import DecompositionTree
@@ -104,38 +106,51 @@ class FinkelsteinQBDecomposer(decomposer_base.DecomposerBase):
     if max_separator_size:
       raise NotImplementedError()
     logging.info('Decompose model %s', self._model.get_name())
-    self._u = []
-    self._s = []
-    self._m = []
-    row_matrix = self._model.get_rows_coefficients()
-    col_matrix = row_matrix.tocsc()
-    all_cols = set(initial_cols)
-    prev_cols = set()
-    prev_rows = set()
-    prev_col_indices = set()
-    all_rows = set()
-    cntr = 0
+
+    m = self._model.get_rows_coefficients()
+
+    j_to_i_mapping = {}
+    for j in range(m.shape[1]):
+      j_to_i_mapping[j] = set()
+
+    # TODO(d2rk): use interaction graph?
+    g = networkx.Graph()
+    g.add_nodes_from(range(m.shape[1]))
+    for i in xrange(m.shape[0]):
+      J_ = _get_indices(m, i)
+      for j in range(len(J_) - 1):
+        j_to_i_mapping[J_[j]].add(i)
+        for j_ in range(j + 1, len(J_)):
+          g.add_edge(J_[j], J_[j_])
+      j_to_i_mapping[J_[-1]].add(i)
+
+    def get_neighbors(nodes):
+      neighbors = set()
+      for node in nodes:
+        neighbors.update(g.neighbors(node))
+      return neighbors
+
+    self._m = [set(initial_cols) | get_neighbors(set(initial_cols))]
+    self._s = [set()]
+    self._u = [set()]
+
+    i = len(self._m)
+    J = get_neighbors(self._m[i - 1])
     while True:
-      prev_cols = set(all_cols)
-      all_rows = set()
-      all_cols = set()
-      for c in prev_cols:
-        rows = _get_indices(col_matrix, c)
-        for row in rows:
-          all_cols.update(_get_indices(row_matrix, row))
-        all_rows.update(rows)
-      row_indices = all_rows - prev_rows
-      if not len(row_indices):
+      M_ = J - self._m[i - 1] - self._s[i - 1]
+      if not len(M_):
         break
-      self._m.append(set())
-      col_indices = set()
-      for i in row_indices:
-        col_indices.update(_get_indices(row_matrix, i))
-      self._s.append(col_indices & prev_col_indices)
-      self._m[cntr] = col_indices - self._s[cntr]
-      self._m[cntr - 1] = self._m[cntr - 1] - self._s[cntr]
-      prev_col_indices = set(col_indices)
-      self._u.append(row_indices)
-      prev_rows = all_rows
-      cntr += 1
+      T = get_neighbors(M_)
+      J_ = T - M_
+      self._m.append(M_)
+      self._u.append(set())
+      self._s.append(J_ & J)
+      self._m[i - 1] -= self._s[i]
+      for j in self._m[i - 1]:
+        self._u[i - 1].update(j_to_i_mapping[j])
+      J = T
+      i += 1
+    for j in self._m[i - 1]:
+      self._u[i - 1].update(j_to_i_mapping[j])
+
     self._build_decomposition_tree()
