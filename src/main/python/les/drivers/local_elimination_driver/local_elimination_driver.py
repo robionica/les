@@ -20,6 +20,7 @@ from les import solution_tables
 from les.mp_model import mp_solution
 from les.drivers import driver_base
 from les.drivers.local_elimination_driver import search_tree
+from les import executors as executor_manager
 from les.utils import logging
 
 
@@ -50,9 +51,11 @@ class LocalEliminationDriver(driver_base.DriverBase):
     if not model.is_binary():
       raise TypeError("Optimization can be applied only to binary integer "
                       "linear programming problems.")
+    self._model = model
     self._pipeline = pipeline
     self._optimization_params = optimization_parameters
     self._driver_params = optimization_parameters.driver.local_elimination_driver_parameters
+    self._executor = executor_manager.get_instance_of(optimization_parameters.executor.executor, self._pipeline)
     self._decomposer = decomposers.get_instance_of(self._driver_params.decomposer, model)
     logging.info("Decomposer: %s" % self._decomposer.__class__.__name__)
     self._solution_table = solution_tables.get_instance_of(self._driver_params.solution_table)
@@ -67,11 +70,10 @@ class LocalEliminationDriver(driver_base.DriverBase):
 
   def _trivial_case(self):
     request = self._executor.build_request()
-    request.set_model(mp_model_parameters.build(self._model))
+    request.set_model(self._model)
     request.set_solver_id(self._optimization_params.driver.default_backend_solver)
-    response = self._pipeline.put_request(request)
-    self._set_solution(response.get_solution())
-    raise NotImplementedError()
+    response = self._executor.execute(request)
+    return response.get_solution()
 
   def _process_decomposition_tree(self, tree):
     # TODO(d2rk): merge nodes if necessary.
@@ -100,6 +102,8 @@ class LocalEliminationDriver(driver_base.DriverBase):
     self._search_tree = search_tree.SearchTree(tree)
     self._solution_table.set_decomposition_tree(tree)
     self.run()
+    #new
+    return self._solution_table.get_solution()
 
   def run(self):
     while True:
