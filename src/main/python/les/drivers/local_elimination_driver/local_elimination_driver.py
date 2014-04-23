@@ -102,7 +102,6 @@ class LocalEliminationDriver(driver_base.DriverBase):
     self._search_tree = search_tree.SearchTree(tree)
     self._solution_table.set_decomposition_tree(tree)
     self.run()
-    #new
     return self._solution_table.get_solution()
 
   def run(self):
